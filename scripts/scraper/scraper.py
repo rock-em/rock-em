@@ -172,3 +172,34 @@ class Client:
             return payload["data"]
 
         raise ScrapeError("exhausted retries")
+
+
+class _TextExtractor(HTMLParser):
+    BLOCK_TAGS = {"p", "div", "pre", "li", "ul", "ol", "br", "h1", "h2", "h3", "h4"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.chunks: list[str] = []
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "li":
+            self.chunks.append("\n- ")
+        elif tag == "sup":
+            self.chunks.append("^")
+        elif tag in self.BLOCK_TAGS:
+            self.chunks.append("\n")
+
+    def handle_endtag(self, tag):
+        if tag in self.BLOCK_TAGS:
+            self.chunks.append("\n")
+
+    def handle_data(self, data):
+        self.chunks.append(data)
+
+
+def html_to_text(html: str) -> str:
+    parser = _TextExtractor()
+    parser.feed(html)
+    text = "".join(parser.chunks).replace("\xa0", " ")
+    text = re.sub(r"[ \t]+\n", "\n", text)
+    return re.sub(r"\n{3,}", "\n\n", text).strip()
