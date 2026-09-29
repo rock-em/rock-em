@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// test
 type Database interface {
 	Ping(context.Context) error
 }
