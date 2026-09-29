@@ -1,11 +1,95 @@
-html {
-  font-family: system-ui, sans-serif;
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  background: #fff;
+  color: #222;
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
 }
 
-main {
-  padding: 2rem;
+.page {
+  width: min(900px, 90%);
+  margin: 60px auto;
+}
+
+.intro {
+  border: none;
+  padding-top: 0;
+}
+
+h1 {
+  margin: 0;
+  font-family: Georgia, serif;
+  font-size: 32px;
+  font-weight: normal;
+}
+
+.intro > p {
+  margin-top: 4px;
+  color: #666;
+}
+
+.summary {
+  display: flex;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+section {
+  margin-top: 50px;
+  padding-top: 8px;
+  border-top: 1px solid #ccc;
+}
+
+h2 {
+  font-family: Georgia, serif;
+  font-size: 21px;
+  font-weight: normal;
+}
+
+.search {
+  width: 100%;
+  padding: 8px;
+  margin: 5px 0 20px;
+  border: 1px solid #aaa;
+  font: inherit;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  font-weight: 600;
+}
+
+th,
+td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+a {
+  color: #0645ad;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.progress-list {
+  max-width: 350px;
+}
+
+.progress-list p {
+  display: flex;
+  justify-content: space-between;
+  margin: 5px 0;
 }
