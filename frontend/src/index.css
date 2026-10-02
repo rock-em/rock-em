@@ -12,12 +12,13 @@ body {
 }
 
 .page {
-  width: min(900px, 90%);
+  width: min(850px, 90%);
   margin: 60px auto;
 }
 
 .intro {
   border: none;
+  margin-top: 0;
   padding-top: 0;
 }
 
@@ -51,45 +52,298 @@ h2 {
   font-weight: normal;
 }
 
+
+/* ---------------------------- */
+/* topic carousel               */
+/* ---------------------------- */
+
+.problem-browser {
+  min-height: 400px;
+}
+
+.topic-carousel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 28px;
+  margin: 35px 0 8px;
+}
+
+.arrow {
+  border: none;
+  background: none;
+  font-size: 25px;
+  cursor: pointer;
+  color: #555;
+  padding: 10px 14px;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.arrow:hover {
+  color: #111;
+  transform: scale(1.15);
+}
+
+
+/* ---------------------------- */
+/* liquid silver topic bubble   */
+/* ---------------------------- */
+
+.silver-bubble {
+  position: relative;
+
+  min-width: 180px;
+  height: 78px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 0 34px;
+
+  border-radius:
+    48% 52% 45% 55% /
+    55% 45% 55% 45%;
+
+  background:
+    radial-gradient(
+      circle at 32% 25%,
+      #ffffff 0%,
+      #eeeeee 22%,
+      #bcbcbc 48%,
+      #f7f7f7 68%,
+      #999999 100%
+    );
+
+  border: 1px solid #aaa;
+
+  box-shadow:
+    inset 8px 8px 18px rgba(255, 255, 255, 0.9),
+    inset -8px -8px 15px rgba(0, 0, 0, 0.13),
+    0 6px 15px rgba(0, 0, 0, 0.08);
+
+  animation:
+    bubble-enter 0.45s ease,
+    liquid-shape 7s ease-in-out infinite alternate;
+}
+
+.silver-bubble span {
+  position: relative;
+  z-index: 2;
+
+  font-family: Georgia, serif;
+  font-size: 20px;
+
+  color: #222;
+}
+
+
+/* fake reflective highlight */
+
+.silver-bubble::before {
+  content: "";
+
+  position: absolute;
+
+  width: 55%;
+  height: 28%;
+
+  top: 10px;
+  left: 18px;
+
+  border-radius: 50%;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.9),
+      rgba(255, 255, 255, 0.1)
+    );
+
+  transform: rotate(-7deg);
+
+  opacity: 0.8;
+}
+
+
+/* ---------------------------- */
+/* liquid animations            */
+/* ---------------------------- */
+
+@keyframes bubble-enter {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.65) scaleY(1.25);
+    filter: blur(3px);
+  }
+
+  55% {
+    transform: scaleX(1.1) scaleY(0.9);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes liquid-shape {
+  0% {
+    border-radius:
+      48% 52% 45% 55% /
+      55% 45% 55% 45%;
+  }
+
+  35% {
+    border-radius:
+      54% 46% 52% 48% /
+      46% 58% 42% 54%;
+  }
+
+  70% {
+    border-radius:
+      43% 57% 49% 51% /
+      57% 42% 58% 43%;
+  }
+
+  100% {
+    border-radius:
+      52% 48% 57% 43% /
+      44% 56% 47% 53%;
+  }
+}
+
+
+/* ---------------------------- */
+/* topic metadata               */
+/* ---------------------------- */
+
+.topic-meta {
+  text-align: center;
+  color: #777;
+  font-size: 13px;
+  margin-bottom: 28px;
+}
+
+
+/* ---------------------------- */
+/* search                       */
+/* ---------------------------- */
+
 .search {
   width: 100%;
-  padding: 8px;
-  margin: 5px 0 20px;
-  border: 1px solid #aaa;
+
+  padding: 9px 10px;
+  margin-bottom: 24px;
+
+  border: none;
+  border-bottom: 1px solid #aaa;
+
   font: inherit;
+
+  outline: none;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+.search:focus {
+  border-bottom-color: #222;
 }
 
-th {
-  text-align: left;
-  font-weight: 600;
+
+/* ---------------------------- */
+/* problems                     */
+/* ---------------------------- */
+
+.problem-list {
+  animation: problems-enter 0.35s ease;
 }
 
-th,
-td {
-  padding: 8px;
+.problem-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 13px 5px;
+
   border-bottom: 1px solid #ddd;
+
+  color: #222;
+  text-decoration: none;
+
+  transition:
+    padding-left 0.2s ease,
+    background 0.2s ease;
 }
 
-a {
-  color: #0645ad;
+.problem-row:hover {
+  padding-left: 10px;
+  background: #fafafa;
   text-decoration: none;
 }
 
-a:hover {
+.problem-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.problem-number {
+  width: 25px;
+
+  color: #777;
+  font-size: 13px;
+}
+
+.problem-name {
+  color: #0645ad;
+}
+
+.problem-row:hover .problem-name {
   text-decoration: underline;
 }
 
-.progress-list {
-  max-width: 350px;
+.difficulty {
+  color: #777;
+  font-size: 13px;
 }
 
-.progress-list p {
-  display: flex;
-  justify-content: space-between;
-  margin: 5px 0;
+.no-results {
+  text-align: center;
+  color: #777;
+  margin-top: 40px;
+}
+
+@keyframes problems-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ---------------------------- */
+/* mobile                       */
+/* ---------------------------- */
+
+@media (max-width: 650px) {
+  .summary {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .topic-carousel {
+    gap: 10px;
+  }
+
+  .silver-bubble {
+    min-width: 150px;
+    height: 68px;
+  }
 }
