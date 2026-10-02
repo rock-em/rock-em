@@ -125,3 +125,50 @@ def parse_url(url: str) -> Target:
     if head == "tag":
         return Target(origin, "tag", parts[1])
     raise ScrapeError(f"unsupported URL: {url}")
+
+
+class Client:
+    def __init__(self, base_url: str, delay: float, cookie: str | None, retries: int = 4):
+        self.base_url = base_url
+        self.delay = delay
+        self.cookie = cookie
+        self.retries = retries
+        self._last_request = 0.0
+
+    def query(self, query: str, variables: dict) -> dict:
+        body = json.dumps({"query": query, "variables": variables}).encode()
+        headers = {
+            "Content-Type": "application/json",
+            "Referer": self.base_url,
+            "User-Agent": USER_AGENT,
+        }
+        if self.cookie:
+            headers["Cookie"] = self.cookie
+
+        for attempt in range(self.retries + 1):
+            wait = self._last_request + self.delay - time.monotonic()
+            if wait > 0:
+                time.sleep(wait)
+            self._last_request = time.monotonic()
+
+            request = urllib.request.Request(f"{self.base_url}/graphql", data=body, headers=headers)
+            try:
+                with urllib.request.urlopen(request, timeout=30) as response:
+                    payload = json.load(response)
+            except urllib.error.HTTPError as err:
+                if (err.code == 429 or err.code >= 500) and attempt < self.retries:
+                    time.sleep(2**attempt * 2)
+                    continue
+                raise ScrapeError(f"HTTP {err.code} from {self.base_url}") from err
+            except urllib.error.URLError as err:
+                if attempt < self.retries:
+                    time.sleep(2**attempt * 2)
+                    continue
+                raise ScrapeError(f"network error: {err.reason}") from err
+
+            if payload.get("errors"):
+                messages = "; ".join(e.get("message", "?") for e in payload["errors"])
+                raise ScrapeError(f"GraphQL error: {messages}")
+            return payload["data"]
+
+        raise ScrapeError("exhausted retries")
