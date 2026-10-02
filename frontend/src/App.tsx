@@ -1,3 +1,4 @@
+import { useState } from "react";
 import "./index.css";
 
 const problems = [
@@ -10,12 +11,24 @@ const problems = [
 ];
 
 function App() {
+  const [search, setSearch] = useState("");
+
+  const filteredProblems = problems.filter((problem) => {
+    const searchText = search.toLowerCase();
+
+    return (
+      problem.title.toLowerCase().includes(searchText) ||
+      problem.topic.toLowerCase().includes(searchText) ||
+      problem.difficulty.toLowerCase().includes(searchText)
+    );
+  });
+
   return (
     <main className="page">
 
       <section className="intro">
         <h1>rock em</h1>
-        <p>A place to practice programming that is nice on the eyes :D </p>
+        <p>A place to practice programming that is nice on the eyes :D</p>
 
         <div className="summary">
           <span><strong>Problems</strong> · 6</span>
@@ -31,6 +44,8 @@ function App() {
           className="search"
           type="text"
           placeholder="Search problems..."
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
         />
 
         <table>
@@ -44,7 +59,7 @@ function App() {
           </thead>
 
           <tbody>
-            {problems.map((problem) => (
+            {filteredProblems.map((problem) => (
               <tr key={problem.id}>
                 <td>{problem.solved ? "✓" : problem.id}</td>
 
@@ -78,7 +93,7 @@ function App() {
         <h2>About</h2>
         <p>
           rock em is an open source program for practicing programming
-          problems! 
+          problems!
         </p>
       </section>
 
