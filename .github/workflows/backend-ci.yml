@@ -11,6 +11,24 @@ jobs:
     name: Backend Build
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: rockem_test
+          POSTGRES_USER: rockem
+          POSTGRES_PASSWORD: rockem
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U rockem -d rockem_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      TEST_DATABASE_URL: postgres://rockem:rockem@localhost:5432/rockem_test?sslmode=disable
+
     defaults:
       run:
         working-directory: backend
@@ -28,12 +46,20 @@ jobs:
       - name: Download dependencies
         run: go mod download
 
-      - name: Check formatting
+      - name: Install migrate
         run: |
-          test -z "$(gofmt -l .)"
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.19.1/migrate.linux-amd64.tar.gz \
+            | tar xvz
+          sudo mv migrate /usr/local/bin/migrate
+
+      - name: Check formatting
+        run: test -z "$(gofmt -l .)"
 
       - name: Vet
         run: go vet ./...
+
+      - name: Run migrations
+        run: migrate -path migrations -database "$TEST_DATABASE_URL" up
 
       - name: Test
         run: go test ./...
