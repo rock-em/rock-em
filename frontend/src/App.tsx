@@ -200,7 +200,7 @@ function runTests(problem: Problem, code: string): Promise<TestResult[]> {
         results.push({ passed: false, input: [], expected: 'Valid JavaScript solution', error: String(error) });
       }
       parent.postMessage({ token: payload.token, results }, '*');
-    <\/script></body></html>`;
+    </script></body></html>`;
   });
 }
 
