@@ -14,6 +14,16 @@ body {
   line-height: 1.6;
 }
 
+button,
+textarea,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
 .page {
   width: min(900px, 92%);
   margin: 60px auto;
@@ -125,19 +135,27 @@ h2 {
 
 .problem-row {
   display: flex;
+  width: 100%;
   justify-content: space-between;
   align-items: center;
   padding: 13px 5px;
+  border: none;
   border-bottom: 1px solid #ddd;
+  background: transparent;
   color: #222;
   text-decoration: none;
+  text-align: left;
   transition: padding-left 0.2s, background 0.2s;
 }
 
 .problem-row:hover {
   padding-left: 10px;
   background: #fafafa;
-  text-decoration: none;
+}
+
+.problem-row:focus-visible {
+  outline: 2px solid #0645ad;
+  outline-offset: 2px;
 }
 
 .problem-left {
@@ -171,6 +189,268 @@ h2 {
   margin-top: 40px;
 }
 
+/* Coding Workspace */
+
+.workspace-page {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+
+.workspace-header {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #ddd;
+}
+
+.back-link {
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: #0645ad;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.workspace-brand {
+  font-family: Georgia, serif;
+  font-size: 24px;
+}
+
+.workspace-counter {
+  color: #777;
+  font-size: 13px;
+}
+
+.workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 24px;
+  align-items: start;
+  margin-top: 26px;
+}
+
+.workspace-panel {
+  min-width: 0;
+  margin: 0;
+  padding: 26px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.workspace-eyebrow {
+  margin-bottom: 8px;
+  color: #777;
+  font-size: 13px;
+}
+
+.description-panel h1 {
+  margin-bottom: 12px;
+}
+
+.description-panel h2 {
+  margin-top: 32px;
+  font-size: 20px;
+}
+
+.problem-difficulty,
+.solved-label {
+  display: inline-block;
+  margin-right: 14px;
+  color: #777;
+  font-size: 13px;
+}
+
+.solved-label {
+  color: #267047;
+}
+
+.problem-description {
+  margin-top: 24px;
+}
+
+.example {
+  padding: 14px 16px;
+  margin: 12px 0;
+  background: #f7f7f7;
+  border-left: 2px solid #ccc;
+  overflow-wrap: anywhere;
+}
+
+.example > div {
+  margin-top: 6px;
+}
+
+.example code,
+.test-case code {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.constraints {
+  padding-left: 20px;
+}
+
+.constraints li {
+  margin-bottom: 7px;
+}
+
+.editor-panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.editor-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.language-label {
+  margin-left: 12px;
+  color: #777;
+  font-size: 13px;
+}
+
+.reset-button {
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 13px;
+}
+
+.reset-button:hover {
+  color: #111;
+  text-decoration: underline;
+}
+
+.code-editor {
+  display: block;
+  width: 100%;
+  min-height: 420px;
+  padding: 20px;
+  resize: vertical;
+  border: 0;
+  outline-offset: -3px;
+  background: #fcfcfc;
+  color: #222;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+.editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid #ddd;
+}
+
+.run-button,
+.submit-button {
+  padding: 9px 17px;
+  border-radius: 3px;
+  border: 1px solid #aaa;
+}
+
+.run-button {
+  background: #fff;
+  color: #333;
+}
+
+.submit-button {
+  background: #222;
+  color: #fff;
+  border-color: #222;
+}
+
+.run-button:hover {
+  background: #f1f1f1;
+}
+
+.submit-button:hover {
+  background: #444;
+}
+
+.run-button:disabled,
+.submit-button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.test-message {
+  padding: 0 20px;
+  margin: 14px 0;
+  font-size: 14px;
+}
+
+.test-results {
+  padding: 0 20px 16px;
+}
+
+.test-results h2 {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+}
+
+.test-results h2 span {
+  font-family: Arial, sans-serif;
+  color: #777;
+  font-size: 13px;
+}
+
+.test-case {
+  padding: 12px 14px;
+  margin-top: 10px;
+  background: #f8f8f8;
+  border-left: 3px solid #bbb;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.test-case > div {
+  margin-top: 5px;
+}
+
+.test-pass {
+  border-left-color: #4b8b63;
+}
+
+.test-fail {
+  border-left-color: #b95b5b;
+}
+
+.runner-note {
+  margin: 0;
+  padding: 0 20px 20px;
+  color: #888;
+  font-size: 12px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Animations */
 
 @keyframes problems-enter {
@@ -187,6 +467,12 @@ h2 {
 
 /* Mobile */
 
+@media (max-width: 850px) {
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 650px) {
   .page {
     margin: 32px auto;
@@ -198,6 +484,30 @@ h2 {
 
   .arrow {
     padding: 5px;
+  }
+
+  .workspace-page {
+    padding: 0 12px 30px;
+  }
+
+  .workspace-panel {
+    padding: 18px;
+  }
+
+  .editor-panel {
+    padding: 0;
+  }
+
+  .workspace-brand {
+    font-size: 20px;
+  }
+
+  .workspace-counter {
+    display: none;
+  }
+
+  .code-editor {
+    min-height: 320px;
   }
 }
 
