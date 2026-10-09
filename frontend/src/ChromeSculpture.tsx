@@ -175,7 +175,7 @@ export default function ChromeSculpture({ topic }: Props) {
       renderer.dispose();
       if (renderer.domElement.parentNode === host) host.removeChild(renderer.domElement);
     };
-  }, []);
+  }, [shapeSeed]);
 
   return (
     <div className="chrome-wrap">
