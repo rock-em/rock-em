@@ -1,4 +1,5 @@
 import { useState } from "react";
+import ChromeSculpture from "./ChromeSculpture";
 import "./index.css";
 
 const problems = [
@@ -12,142 +13,57 @@ const problems = [
 
 function App() {
   const topics = [...new Set(problems.map((problem) => problem.topic))];
-
   const [topicIndex, setTopicIndex] = useState(0);
   const [search, setSearch] = useState("");
-
   const currentTopic = topics[topicIndex];
-
-  const topicProblems = problems.filter((problem) => {
-    const matchesTopic = problem.topic === currentTopic;
-
-    const matchesSearch =
-      problem.title.toLowerCase().includes(search.toLowerCase()) ||
-      problem.difficulty.toLowerCase().includes(search.toLowerCase());
-
-    return matchesTopic && matchesSearch;
-  });
-
-  const solvedCount = problems.filter(
-    (problem) => problem.topic === currentTopic && problem.solved
-  ).length;
-
-  const totalTopicProblems = problems.filter(
-    (problem) => problem.topic === currentTopic
-  ).length;
-
-  function nextTopic() {
-    setTopicIndex((prev) => (prev + 1) % topics.length);
-    setSearch("");
-  }
-
-  function previousTopic() {
-    setTopicIndex((prev) =>
-      prev === 0 ? topics.length - 1 : prev - 1
-    );
-
-    setSearch("");
-  }
+  const topicProblems = problems.filter((problem) =>
+    problem.topic === currentTopic &&
+    (problem.title.toLowerCase().includes(search.toLowerCase()) ||
+      problem.difficulty.toLowerCase().includes(search.toLowerCase()))
+  );
+  const solvedCount = problems.filter((p) => p.topic === currentTopic && p.solved).length;
+  const totalTopicProblems = problems.filter((p) => p.topic === currentTopic).length;
+  function nextTopic() { setTopicIndex((prev) => (prev + 1) % topics.length); setSearch(""); }
+  function previousTopic() { setTopicIndex((prev) => (prev + topics.length - 1) % topics.length); setSearch(""); }
 
   return (
     <main className="page">
       <section className="intro">
         <h1>rock em</h1>
-
-        <p>
-          A place to practice programming that is nice on the eyes :D
-        </p>
-
+        <p>A place to practice programming that is nice on the eyes :D</p>
         <div className="summary">
-          <span>
-            <strong>Problems</strong> · {problems.length}
-          </span>
-
-          <span>
-            <strong>Solved</strong> ·{" "}
-            {problems.filter((problem) => problem.solved).length}
-          </span>
-
-          <span>
-            <strong>Topics</strong> · {topics.length}
-          </span>
+          <span><strong>Problems</strong> · {problems.length}</span>
+          <span><strong>Solved</strong> · {problems.filter((p) => p.solved).length}</span>
+          <span><strong>Topics</strong> · {topics.length}</span>
         </div>
       </section>
-
       <section className="problem-browser">
         <div className="topic-carousel">
-          <button
-            className="arrow"
-            onClick={previousTopic}
-            aria-label="Previous topic"
-          >
-            ←
-          </button>
-
-          <div className="silver-bubble" key={currentTopic}>
-            <span>{currentTopic}</span>
-          </div>
-
-          <button
-            className="arrow"
-            onClick={nextTopic}
-            aria-label="Next topic"
-          >
-            →
-          </button>
+          <button className="arrow" onClick={previousTopic} aria-label="Previous topic">←</button>
+          <ChromeSculpture key={currentTopic} topic={currentTopic} />
+          <button className="arrow" onClick={nextTopic} aria-label="Next topic">→</button>
         </div>
-
         <div className="topic-meta">
-          {solvedCount} / {totalTopicProblems} solved
-          <span> · </span>
-          {topicIndex + 1} of {topics.length}
+          {solvedCount} / {totalTopicProblems} solved <span> · </span> {topicIndex + 1} of {topics.length}
         </div>
-
-        <input
-          className="search"
-          type="text"
-          placeholder={`Search ${currentTopic.toLowerCase()}...`}
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
-
+        <input className="search" type="text" placeholder={`Search ${currentTopic.toLowerCase()}...`} value={search} onChange={(event) => setSearch(event.target.value)} />
         <div className="problem-list" key={`${currentTopic}-${search}`}>
-          {topicProblems.length > 0 ? (
-            topicProblems.map((problem) => (
-              <a href="#" className="problem-row" key={problem.id}>
-                <div className="problem-left">
-                  <span className="problem-number">
-                    {problem.solved ? "✓" : problem.id}
-                  </span>
-
-                  <span className="problem-name">
-                    {problem.title}
-                  </span>
-                </div>
-
-                <span className="difficulty">
-                  {problem.difficulty}
-                </span>
-              </a>
-            ))
-          ) : (
-            <p className="no-results">
-              No problems found.
-            </p>
-          )}
+          {topicProblems.length ? topicProblems.map((problem) => (
+            <a href="#" className="problem-row" key={problem.id} onClick={(e) => e.preventDefault()}>
+              <div className="problem-left">
+                <span className="problem-number">{problem.solved ? "✓" : problem.id}</span>
+                <span className="problem-name">{problem.title}</span>
+              </div>
+              <span className="difficulty">{problem.difficulty}</span>
+            </a>
+          )) : <p className="no-results">No problems found.</p>}
         </div>
       </section>
-
       <section>
         <h2>About</h2>
-
-        <p>
-          rock em is an open source program for practicing programming
-          problems!
-        </p>
+        <p>rock em is an open source program for practicing programming problems!</p>
       </section>
     </main>
   );
 }
-
 export default App;
