@@ -5,11 +5,11 @@ import "./ChromeSculpture.css";
 
 type Props = { topic: string };
 
-const shapeSeed = Array.from(topic).reduce(
+export default function ChromeSculpture({ topic }: Props) {
+  const shapeSeed = Array.from(topic).reduce(
   (sum, char) => sum + char.charCodeAt(0),
   0
 );
-export default function ChromeSculpture({ topic }: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
   const pointer = useRef({ x: 0, y: 0, active: false, dragging: false });
 
@@ -62,7 +62,6 @@ export default function ChromeSculpture({ topic }: Props) {
     let mx = 0;
     let my = 0;
     let energy = 0;
-    let lastTime = 0;
 
     const resize = () => {
       const width = Math.max(host.clientWidth, 1);
@@ -79,8 +78,7 @@ export default function ChromeSculpture({ topic }: Props) {
       if (disposed) return;
       raf = requestAnimationFrame(animate);
       const t = reduceMotion ? 0 : clock.getElapsedTime();
-      const dt = Math.min(t - lastTime, 0.05);
-      lastTime = t;
+      
       const targetX = pointer.current.active ? pointer.current.x : 0;
       const targetY = pointer.current.active ? pointer.current.y : 0;
       mx += (targetX - mx) * 0.16;
