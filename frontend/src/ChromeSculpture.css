@@ -1,0 +1,65 @@
+
+/* Chrome Sculpture */
+
+.chrome-wrap {
+  position: relative;
+  width: min(100%, 620px);
+  min-width: 0;
+  text-align: center;
+}
+
+.chrome-stage {
+  position: relative;
+  width: 100%;
+  height: clamp(260px, 42vw, 390px);
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.chrome-stage:active {
+  cursor: grabbing;
+}
+
+.chrome-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Topic text in front of sculpture */
+
+.chrome-topic {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+
+  margin: 0;
+  padding: 8px 18px;
+
+  font-family: Georgia, serif;
+  font-size: 26px;
+  font-weight: normal;
+  color: #111;
+
+  text-shadow:
+    0 1px 3px rgba(255, 255, 255, 0.9),
+    0 0 12px rgba(255, 255, 255, 0.7);
+
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+/* Mobile */
+
+@media (max-width: 650px) {
+  .chrome-stage {
+    height: 260px;
+  }
+
+  .chrome-topic {
+    font-size: 21px;
+  }
+}

@@ -1,3 +1,6 @@
+
+/* General */
+
 * {
   box-sizing: border-box;
 }
@@ -12,9 +15,11 @@ body {
 }
 
 .page {
-  width: min(850px, 90%);
+  width: min(900px, 92%);
   margin: 60px auto;
 }
+
+/* Introduction */
 
 .intro {
   border: none;
@@ -36,9 +41,12 @@ h1 {
 
 .summary {
   display: flex;
-  gap: 32px;
+  flex-wrap: wrap;
+  gap: 12px 32px;
   margin-top: 24px;
 }
+
+/* Sections */
 
 section {
   margin-top: 50px;
@@ -52,10 +60,7 @@ h2 {
   font-weight: normal;
 }
 
-
-/* ---------------------------- */
-/* topic carousel               */
-/* ---------------------------- */
+/* Topic Carousel */
 
 .problem-browser {
   min-height: 400px;
@@ -63,22 +68,21 @@ h2 {
 
 .topic-carousel {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 28px;
-  margin: 35px 0 8px;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0 0;
 }
 
 .arrow {
+  flex: 0 0 auto;
   border: none;
   background: none;
-  font-size: 25px;
+  font-size: 27px;
   cursor: pointer;
   color: #555;
-  padding: 10px 14px;
-  transition:
-    transform 0.2s ease,
-    color 0.2s ease;
+  padding: 12px;
+  transition: transform 0.2s, color 0.2s;
 }
 
 .arrow:hover {
@@ -86,164 +90,26 @@ h2 {
   transform: scale(1.15);
 }
 
-
-/* ---------------------------- */
-/* liquid silver topic bubble   */
-/* ---------------------------- */
-
-.silver-bubble {
-  position: relative;
-
-  min-width: 180px;
-  height: 78px;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  padding: 0 34px;
-
-  border-radius:
-    48% 52% 45% 55% /
-    55% 45% 55% 45%;
-
-  background:
-    radial-gradient(
-      circle at 32% 25%,
-      #ffffff 0%,
-      #eeeeee 22%,
-      #bcbcbc 48%,
-      #f7f7f7 68%,
-      #999999 100%
-    );
-
-  border: 1px solid #aaa;
-
-  box-shadow:
-    inset 8px 8px 18px rgba(255, 255, 255, 0.9),
-    inset -8px -8px 15px rgba(0, 0, 0, 0.13),
-    0 6px 15px rgba(0, 0, 0, 0.08);
-
-  animation:
-    bubble-enter 0.45s ease,
-    liquid-shape 7s ease-in-out infinite alternate;
+.arrow:focus-visible {
+  outline: 2px solid #0645ad;
 }
-
-.silver-bubble span {
-  position: relative;
-  z-index: 2;
-
-  font-family: Georgia, serif;
-  font-size: 20px;
-
-  color: #222;
-}
-
-
-/* fake reflective highlight */
-
-.silver-bubble::before {
-  content: "";
-
-  position: absolute;
-
-  width: 55%;
-  height: 28%;
-
-  top: 10px;
-  left: 18px;
-
-  border-radius: 50%;
-
-  background:
-    linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.9),
-      rgba(255, 255, 255, 0.1)
-    );
-
-  transform: rotate(-7deg);
-
-  opacity: 0.8;
-}
-
-
-/* ---------------------------- */
-/* liquid animations            */
-/* ---------------------------- */
-
-@keyframes bubble-enter {
-  0% {
-    opacity: 0;
-    transform: scaleX(0.65) scaleY(1.25);
-    filter: blur(3px);
-  }
-
-  55% {
-    transform: scaleX(1.1) scaleY(0.9);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1);
-    filter: blur(0);
-  }
-}
-
-@keyframes liquid-shape {
-  0% {
-    border-radius:
-      48% 52% 45% 55% /
-      55% 45% 55% 45%;
-  }
-
-  35% {
-    border-radius:
-      54% 46% 52% 48% /
-      46% 58% 42% 54%;
-  }
-
-  70% {
-    border-radius:
-      43% 57% 49% 51% /
-      57% 42% 58% 43%;
-  }
-
-  100% {
-    border-radius:
-      52% 48% 57% 43% /
-      44% 56% 47% 53%;
-  }
-}
-
-
-/* ---------------------------- */
-/* topic metadata               */
-/* ---------------------------- */
 
 .topic-meta {
   text-align: center;
   color: #777;
   font-size: 13px;
-  margin-bottom: 28px;
+  margin: 10px 0 28px;
 }
 
-
-/* ---------------------------- */
-/* search                       */
-/* ---------------------------- */
+/* Search */
 
 .search {
   width: 100%;
-
   padding: 9px 10px;
   margin-bottom: 24px;
-
   border: none;
   border-bottom: 1px solid #aaa;
-
   font: inherit;
-
   outline: none;
 }
 
@@ -251,10 +117,7 @@ h2 {
   border-bottom-color: #222;
 }
 
-
-/* ---------------------------- */
-/* problems                     */
-/* ---------------------------- */
+/* Problem List */
 
 .problem-list {
   animation: problems-enter 0.35s ease;
@@ -264,17 +127,11 @@ h2 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   padding: 13px 5px;
-
   border-bottom: 1px solid #ddd;
-
   color: #222;
   text-decoration: none;
-
-  transition:
-    padding-left 0.2s ease,
-    background 0.2s ease;
+  transition: padding-left 0.2s, background 0.2s;
 }
 
 .problem-row:hover {
@@ -291,7 +148,6 @@ h2 {
 
 .problem-number {
   width: 25px;
-
   color: #777;
   font-size: 13px;
 }
@@ -315,6 +171,8 @@ h2 {
   margin-top: 40px;
 }
 
+/* Animations */
+
 @keyframes problems-enter {
   from {
     opacity: 0;
@@ -327,23 +185,26 @@ h2 {
   }
 }
 
-
-/* ---------------------------- */
-/* mobile                       */
-/* ---------------------------- */
+/* Mobile */
 
 @media (max-width: 650px) {
-  .summary {
-    flex-direction: column;
-    gap: 2px;
+  .page {
+    margin: 32px auto;
   }
 
   .topic-carousel {
-    gap: 10px;
+    gap: 0;
   }
 
-  .silver-bubble {
-    min-width: 150px;
-    height: 68px;
+  .arrow {
+    padding: 5px;
+  }
+}
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+  .problem-list {
+    animation: none;
   }
 }
