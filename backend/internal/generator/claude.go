@@ -10,7 +10,7 @@ import (
 	"github.com/anthropics/anthropic-sdk-go/option"
 )
 
-const model = "claude-opus-5-5"
+const model = "claude-haiku-5-5"
 
 const systemPrompt = `You write original programming practice problems for an interview prep site.
 
@@ -48,28 +48,26 @@ func NewClaudeGenerator(opts ...option.RequestOption) *ClaudeGenerator {
 }
 
 func (g *ClaudeGenerator) Generate(ctx context.Context, req Request) (Problem, error) {
-	message, err := g.client.Beta.Messages.New(ctx, anthropic.BetaMessageNewParams{
+	message, err := g.client.Messages.New(ctx, anthropic.MessageNewParams{
 		Model:     model,
 		MaxTokens: 16000,
-		System:    []anthropic.BetaTextBlockParam{{Text: systemPrompt}},
-		Messages: []anthropic.BetaMessageParam{
-			anthropic.NewBetaUserMessage(anthropic.NewBetaTextBlock(userPrompt(req))),
+		System:    []anthropic.TextBlockParam{{Text: systemPrompt}},
+		Messages: []anthropic.MessageParam{
+			anthropic.NewUserMessage(anthropic.NewTextBlock(userPrompt(req))),
 		},
-		OutputConfig: anthropic.BetaOutputConfigParam{
-			Effort: anthropic.BetaOutputConfigEffortHigh,
-			Format: anthropic.BetaJSONOutputFormatParam{Schema: outputSchema},
+		OutputConfig: anthropic.OutputConfigParam{
+			Effort: anthropic.OutputConfigEffortHigh,
+			Format: anthropic.JSONOutputFormatParam{Schema: outputSchema},
 		},
-		Fallbacks: anthropic.BetaFallbacksParamOfDefault(),
-		Betas:     []anthropic.AnthropicBeta{anthropic.AnthropicBetaServerSideFallback2026_07_01},
 	})
 	if err != nil {
 		return Problem{}, fmt.Errorf("claude request: %w", err)
 	}
 
 	switch message.StopReason {
-	case anthropic.BetaStopReasonRefusal:
+	case anthropic.StopReasonRefusal:
 		return Problem{}, errors.New("the model declined to generate this problem")
-	case anthropic.BetaStopReasonMaxTokens:
+	case anthropic.StopReasonMaxTokens:
 		return Problem{}, errors.New("the model ran out of output tokens")
 	}
 

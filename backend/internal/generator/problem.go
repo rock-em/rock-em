@@ -96,7 +96,7 @@ type modelOutput struct {
 	} `json:"tests"`
 }
 
-var outputSchema = json.RawMessage(`{
+var outputSchema = mustDecodeSchema(`{
 	"type": "object",
 	"additionalProperties": false,
 	"required": ["title", "description", "examples", "constraints", "functionName", "starter", "referenceSolution", "tests"],
@@ -134,6 +134,14 @@ var outputSchema = json.RawMessage(`{
 		}
 	}
 }`)
+
+func mustDecodeSchema(raw string) map[string]any {
+	var schema map[string]any
+	if err := json.Unmarshal([]byte(raw), &schema); err != nil {
+		panic(fmt.Sprintf("invalid output schema: %v", err))
+	}
+	return schema
+}
 
 // parseProblem decodes and validates the model's structured output.
 func parseProblem(raw string, req Request) (Problem, error) {
