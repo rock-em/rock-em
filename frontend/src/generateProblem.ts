@@ -1,0 +1,29 @@
+export type Level = "beginner" | "intermediate" | "advanced";
+
+export type GenerateRequest = { topic: string; theme: string; level: Level };
+
+export type GeneratedProblem = {
+  title: string;
+  topic: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  description: string;
+  examples: { input: string; output: string; explanation?: string }[];
+  constraints: string[];
+  functionName: string;
+  starter: string;
+  referenceSolution: string;
+  tests: { input: unknown[]; expected: unknown }[];
+};
+
+export async function generateProblem(request: GenerateRequest): Promise<GeneratedProblem> {
+  const response = await fetch("/api/problems/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request),
+  });
+  const body = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(body?.error ?? `Request failed with status ${response.status}`);
+  }
+  return body as GeneratedProblem;
+}
