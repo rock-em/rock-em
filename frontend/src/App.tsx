@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import ChromeSculpture from "./ChromeSculpture";
+import { generateProblem, type GeneratedProblem, type Level } from "./generateProblem";
 import "./index.css";
 
-type Difficulty = "Easy" | "Medium";
+type Difficulty = "Easy" | "Medium" | "Hard";
 type TestCase = { input: unknown[]; expected: unknown };
 type Problem = {
   id: number;
@@ -16,9 +17,11 @@ type Problem = {
   functionName: string;
   starter: string;
   tests: TestCase[];
+  referenceSolution?: string;
+  generated?: boolean;
 };
 
-const problems: Problem[] = [
+const baseProblems: Problem[] = [
   {
     id: 1, title: "Two Sum", topic: "Arrays", difficulty: "Easy", solved: true,
     description: "Given an array of integers nums and an integer target, return the indices of two different elements whose values add up to target. You may assume exactly one solution exists. Return the indices in any order.",
@@ -156,7 +159,7 @@ function runTests(problem: Problem, code: string): Promise<TestResult[]> {
       resolve([{ passed: false, input: [], expected: "Completed within 3 seconds", error: "Execution timed out. Check for an infinite loop." }]);
     }, 3000);
 
-    const payload = JSON.stringify({ code, functionName: problem.functionName, tests: problem.tests, token });
+    const payload = JSON.stringify({ code, functionName: problem.functionName, tests: problem.tests, plain: Boolean(problem.generated), token });
     const safePayload = payload.replace(/</g, "\\u003c");
     iframe.srcdoc = `<!doctype html><html><body><script>
       const payload = ${safePayload};
@@ -178,11 +181,12 @@ function runTests(problem: Problem, code: string): Promise<TestResult[]> {
         for (const test of payload.tests) {
           const input = JSON.parse(JSON.stringify(test.input));
           try {
-            const args = payload.functionName === 'mergeTwoLists' ? input.map(toList) : input;
+            const linkedList = !payload.plain && payload.functionName === 'mergeTwoLists';
+            const args = linkedList ? input.map(toList) : input;
             let actual = solution(...args);
-            if (payload.functionName === 'mergeTwoLists') actual = fromList(actual);
+            if (linkedList) actual = fromList(actual);
             let passed;
-            if (payload.functionName === 'twoSum') {
+            if (!payload.plain && payload.functionName === 'twoSum') {
               const indices = actual;
               passed = Array.isArray(indices) && indices.length === 2 &&
                 Number.isInteger(indices[0]) && Number.isInteger(indices[1]) &&
@@ -204,16 +208,37 @@ function runTests(problem: Problem, code: string): Promise<TestResult[]> {
   });
 }
 
+const MIN_VERIFIED_TESTS = 3;
+
+// Generated test cases can contain mistakes, so keep only the ones the
+// generated reference solution actually passes.
+async function verifyGeneratedProblem(generated: GeneratedProblem, id: number): Promise<Problem> {
+  const candidate: Problem = { ...generated, id, solved: false, generated: true };
+  const results = await runTests(candidate, generated.referenceSolution);
+  const tests = candidate.tests.filter((_, index) => results[index]?.passed);
+  if (tests.length < MIN_VERIFIED_TESTS) {
+    throw new Error("The generated test cases did not check out. Please try again.");
+  }
+  return { ...candidate, tests };
+}
+
 function App() {
+  const [generated, setGenerated] = useState<Problem[]>([]);
+  const problems = [...baseProblems, ...generated];
   const topics = [...new Set(problems.map((problem) => problem.topic))];
   const [topicIndex, setTopicIndex] = useState(0);
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [solutions, setSolutions] = useState<Record<number, string>>({});
-  const [completed, setCompleted] = useState<number[]>(problems.filter((p) => p.solved).map((p) => p.id));
+  const [completed, setCompleted] = useState<number[]>(baseProblems.filter((p) => p.solved).map((p) => p.id));
   const [results, setResults] = useState<TestResult[] | null>(null);
   const [running, setRunning] = useState(false);
   const [message, setMessage] = useState("");
+  const [genTopic, setGenTopic] = useState("");
+  const [genTheme, setGenTheme] = useState("");
+  const [genLevel, setGenLevel] = useState<Level>("intermediate");
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState("");
 
   const currentTopic = topics[topicIndex];
   const selected = problems.find((p) => p.id === selectedId);
@@ -229,6 +254,27 @@ function App() {
   function previousTopic() { setTopicIndex((prev) => (prev + topics.length - 1) % topics.length); setSearch(""); }
   function openProblem(id: number) { setSelectedId(id); setResults(null); setMessage(""); window.scrollTo(0, 0); }
   function goBack() { setSelectedId(null); setResults(null); setMessage(""); window.scrollTo(0, 0); }
+
+  async function createProblem(event: FormEvent) {
+    event.preventDefault();
+    if (generating || !genTopic.trim()) return;
+    setGenerating(true);
+    setGenError("");
+    try {
+      const raw = await generateProblem({ topic: genTopic.trim(), theme: genTheme.trim(), level: genLevel });
+      const id = Math.max(...problems.map((p) => p.id)) + 1;
+      const problem = await verifyGeneratedProblem(raw, id);
+      const existingTopic = topics.indexOf(problem.topic);
+      setGenerated((previous) => [...previous, problem]);
+      setTopicIndex(existingTopic === -1 ? topics.length : existingTopic);
+      setSearch("");
+      openProblem(id);
+    } catch (error) {
+      setGenError(error instanceof Error ? error.message : String(error));
+    } finally {
+      setGenerating(false);
+    }
+  }
 
   async function checkSolution(submit: boolean) {
     if (!selected || running) return;
@@ -263,7 +309,7 @@ function App() {
 
         <div className="workspace-grid">
           <section className="workspace-panel description-panel">
-            <div className="workspace-eyebrow">Problem {selected.id} · {selected.topic}</div>
+            <div className="workspace-eyebrow">Problem {selected.id} · {selected.topic}{selected.generated && " · Generated"}</div>
             <h1>{selected.title}</h1>
             <span className="problem-difficulty">{selected.difficulty}</span>
             {completed.includes(selected.id) && <span className="solved-label">✓ Solved</span>}
@@ -279,6 +325,12 @@ function App() {
             ))}
             <h2>Constraints</h2>
             <ul className="constraints">{selected.constraints.map((constraint) => <li key={constraint}>{constraint}</li>)}</ul>
+            {selected.referenceSolution && (
+              <details className="reference-solution">
+                <summary>Reference solution</summary>
+                <pre><code>{selected.referenceSolution}</code></pre>
+              </details>
+            )}
           </section>
 
           <section className="workspace-panel editor-panel">
@@ -364,6 +416,31 @@ function App() {
             </button>
           )) : <p className="no-results">No problems found.</p>}
         </div>
+      </section>
+      <section className="generator">
+        <h2>Generate a problem</h2>
+        <p>Pick something you want to learn and get a fresh problem with test cases, not a repeat of a classic.</p>
+        <form className="generator-form" onSubmit={(event) => void createProblem(event)}>
+          <label>
+            Topic
+            <input type="text" required maxLength={120} placeholder="e.g. sliding window, tries, dynamic programming" value={genTopic} onChange={(event) => setGenTopic(event.target.value)} />
+          </label>
+          <label>
+            Industry or theme <span className="optional">(optional)</span>
+            <input type="text" maxLength={200} placeholder="e.g. fintech payments, game dev, healthcare" value={genTheme} onChange={(event) => setGenTheme(event.target.value)} />
+          </label>
+          <label>
+            Level
+            <select value={genLevel} onChange={(event) => setGenLevel(event.target.value as Level)}>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </label>
+          <button type="submit" className="submit-button" disabled={generating || !genTopic.trim()}>{generating ? "Generating…" : "Generate problem"}</button>
+        </form>
+        {generating && <p className="generator-status" role="status">Writing the problem and checking its test cases. This can take a minute.</p>}
+        {genError && <p className="generator-status generator-error" role="alert">{genError}</p>}
       </section>
       <section>
         <h2>About</h2>

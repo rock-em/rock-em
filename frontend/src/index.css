@@ -518,3 +518,69 @@ h2 {
     animation: none;
   }
 }
+
+/* Problem Generator */
+
+.generator-form {
+  display: grid;
+  gap: 16px;
+  max-width: 520px;
+}
+
+.generator-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.generator-form input,
+.generator-form select {
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid #aaa;
+  background: transparent;
+  outline: none;
+}
+
+.generator-form input:focus,
+.generator-form select:focus {
+  border-bottom-color: #222;
+}
+
+.generator-form button {
+  justify-self: start;
+}
+
+.generator-form button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.optional {
+  color: #777;
+}
+
+.generator-status {
+  color: #555;
+  font-size: 14px;
+}
+
+.generator-error {
+  color: #b95b5b;
+}
+
+.reference-solution {
+  margin-top: 24px;
+}
+
+.reference-solution summary {
+  cursor: pointer;
+  color: #0645ad;
+}
+
+.reference-solution pre {
+  padding: 14px;
+  background: #f8f8f8;
+  overflow-x: auto;
+  font-size: 13px;
+}
