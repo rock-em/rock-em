@@ -408,6 +408,7 @@ function App() {
 
 
         <TopicLearningPath
+          key={currentTopic}
           topic={currentTopic}
           problems={problems.filter(
             (problem) => problem.topic === currentTopic
