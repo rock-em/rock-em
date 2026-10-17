@@ -91,8 +91,6 @@ export default function TopicLearningPath({ topic, problems, completedIds, onOpe
     }
   }, [progress]);
 
-  useEffect(() => setExpanded(false), [topic]);
-
   const guide = guides[topic] ?? {
     intro: `Practice ${topic} with a focused learning checklist and coding exercises.`,
     concepts: [
