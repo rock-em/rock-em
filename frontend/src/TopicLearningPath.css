@@ -1,0 +1,187 @@
+/* Learning Path */
+
+.learning-path {
+  margin: 0 0 28px;
+  padding: 23px 25px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.learning-path-heading,
+.learning-path-stats,
+.learning-path-toggle,
+.learning-path-next {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.learning-path-kicker,
+.learning-path-next small {
+  color: #888;
+  font-size: 11px;
+  letter-spacing: 1.1px;
+}
+
+.learning-path-heading h2 {
+  margin: 4px 0 0;
+}
+
+.learning-path-percent {
+  color: #555;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.learning-path-intro {
+  margin: 12px 0 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Progress Bar */
+
+.learning-path-progress {
+  height: 5px;
+  overflow: hidden;
+  background: #eee;
+  border-radius: 10px;
+}
+
+.learning-path-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #333;
+  transition: width 0.25s ease;
+}
+
+.learning-path-stats {
+  margin-top: 8px;
+  color: #777;
+  font-size: 12px;
+}
+
+/* Toggle */
+
+.learning-path-toggle {
+  width: 100%;
+  margin-top: 22px;
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid #eee;
+  background: none;
+  color: #0645ad;
+  text-align: left;
+}
+
+.learning-path-toggle:hover {
+  text-decoration: underline;
+}
+
+/* Concepts */
+
+.learning-path-concepts {
+  display: grid;
+  gap: 0;
+  padding-bottom: 10px;
+}
+
+.learning-path-concept {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 0;
+  border-top: 1px solid #f1f1f1;
+  cursor: pointer;
+}
+
+.learning-path-concept input {
+  margin: 5px 0 0;
+  accent-color: #333;
+}
+
+.learning-path-concept span {
+  display: grid;
+  gap: 3px;
+}
+
+.learning-path-concept strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.learning-path-concept small {
+  color: #777;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Next Problem */
+
+.learning-path-next {
+  margin-top: 12px;
+  padding: 15px 0 0;
+  border-top: 1px solid #ddd;
+}
+
+.learning-path-next > div {
+  display: grid;
+  gap: 3px;
+}
+
+.learning-path-next strong {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.learning-path-next span {
+  font-size: 12px;
+  color: #888;
+}
+
+.learning-path-next button {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+  border: 1px solid #333;
+  border-radius: 3px;
+  background: #222;
+  color: white;
+  font-size: 13px;
+}
+
+.learning-path-next button:hover {
+  background: #444;
+}
+
+.learning-path-next button:focus-visible,
+.learning-path-toggle:focus-visible {
+  outline: 2px solid #0645ad;
+  outline-offset: 2px;
+}
+
+/* Mobile */
+
+@media (max-width: 650px) {
+  .learning-path {
+    padding: 18px;
+  }
+
+  .learning-path-next {
+    align-items: flex-start;
+  }
+
+  .learning-path-stats {
+    flex-wrap: wrap;
+  }
+}
+
+/* Accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+  .learning-path-progress > span {
+    transition: none;
+  }
+}
