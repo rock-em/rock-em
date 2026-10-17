@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import ChromeSculpture from "./ChromeSculpture";
 import { generateProblem, type GeneratedProblem, type Level } from "./generateProblem";
+import TopicLearningPath from "./TopicLearningPath";
 import "./index.css";
 
 type Difficulty = "Easy" | "Medium" | "Hard";
@@ -404,6 +405,18 @@ function App() {
         <div className="topic-meta">
           {solvedCount} / {totalTopicProblems} solved <span> · </span> {topicIndex + 1} of {topics.length}
         </div>
+
+
+        <TopicLearningPath
+          topic={currentTopic}
+          problems={problems.filter(
+            (problem) => problem.topic === currentTopic
+          )}
+          completedIds={completed}
+          onOpenProblem={openProblem}
+        />
+
+
         <input className="search" type="text" placeholder={`Search ${currentTopic.toLowerCase()}...`} value={search} onChange={(event) => setSearch(event.target.value)} />
         <div className="problem-list" key={`${currentTopic}-${search}`}>
           {topicProblems.length ? topicProblems.map((problem) => (
