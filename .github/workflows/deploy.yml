@@ -108,7 +108,7 @@ jobs:
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "i-0a1fa506d610e83ed" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[\"/usr/local/bin/rockem-deploy ${GITHUB_SHA}\"]" \
+            --parameters "commands=[\"/bin/bash /usr/local/bin/rockem-deploy ${GITHUB_SHA}\"]" \
             --query "Command.CommandId" \
             --output text)
 
