@@ -30,3 +30,20 @@ Create a production build:
 ```bash
 npm run build
 ```
+
+### Problem generator
+
+The home page can generate original practice problems from a topic you want
+to learn, an optional industry or theme, and a level. Each problem comes with
+test cases, which are checked against a reference solution before the problem
+opens.
+
+Generation runs through the backend and needs an Anthropic API key. Add it to
+`backend/.env`:
+
+```bash
+ANTHROPIC_API_KEY="sk-ant-..."
+```
+
+Then start the backend (`go run ./cmd/api` from `backend/` after sourcing
+`dev-env.sh`). The frontend dev server proxies `/api` to it.
