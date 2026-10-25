@@ -26,6 +26,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Verify release commit
+        run: |
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+
+          echo "GitHub event SHA: ${GITHUB_SHA}"
+          echo "Checked-out SHA:   ${ACTUAL_SHA}"
+
+          if [[ "$ACTUAL_SHA" != "$GITHUB_SHA" ]]; then
+            echo "ERROR: checked-out commit does not match the triggering commit"
+            exit 1
+          fi
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -33,11 +45,17 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+
+      - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci
 
-      - name: Type check
+      - name: Type check frontend
         working-directory: frontend
         run: npm run typecheck
 
@@ -45,11 +63,32 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-      - name: Package frontend
+      - name: Check backend build
+        working-directory: backend
+        run: go build ./...
+
+      - name: Build Linux API binary
+        working-directory: backend
         env:
-          ACTUAL_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          CGO_ENABLED: "0"
+          GOOS: linux
+          GOARCH: amd64
         run: |
-          tar -C frontend/dist -czf "rockem-${ACTUAL_SHA}.tar.gz" .
+          mkdir -p ../release/backend
+          go build -trimpath -o ../release/backend/rockem-api ./cmd/api
+
+      - name: Package release
+        run: |
+          mkdir -p release/frontend release/migrations
+
+          cp -a frontend/dist/. release/frontend/
+          cp -a backend/migrations/. release/migrations/
+
+          test -f release/frontend/index.html
+          test -x release/backend/rockem-api
+          test -f release/migrations/000001_create_problems.up.sql
+
+          tar -C release -czf "rockem-${GITHUB_SHA}.tar.gz" .
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6.3.0
@@ -77,7 +116,6 @@ jobs:
           echo "SSM command: $COMMAND_ID"
 
       - name: Wait for deployment
-        id: wait
         run: |
           aws ssm wait command-executed \
             --command-id "${{ steps.deploy.outputs.command_id }}" \
@@ -99,5 +137,13 @@ jobs:
             --retry 3 \
             --retry-delay 2 \
             https://rockem.xyz/ > /dev/null
+
+          curl \
+            --fail \
+            --show-error \
+            --silent \
+            --retry 3 \
+            --retry-delay 2 \
+            https://rockem.xyz/api/health
 
           echo "Production health check passed."
