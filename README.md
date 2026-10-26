@@ -47,3 +47,9 @@ ANTHROPIC_API_KEY="sk-ant-..."
 
 Then start the backend (`go run ./cmd/api` from `backend/` after sourcing
 `dev-env.sh`). The frontend dev server proxies `/api` to it.
+
+### Accounts and problem management
+
+The backend supports user accounts, cookie sessions, admin problem management,
+and per-user bookmarks/progress. See [API setup and reference](docs/api.md) for
+migrations, local cookie settings, admin provisioning, and request examples.
