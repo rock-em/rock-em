@@ -1,0 +1,192 @@
+
+.adaptive-practice {
+  margin-top: 50px;
+  padding-top: 20px;
+  border-top: 1px solid #ccc;
+}
+
+.adaptive-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.adaptive-heading h2 {
+  margin: 5px 0;
+}
+
+.adaptive-kicker {
+  color: #888;
+  font-size: 11px;
+  letter-spacing: 1.1px;
+}
+
+.adaptive-subtitle {
+  color: #888;
+  font-size: 13px;
+}
+
+.adaptive-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 28px;
+}
+
+.adaptive-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.adaptive-stat span {
+  color: #777;
+  font-size: 13px;
+}
+
+.adaptive-stat strong {
+  font-family: Georgia, serif;
+  font-size: 30px;
+  font-weight: normal;
+}
+
+.adaptive-progress-heading {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 28px;
+  color: #555;
+  font-size: 13px;
+}
+
+.adaptive-progress-bar {
+  height: 6px;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #eee;
+}
+
+.adaptive-progress-bar > div {
+  height: 100%;
+  border-radius: inherit;
+  background: #267047;
+  transition: width 0.4s ease;
+}
+
+.adaptive-recommendations {
+  margin-top: 32px;
+}
+
+.adaptive-recommendations h3 {
+  margin-bottom: 4px;
+  font-family: Georgia, serif;
+  font-size: 19px;
+  font-weight: normal;
+}
+
+.adaptive-recommendations > p {
+  margin-top: 0;
+  color: #777;
+  font-size: 13px;
+}
+
+.adaptive-problem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 15px 5px;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  background: transparent;
+  text-align: left;
+  transition: background 0.2s, padding-left 0.2s;
+}
+
+.adaptive-problem:hover {
+  padding-left: 10px;
+  background: #fafafa;
+}
+
+.adaptive-problem:focus-visible {
+  outline: 2px solid #0645ad;
+  outline-offset: 2px;
+}
+
+.adaptive-problem-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.adaptive-problem-title {
+  color: #0645ad;
+  font-size: 14px;
+}
+
+.adaptive-problem-difficulty {
+  color: #888;
+  font-size: 12px;
+}
+
+.adaptive-reason {
+  padding: 4px 9px;
+  border-radius: 3px;
+  color: #666;
+  background: #f2f2f2;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.priority-0 {
+  background: #fceaea;
+  color: #a34444;
+}
+
+.priority-1 {
+  background: #fff4df;
+  color: #946819;
+}
+
+.priority-2 {
+  background: #eef3fa;
+  color: #456993;
+}
+
+.priority-3 {
+  background: #eaf5ed;
+  color: #267047;
+}
+
+@media (max-width: 650px) {
+  .adaptive-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .adaptive-stat {
+    padding: 14px;
+  }
+
+  .adaptive-problem {
+    flex-wrap: wrap;
+  }
+
+  .adaptive-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adaptive-progress-bar > div,
+  .adaptive-problem {
+    transition: none;
+  }
+}

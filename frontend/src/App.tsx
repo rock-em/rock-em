@@ -2,7 +2,11 @@ import { useState, type FormEvent } from "react";
 import ChromeSculpture from "./ChromeSculpture";
 import { generateProblem, type GeneratedProblem, type Level } from "./generateProblem";
 import TopicLearningPath from "./TopicLearningPath";
+import AdaptivePractice, {
+  recordPracticeAttempt
+} from "./AdaptivePractice";
 import "./index.css";
+
 
 type Difficulty = "Easy" | "Medium" | "Hard";
 type TestCase = { input: unknown[]; expected: unknown };
@@ -285,8 +289,15 @@ function App() {
     try {
       const testResults = await runTests(selected, solutions[selected.id] ?? selected.starter);
       setResults(testResults);
-      const passed = testResults.length === selected.tests.length && testResults.every((test) => test.passed);
-      if (submit && passed) {
+      const passed = testResults.length === selected.tests.length &&
+  testResults.every((test) => test.passed);
+
+//Track performance when the user clicks Submit
+if (submit && testResults.length > 0) {
+  recordPracticeAttempt(selected.id, passed);
+}
+
+if (submit && passed) {
         setCompleted((previous) => previous.includes(selected.id) ? previous : [...previous, selected.id]);
         setMessage("Accepted! All tests passed. Problem marked as solved.");
       } else if (submit) {
@@ -431,6 +442,13 @@ function App() {
           )) : <p className="no-results">No problems found.</p>}
         </div>
       </section>
+
+    <AdaptivePractice
+    problems={problems}
+    onSelectProblem={(problem) => openProblem(Number(problem.id))}
+    />
+
+      
       <section className="generator">
         <h2>Generate a problem</h2>
         <p>Pick something you want to learn and get a fresh problem with test cases, not a repeat of a classic.</p>
