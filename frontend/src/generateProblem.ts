@@ -23,6 +23,7 @@ export async function generateProblem(request: GenerateRequest): Promise<Generat
   });
   const body = await response.json().catch(() => null);
   if (!response.ok) {
+    if (response.status === 401) throw new Error("Sign in above to generate a practice problem.");
     throw new Error(body?.error ?? `Request failed with status ${response.status}`);
   }
   return body as GeneratedProblem;
