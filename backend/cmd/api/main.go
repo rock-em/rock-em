@@ -9,8 +9,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rock-em/rock-em/backend/internal/generator"
-	"github.com/rock-em/rock-em/backend/internal/health"
-	"github.com/rock-em/rock-em/backend/internal/problems"
+	"github.com/rock-em/rock-em/backend/internal/server"
 )
 
 type healthResponse struct {
@@ -38,20 +37,18 @@ func main() {
 
 	log.Println("connected to PostgreSQL")
 
-	mux := http.NewServeMux()
-
-	healthHandler := health.NewHandler(db)
-	problemHandler := problems.NewHandler(db)
+	// Secure by default. Disable only for local HTTP development.
+	secureCookies := os.Getenv("AUTH_COOKIE_SECURE") != "false"
 	generatorHandler := generator.NewHandler(generator.NewClaudeGenerator())
-
-	mux.HandleFunc("GET /api/health", healthHandler.Check)
-	mux.HandleFunc("GET /api/problems", problemHandler.List)
-	mux.HandleFunc("GET /api/problems/{slug}", problemHandler.Get)
-	mux.HandleFunc("POST /api/problems/generate", generatorHandler.Generate)
+	mux := server.New(db, secureCookies, generatorHandler.Generate)
 
 	server := &http.Server{
-		Addr:    "127.0.0.1:8080",
-		Handler: mux,
+		Addr:              "127.0.0.1:8080",
+		Handler:           mux,
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       15 * time.Second,
+		WriteTimeout:      180 * time.Second,
+		IdleTimeout:       60 * time.Second,
 	}
 
 	log.Printf("Rock Em API listening on %s", server.Addr)
