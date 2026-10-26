@@ -1,26 +1,11 @@
 
 import { useEffect, useMemo, useState } from "react";
+import {
+  loadProgress,
+  type PracticeProblem,
+  type ProgressRecord,
+} from "./practiceProgress";
 import "./AdaptivePractice.css";
-
-const STORAGE_KEY = "adaptive-practice-progress";
-
-// Types
-export interface PracticeProblem {
-  id: string | number;
-  title: string;
-  difficulty: string;
-}
-
-interface PracticeProgress {
-  attempts: number;
-  successes: number;
-  streak: number;
-  interval: number;
-  lastAttempt?: string;
-  nextReview?: string;
-}
-
-type ProgressRecord = Record<string, PracticeProgress>;
 
 interface AdaptivePracticeProps {
   problems: PracticeProblem[];
@@ -32,60 +17,6 @@ interface RecommendedProblem extends PracticeProblem {
   reason: string;
 }
 
-// Load saved progress
-function loadProgress(): ProgressRecord {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? (JSON.parse(saved) as ProgressRecord) : {};
-  } catch {
-    return {};
-  }
-}
-
-// Record a completed submission
-export function recordPracticeAttempt(
-  problemId: string | number,
-  passed: boolean
-): void {
-  const progress = loadProgress();
-  const id = String(problemId);
-
-  const previous: PracticeProgress = progress[id] || {
-    attempts: 0,
-    successes: 0,
-    streak: 0,
-    interval: 0,
-  };
-
-  const streak = passed ? previous.streak + 1 : 0;
-
-  // Spaced repetition schedule (days)
-  const intervals = [0, 1, 3, 7, 14, 30];
-
-  const interval = passed
-    ? intervals[Math.min(streak, intervals.length - 1)]
-    : 0;
-
-  const nextReview = new Date();
-  nextReview.setDate(nextReview.getDate() + interval);
-
-  progress[id] = {
-    attempts: previous.attempts + 1,
-    successes: previous.successes + (passed ? 1 : 0),
-    streak,
-    interval,
-    lastAttempt: new Date().toISOString(),
-    nextReview: nextReview.toISOString(),
-  };
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-
-  window.dispatchEvent(
-    new Event("practice-progress-updated")
-  );
-}
-
-// Dashboard component
 export default function AdaptivePractice({
   problems,
   onSelectProblem,
@@ -94,6 +25,9 @@ export default function AdaptivePractice({
     loadProgress
   );
 
+  const [now, setNow] = useState(0);
+
+  // Load updated progress after submissions
   useEffect(() => {
     const refresh = (): void => {
       setProgress(loadProgress());
@@ -116,9 +50,30 @@ export default function AdaptivePractice({
     };
   }, []);
 
+  // Update the current time for scheduled reviews
+  useEffect(() => {
+    const updateTime = (): void => {
+      setNow(Date.now());
+    };
+
+    const initialTimer = window.setTimeout(updateTime, 0);
+
+    const interval = window.setInterval(
+      updateTime,
+      60000
+    );
+
+    return () => {
+      window.clearTimeout(initialTimer);
+      window.clearInterval(interval);
+    };
+  }, []);
+
   // Calculate progress statistics
   const stats = useMemo(() => {
-    const entries = Object.values(progress);
+    const entries = problems
+      .map((problem) => progress[String(problem.id)])
+      .filter((record) => record !== undefined);
 
     const attempted = entries.length;
 
@@ -148,12 +103,10 @@ export default function AdaptivePractice({
       mastered,
       accuracy,
     };
-  }, [progress]);
+  }, [problems, progress]);
 
   // Generate personalized recommendations
   const recommendations = useMemo<RecommendedProblem[]>(() => {
-    const now = Date.now();
-
     return problems
       .map((problem): RecommendedProblem => {
         const record = progress[String(problem.id)];
@@ -167,6 +120,7 @@ export default function AdaptivePractice({
           };
         }
 
+        // Check whether a problem is due for review
         const due = record.nextReview
           ? new Date(record.nextReview).getTime() <= now
           : true;
@@ -198,7 +152,7 @@ export default function AdaptivePractice({
       })
       .sort((a, b) => a.priority - b.priority)
       .slice(0, 5);
-  }, [problems, progress]);
+  }, [problems, progress, now]);
 
   const total = problems.length;
 

@@ -2,9 +2,8 @@ import { useState, type FormEvent } from "react";
 import ChromeSculpture from "./ChromeSculpture";
 import { generateProblem, type GeneratedProblem, type Level } from "./generateProblem";
 import TopicLearningPath from "./TopicLearningPath";
-import AdaptivePractice, {
-  recordPracticeAttempt
-} from "./AdaptivePractice";
+import AdaptivePractice from "./AdaptivePractice";
+import { recordPracticeAttempt } from "./practiceProgress";
 import "./index.css";
 
 
