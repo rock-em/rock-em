@@ -1,9 +1,12 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+
+afterEach(() => vi.unstubAllGlobals())
 
 describe('App', () => {
   it('renders the Rock Em heading', () => {
+    vi.stubGlobal('fetch', vi.fn(() => new Promise(() => {})))
     render(<App />)
 
     expect(

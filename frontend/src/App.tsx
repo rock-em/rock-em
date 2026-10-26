@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import Account from "./Account";
 import ChromeSculpture from "./ChromeSculpture";
 import { generateProblem, type GeneratedProblem, type Level } from "./generateProblem";
 import TopicLearningPath from "./TopicLearningPath";
@@ -406,6 +407,7 @@ if (submit && passed) {
           <span><strong>Topics</strong> · {topics.length}</span>
         </div>
       </section>
+      <Account />
       <section className="problem-browser">
         <div className="topic-carousel">
           <button className="arrow" onClick={previousTopic} aria-label="Previous topic">←</button>
