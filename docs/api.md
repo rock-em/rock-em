@@ -1,7 +1,7 @@
 # Accounts and problem API
 
 The API is served at `/api` on the same origin as the frontend. Apply migrations
-`000001` and `000002` before starting this version. Existing problems remain
+`000001`, `000002`, and `000003` before starting this version. Existing problems remain
 public; the new migration does not alter their IDs or content.
 
 ## Accounts
@@ -127,4 +127,25 @@ a deliberate backup/restore plan. Periodically remove expired sessions with
 expired sessions and retains at most ten recent sessions.
 
 Integration tests use `TEST_DATABASE_URL` pointing to a disposable database with
-both migrations applied. Run `go test ./...` and `go vet ./...` from `backend/`.
+all migrations applied. Run `go test ./...` and `go vet ./...` from `backend/`.
+
+## Starter catalog
+
+Migration `000003_seed_problems` adds six problems matching the frontend demo:
+Two Sum, Valid Parentheses, Binary Search, Merge Two Sorted Lists, Maximum
+Subarray, and Number of Islands. It includes descriptions, topics, difficulty,
+examples, constraints, function names, and JavaScript starter code.
+
+These are ordinary database records returned by `GET /api/problems`, editable
+and removable through the admin API. No special hardcoded API response or
+startup reseeding is involved. Applying normal migrations installs them on
+existing and fresh databases. Matching slugs are skipped, including archived
+entries, so existing content is never overwritten or resurrected.
+
+IDs are assigned by the database and need not match the frontend demo IDs. The
+demo's `solved` flags are not copied: completion belongs to each user. Executable
+demo test cases are not copied because the catalog schema has no judge/test-case
+storage yet. The frontend still uses its own temporary catalog.
+
+Rolling back this data migration deliberately retains the problems to preserve
+admin edits and user progress; it does not delete rows based solely on their slug.
