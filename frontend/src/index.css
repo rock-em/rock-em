@@ -669,3 +669,28 @@ h2 {
 }
 
 .forgot-password-link { text-align: right; font-size: 13px; margin-top: -8px; }
+
+/* Keep browsing focused; supporting tools live on their own pages. */
+.site-header-start { display: flex; align-items: center; gap: 30px; min-width: 0; }
+.site-brand { white-space: nowrap; }
+.site-navigation { font-size: 14px; }
+.explore-menu { position: relative; }
+.explore-menu summary { cursor: pointer; color: #666; }
+.explore-links { position: absolute; top: calc(100% + 16px); left: 0; z-index: 20; width: 205px; padding: 8px; border: 1px solid #ddd; border-radius: 3px; background: #fff; }
+.explore-links a { display: block; padding: 9px 12px; text-decoration: none; }
+.explore-links a:hover, .explore-links a[aria-current="page"] { background: #f5f5f5; color: #111; }
+.browse-page { margin-top: 20px; }
+.browse-page .problem-browser { border: 0; margin: 0; padding: 0; }
+.utility-page > .generator { margin: 0; padding: 0; border: 0; }
+.utility-page > p { color: #666; }
+.utility-page a { color: #0645ad; text-underline-offset: 4px; }
+.topic-picker { display: grid; gap: 6px; max-width: 280px; margin-top: 28px; }
+.topic-picker select { font: inherit; padding: 9px 12px; border: 1px solid #ccc; border-radius: 3px; background: #fff; color: #222; }
+.about-page { max-width: 620px; }
+@media (max-width: 650px) {
+  .site-header-start { gap: 14px; }
+  .site-navigation { font-size: 13px; }
+  .site-header { gap: 12px; }
+  .account-nav { gap: 10px; }
+  .account-button { padding: 7px 10px; }
+}

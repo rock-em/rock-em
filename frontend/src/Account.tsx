@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import PasswordReset from './PasswordReset';
+import SiteNavigation from './SiteNavigation';
+import { navigateTo } from './navigation';
 
 type User = { displayName: string; email: string; role: "user" | "admin" };
 type Page = 'sign-in' | 'sign-up' | 'forgot-password' | 'reset-password' | null;
 const currentPage = (): Page => {
-  const path = window.location.pathname.slice(1);
+  const path = window.location.pathname.replace(/\/$/, '').slice(1);
   return path === 'sign-in' || path === 'sign-up' || path === 'forgot-password' || path === 'reset-password' ? path : null;
 };
 
@@ -64,11 +66,10 @@ export default function Account({ children }: { children: ReactNode }) {
   }, []);
 
   function navigate(next: Page) {
-    window.history.pushState(null, '', next ? `/${next}` : '/');
+    navigateTo(next ? `/${next}` : '/');
     setPage(next);
     setError('');
     setShowPassword(false);
-    window.scrollTo(0, 0);
   }
 
   function link(next: Page, label: string, className?: string) {
@@ -102,7 +103,7 @@ export default function Account({ children }: { children: ReactNode }) {
 
   return <>
     <header className="site-header">
-      {link(null, 'rock em', 'site-brand')}
+      <div className="site-header-start">{link(null, 'rock em', 'site-brand')}<SiteNavigation /></div>
       <nav aria-label="Account" className="account-nav">
         {checking ? <span className="account-muted" role="status">Loading account…</span> : user ?
           <details className="profile" ref={profile}>
