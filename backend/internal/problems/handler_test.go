@@ -39,6 +39,11 @@ func TestGetReturnsProblem(t *testing.T) {
 		}
 	})
 
+	_, err = db.Exec(t.Context(), `UPDATE problems SET languages='{"python":{"requirements":[],"examples":[],"constraints":[],"tests":[{"input":[[1,2],3],"expected":[0,1]}],"starter":"def two_sum(nums, target): pass","functionName":"two_sum","indexBase":0}}' WHERE slug='test-two-sum'`)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	handler := NewHandler(db)
 
 	request := httptest.NewRequest(
@@ -114,13 +119,11 @@ func TestGetReturnsNotFound(t *testing.T) {
 		)
 	}
 
-	expected := "{\"error\":\"problem not found\"}\n"
-
-	if response.Body.String() != expected {
-		t.Errorf(
-			"expected body %q, got %q",
-			expected,
-			response.Body.String(),
-		)
+	var body map[string]string
+	if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	if body["code"] != "problem_not_found" {
+		t.Fatalf("unexpected error: %v", body)
 	}
 }
