@@ -315,7 +315,6 @@ if (submit && passed) {
       <main className="workspace-page">
         <header className="workspace-header">
           <button className="back-link" onClick={goBack}>← Back to problems</button>
-          <span className="workspace-brand">rock em</span>
           <span className="workspace-counter">{completed.length} / {problems.length} solved</span>
         </header>
 
@@ -399,7 +398,7 @@ if (submit && passed) {
   return (
     <main className="page">
       <section className="intro">
-        <h1>rock em</h1>
+        <h1 className="sr-only">Programming practice</h1>
         <p>A place to practice programming that is nice on the eyes :D</p>
         <div className="summary">
           <span><strong>Problems</strong> · {problems.length}</span>
