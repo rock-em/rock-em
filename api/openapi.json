@@ -301,12 +301,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string",
-              "enum": [
-                "easy",
-                "medium",
-                "hard"
-              ]
+              "$ref": "#/components/schemas/Difficulty"
             }
           }
         ]
@@ -1390,12 +1385,7 @@
             "maxLength": 200
           },
           "difficulty": {
-            "type": "string",
-            "enum": [
-              "easy",
-              "medium",
-              "hard"
-            ]
+            "$ref": "#/components/schemas/Difficulty"
           },
           "category": {
             "type": "string",
@@ -1431,12 +1421,7 @@
             "maxLength": 200
           },
           "difficulty": {
-            "type": "string",
-            "enum": [
-              "easy",
-              "medium",
-              "hard"
-            ]
+            "$ref": "#/components/schemas/Difficulty"
           },
           "category": {
             "type": "string",
@@ -1535,12 +1520,7 @@
             "maxLength": 200
           },
           "difficulty": {
-            "type": "string",
-            "enum": [
-              "easy",
-              "medium",
-              "hard"
-            ]
+            "$ref": "#/components/schemas/Difficulty"
           },
           "category": {
             "type": "string",
@@ -1655,12 +1635,7 @@
             "type": "string"
           },
           "difficulty": {
-            "type": "string",
-            "enum": [
-              "Easy",
-              "Medium",
-              "Hard"
-            ]
+            "$ref": "#/components/schemas/Difficulty"
           },
           "description": {
             "type": "string"
@@ -1778,12 +1753,7 @@
             "maxLength": 200
           },
           "difficulty": {
-            "type": "string",
-            "enum": [
-              "easy",
-              "medium",
-              "hard"
-            ]
+            "$ref": "#/components/schemas/Difficulty"
           },
           "category": {
             "type": "string",
@@ -1814,6 +1784,14 @@
           "languages"
         ],
         "additionalProperties": false
+      },
+      "Difficulty": {
+        "type": "string",
+        "enum": [
+          "easy",
+          "medium",
+          "hard"
+        ]
       }
     }
   }

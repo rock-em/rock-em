@@ -65,8 +65,8 @@ func TestParseProblem(t *testing.T) {
 		t.Errorf("expected topic from request, got %q", problem.Topic)
 	}
 
-	if problem.Difficulty != "Hard" {
-		t.Errorf("expected difficulty %q, got %q", "Hard", problem.Difficulty)
+	if problem.Difficulty != "hard" {
+		t.Errorf("expected difficulty %q, got %q", "hard", problem.Difficulty)
 	}
 
 	if len(problem.Tests) != 4 {
