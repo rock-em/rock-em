@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import "./ChromeSculpture.css";
 
@@ -40,22 +41,29 @@ export default function ChromeSculpture({ topic }: Props) {
     const environment = pmrem.fromScene(room, 0.035);
     scene.environment = environment.texture;
 
-    const geometry = new THREE.SphereGeometry(1.55, 112, 80);
+    // Evenly spaced vertices avoid the pinched poles of a latitude/longitude
+    // sphere. Weld shared edges so recalculated chrome normals have no seams.
+    const source = new THREE.IcosahedronGeometry(1.55, 31);
+    source.deleteAttribute("uv");
+    source.deleteAttribute("normal");
+    const geometry = mergeVertices(source);
+    source.dispose();
     const base = new Float32Array(geometry.attributes.position.array);
     const positions = geometry.attributes.position as THREE.BufferAttribute;
     const material = new THREE.MeshPhysicalMaterial({
       color: 0xffffff,
       metalness: 1,
-      roughness: 0.055,
+      roughness: 0.12,
       clearcoat: 1,
-      clearcoatRoughness: 0.04,
+      clearcoatRoughness: 0.10,
       envMapIntensity: 2.4,
-      side: THREE.DoubleSide,
     });
     const mesh = new THREE.Mesh(geometry, material);
+    geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 2.65);
     scene.add(mesh);
 
-    const clock = new THREE.Clock();
+    let elapsed = 0;
+    let previousTime = performance.now();
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let raf = 0;
     let disposed = false;
@@ -77,17 +85,24 @@ export default function ChromeSculpture({ topic }: Props) {
     function animate() {
       if (disposed) return;
       raf = requestAnimationFrame(animate);
-      const t = reduceMotion ? 0 : clock.getElapsedTime();
+      const now = performance.now();
+      const dt = Math.min((now - previousTime) / 1000, 0.05);
+      previousTime = now;
+      if (!reduceMotion) elapsed += dt;
+      const t = elapsed;
+      const pointerEase = 1 - Math.exp(-10 * dt);
+      const energyEase = 1 - Math.exp(-5.5 * dt);
       
       const targetX = pointer.current.active ? pointer.current.x : 0;
       const targetY = pointer.current.active ? pointer.current.y : 0;
-      mx += (targetX - mx) * 0.16;
-      my += (targetY - my) * 0.16;
+      mx += (targetX - mx) * pointerEase;
+      my += (targetY - my) * pointerEase;
       energy += (
         (pointer.current.dragging ? 1.8 : pointer.current.active ? 1.0 : 0)
         - energy
-      ) * 0.09;
+      ) * energyEase;
       
+      let maxRadiusSquared = 0;
       for (let i = 0; i < positions.count; i++) {
         const x = base[i * 3];
         const y = base[i * 3 + 1];
@@ -105,7 +120,7 @@ export default function ChromeSculpture({ topic }: Props) {
             Math.cos(2.6 * nz - t * 0.5) +
           0.22 * Math.sin(4.5 * ny - 3.0 * nz - t * 0.65 + seed * 0.7) +
           0.18 * Math.cos(5.0 * nx + 3.0 * nz + t * 0.55 + seed * 1.3) +
-          0.12 * Math.sin(7.0 * (nx + ny) - t * 0.9 + seed * 0.4);
+          0.06 * Math.sin(7.0 * (nx + ny) - t * 0.9 + seed * 0.4);
 
         // Distance from cursor's projected position
         const dx = nx - mx * 0.85;
@@ -117,10 +132,10 @@ export default function ChromeSculpture({ topic }: Props) {
 
         // Surface ripples spread outward from cursor
         const ripple =
-          Math.sin(distance * 17.0 - t * 10.0) *
+          Math.sin(distance * 11.0 - t * 6.0) *
           influence *
           energy *
-          0.22;
+          0.10;
 
         // Push surface outward or inward near cursor
         const deformation =
@@ -151,8 +166,19 @@ export default function ChromeSculpture({ topic }: Props) {
           z * radius +
             0.16 * Math.sin(3.2 * nx + t * 0.45)
         );
+        maxRadiusSquared = Math.max(maxRadiusSquared,
+          positions.getX(i) ** 2 + positions.getY(i) ** 2 + positions.getZ(i) ** 2);
       }
 
+      // Fit a sphere around every deformed vertex, leaving room on all sides
+      // even while dragging or on a narrow screen. Expand immediately to avoid
+      // clipping, and ease back slowly without a distracting camera snap.
+      const halfVertical = THREE.MathUtils.degToRad(camera.fov / 2);
+      const halfHorizontal = Math.atan(Math.tan(halfVertical) * camera.aspect);
+      const radius = Math.max(2.65, Math.sqrt(maxRadiusSquared));
+      const distance = radius * 1.12 / Math.sin(Math.min(halfVertical, halfHorizontal));
+      camera.position.z = Math.max(distance, camera.position.z + (distance - camera.position.z) * (1 - Math.exp(-2 * dt)));
+      geometry.boundingSphere!.radius = radius;
       positions.needsUpdate = true;
       geometry.computeVertexNormals();
       mesh.rotation.y = t * 0.13 + mx * 0.38;
@@ -187,14 +213,15 @@ export default function ChromeSculpture({ topic }: Props) {
         onPointerEnter={() => { pointer.current.active = true; }}
         onPointerMove={(event) => {
           const bounds = event.currentTarget.getBoundingClientRect();
-          pointer.current.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
-          pointer.current.y = ((event.clientY - bounds.top) / bounds.height) * 2 - 1;
+          pointer.current.x = THREE.MathUtils.clamp(((event.clientX - bounds.left) / bounds.width) * 2 - 1, -1, 1);
+          pointer.current.y = THREE.MathUtils.clamp(((event.clientY - bounds.top) / bounds.height) * 2 - 1, -1, 1);
         }}
         onPointerDown={(event) => {
           pointer.current.dragging = true;
           event.currentTarget.setPointerCapture(event.pointerId);
         }}
         onPointerUp={() => { pointer.current.dragging = false; }}
+        onLostPointerCapture={() => { pointer.current.dragging = false; }}
         onPointerCancel={() => { pointer.current.dragging = false; }}
         onPointerLeave={() => { pointer.current.active = false; pointer.current.dragging = false; }}
       />
