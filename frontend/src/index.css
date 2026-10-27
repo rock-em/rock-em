@@ -1,3 +1,34 @@
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("./assets/fonts/AtkinsonHyperlegible-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("./assets/fonts/AtkinsonHyperlegible-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("./assets/fonts/AtkinsonHyperlegible-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("./assets/fonts/AtkinsonHyperlegible-BoldItalic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
 
 /* General */
 
@@ -9,7 +40,7 @@ body {
   margin: 0;
   background: #fff;
   color: #222;
-  font-family: Arial, sans-serif;
+  font-family: "Atkinson Hyperlegible", Arial, sans-serif;
   font-size: 15px;
   line-height: 1.6;
 }
@@ -406,7 +437,7 @@ h2 {
 }
 
 .test-results h2 span {
-  font-family: Arial, sans-serif;
+  font-family: "Atkinson Hyperlegible", Arial, sans-serif;
   color: #777;
   font-size: 13px;
 }
