@@ -17,6 +17,7 @@ type apiServer struct {
 	p                                   *problems.Handler
 	health                              *health.Handler
 	login, register, password, generate http.HandlerFunc
+	forgot, reset                       http.HandlerFunc
 }
 
 var _ apigen.ServerInterface = (*apiServer)(nil)
@@ -25,7 +26,7 @@ func newAPI(a *auth.Handler, p *problems.Handler, h *health.Handler, generate ht
 	if generate == nil {
 		generate = notImplemented
 	}
-	return &apiServer{a: a, p: p, health: h, login: auth.Limit(10, time.Minute, a.Login), register: auth.Limit(5, time.Minute, a.Register), password: a.Require(false, auth.Limit(5, time.Minute, a.Password)), generate: a.Require(false, auth.Limit(5, time.Minute, generate))}
+	return &apiServer{forgot: auth.Limit(5, time.Minute, a.ForgotPassword), reset: auth.Limit(10, time.Minute, a.ResetPassword), a: a, p: p, health: h, login: auth.Limit(10, time.Minute, a.Login), register: auth.Limit(5, time.Minute, a.Register), password: a.Require(false, auth.Limit(5, time.Minute, a.Password)), generate: a.Require(false, auth.Limit(5, time.Minute, generate))}
 }
 func notImplemented(w http.ResponseWriter, r *http.Request) {
 	httpapi.JSON(w, http.StatusNotImplemented, map[string]string{"code": "not_implemented", "error": "this endpoint is not implemented yet"})
@@ -138,3 +139,6 @@ func (s *apiServer) GetSubmission(w http.ResponseWriter, r *http.Request, id str
 	r.SetPathValue("id", id)
 	s.a.Require(false, notImplemented)(w, r)
 }
+
+func (s *apiServer) ForgotPassword(w http.ResponseWriter, r *http.Request) { s.forgot(w, r) }
+func (s *apiServer) ResetPassword(w http.ResponseWriter, r *http.Request)  { s.reset(w, r) }

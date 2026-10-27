@@ -11,8 +11,11 @@ import (
 	"github.com/rock-em/rock-em/backend/internal/problems"
 )
 
-func New(db *pgxpool.Pool, secureCookies bool, generate http.HandlerFunc) http.Handler {
+func New(db *pgxpool.Pool, secureCookies bool, generate http.HandlerFunc, resetSender ...auth.ResetSender) http.Handler {
 	a := auth.NewHandler(db, secureCookies)
+	if len(resetSender) > 0 {
+		a.SetResetSender(resetSender[0])
+	}
 	p := problems.NewHandler(db)
 	api := newAPI(a, p, health.NewHandler(db), generate)
 	mux := apigen.HandlerWithOptions(api, apigen.StdHTTPServerOptions{

@@ -136,3 +136,16 @@ content. No production database changes have been applied by this task.
 The existing frontend uses its temporary catalog/JavaScript runner. A typed client and
 simple language selector are ready, but connecting a complete API-backed workspace is
 separate from these stubs. Preserve editor drafts by `(slug, language)` when integrating.
+
+### Password recovery
+
+`POST /api/auth/forgot-password` accepts `{ "email": "..." }` without a session.
+It returns 202 with a generic `message`, irrespective of whether an account exists.
+If email delivery is not configured, it returns 503. Requests are rate limited.
+
+`POST /api/auth/reset-password` accepts `{ "token": "...", "newPassword": "..." }`
+without a session. Tokens expire after 30 minutes and can be used once. A successful
+204 response means the password was changed and all existing sessions were revoked;
+users must log in again. Invalid/expired tokens and invalid passwords return 400.
+Passwords must contain 12–72 UTF-8 bytes. See
+`frontend/docs/authentication.md` for SMTP setup and delivery behavior.

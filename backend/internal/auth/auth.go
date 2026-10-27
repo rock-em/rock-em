@@ -33,9 +33,11 @@ type contextKey struct{}
 func Current(r *http.Request) User { u, _ := r.Context().Value(contextKey{}).(User); return u }
 
 type Handler struct {
-	db        *pgxpool.Pool
-	secure    bool
-	dummyHash []byte
+	db         *pgxpool.Pool
+	secure     bool
+	dummyHash  []byte
+	sendReset  ResetSender
+	resetSlots chan struct{}
 }
 
 func NewHandler(db *pgxpool.Pool, secure bool) *Handler {
@@ -43,7 +45,7 @@ func NewHandler(db *pgxpool.Pool, secure bool) *Handler {
 	if err != nil {
 		panic(err)
 	}
-	return &Handler{db: db, secure: secure, dummyHash: dummy}
+	return &Handler{db: db, secure: secure, dummyHash: dummy, resetSlots: make(chan struct{}, 8)}
 }
 func validPassword(s string) bool { return len(s) >= 12 && len(s) <= 72 }
 func normalizeEmail(s string) (string, bool) {
@@ -236,6 +238,9 @@ func (h *Handler) Password(w http.ResponseWriter, r *http.Request) {
 	_, err = tx.Exec(r.Context(), `UPDATE users SET password_hash=$1 WHERE id=$2`, string(b), Current(r).ID)
 	if err == nil {
 		_, err = tx.Exec(r.Context(), `DELETE FROM sessions WHERE user_id=$1`, Current(r).ID)
+	}
+	if err == nil {
+		_, err = tx.Exec(r.Context(), `DELETE FROM password_resets WHERE user_id=$1`, Current(r).ID)
 	}
 	if err != nil || tx.Commit(r.Context()) != nil {
 		httpapi.Error(w, 500, "could not change password")
