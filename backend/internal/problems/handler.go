@@ -1,12 +1,11 @@
 package problems
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
-	"regexp"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -16,55 +15,10 @@ import (
 	"github.com/rock-em/rock-em/backend/internal/httpapi"
 )
 
-type Example struct {
-	Input       string `json:"input"`
-	Output      string `json:"output"`
-	Explanation string `json:"explanation,omitempty"`
-}
-type Input struct {
-	Slug         string    `json:"slug"`
-	Title        string    `json:"title"`
-	Description  string    `json:"description"`
-	Difficulty   string    `json:"difficulty"`
-	Topic        string    `json:"topic"`
-	Examples     []Example `json:"examples"`
-	Constraints  []string  `json:"constraints"`
-	Starter      string    `json:"starter"`
-	FunctionName string    `json:"functionName"`
-}
-type ProblemDetail struct {
-	ID int64 `json:"id"`
-	Input
-	UpdatedAt time.Time `json:"updatedAt"`
-}
-type Problem = ProblemDetail
 type Handler struct{ db *pgxpool.Pool }
 
 func NewHandler(db *pgxpool.Pool) *Handler { return &Handler{db: db} }
 
-var slugPattern = regexp.MustCompile(`^[a-z0-9]+(?:-[a-z0-9]+)*$`)
-var functionPattern = regexp.MustCompile(`^[A-Za-z_$][A-Za-z0-9_$]*$`)
-
-func (in *Input) valid() bool {
-	in.Title = strings.TrimSpace(in.Title)
-	in.Description = strings.TrimSpace(in.Description)
-	in.Topic = strings.TrimSpace(in.Topic)
-	if in.Examples == nil {
-		in.Examples = []Example{}
-	}
-	if in.Constraints == nil {
-		in.Constraints = []string{}
-	}
-	return len(in.Slug) > 0 && len(in.Slug) <= 120 && slugPattern.MatchString(in.Slug) && in.Slug != "generate" && len(in.Title) > 0 && len(in.Title) <= 200 && len(in.Description) > 0 && len(in.Description) <= 50000 && (in.Difficulty == "easy" || in.Difficulty == "medium" || in.Difficulty == "hard") && len(in.Topic) <= 120 && len(in.Examples) <= 20 && len(in.Constraints) <= 50 && len(in.Starter) <= 50000 && len(in.FunctionName) <= 120 && (in.FunctionName == "" || functionPattern.MatchString(in.FunctionName))
-}
-
-const columns = `id,slug,title,description,difficulty,topic,examples,constraints,starter,function_name,updated_at`
-
-func scan(row interface{ Scan(...any) error }) (ProblemDetail, error) {
-	var p ProblemDetail
-	err := row.Scan(&p.ID, &p.Slug, &p.Title, &p.Description, &p.Difficulty, &p.Topic, &p.Examples, &p.Constraints, &p.Starter, &p.FunctionName, &p.UpdatedAt)
-	return p, err
-}
 func fail(w http.ResponseWriter, err error) {
 	var pe *pgconn.PgError
 	switch {
@@ -97,20 +51,25 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 	limit, offset, ok := page(r)
 	q := r.URL.Query()
 	difficulty := q.Get("difficulty")
-	if !ok || len(q.Get("q")) > 200 || len(q.Get("topic")) > 120 || (difficulty != "" && difficulty != "easy" && difficulty != "medium" && difficulty != "hard") {
+	category := q.Get("category")
+	// Preserve the old filter alias, but use category in responses and new clients.
+	if category == "" {
+		category = q.Get("topic")
+	}
+	if !ok || len(q.Get("q")) > 200 || len(category) > 120 || (difficulty != "" && difficulty != "easy" && difficulty != "medium" && difficulty != "hard") {
 		httpapi.Error(w, 400, "invalid pagination or filters")
 		return
 	}
-	rows, err := h.db.Query(r.Context(), `SELECT `+columns+` FROM problems WHERE deleted_at IS NULL AND ($1='' OR difficulty=$1) AND ($2='' OR topic=$2) AND ($3='' OR title ILIKE '%'||$3||'%' OR description ILIKE '%'||$3||'%') ORDER BY id LIMIT $4 OFFSET $5`, difficulty, q.Get("topic"), q.Get("q"), limit, offset)
+	rows, err := h.db.Query(r.Context(), `SELECT slug,title,short_description,difficulty,topic FROM problems WHERE deleted_at IS NULL AND ($1='' OR difficulty=$1) AND ($2='' OR topic=$2) AND ($3='' OR title ILIKE '%'||$3||'%' OR short_description ILIKE '%'||$3||'%') ORDER BY id LIMIT $4 OFFSET $5`, difficulty, category, q.Get("q"), limit, offset)
 	if err != nil {
 		fail(w, err)
 		return
 	}
 	defer rows.Close()
-	result := []ProblemDetail{}
+	result := []Summary{}
 	for rows.Next() {
-		p, err := scan(rows)
-		if err != nil {
+		var p Summary
+		if err := rows.Scan(&p.Slug, &p.Title, &p.ShortDescription, &p.Difficulty, &p.Category); err != nil {
 			fail(w, err)
 			return
 		}
@@ -123,49 +82,77 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 	httpapi.JSON(w, 200, result)
 }
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
-	p, err := scan(h.db.QueryRow(r.Context(), `SELECT `+columns+` FROM problems WHERE slug=$1 AND deleted_at IS NULL`, r.PathValue("slug")))
+	language := "python"
+	if values, present := r.URL.Query()["language"]; present {
+		if len(values) != 1 || !languagePattern.MatchString(values[0]) {
+			httpapi.Error(w, 400, "provide one lowercase language identifier")
+			return
+		}
+		language = values[0]
+	}
+	p, languages, err := h.getDetail(r.Context(), r.PathValue("slug"), language)
+	if errors.Is(err, errLanguageUnavailable) {
+		httpapi.JSON(w, 404, map[string]any{"code": "language_not_available", "error": "requested language is not available for this problem", "languages": languages})
+		return
+	}
 	if err != nil {
-		fail(w, err)
+		problemReadError(w, err)
 		return
 	}
 	httpapi.JSON(w, 200, p)
 }
-func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	var in Input
-	if !httpapi.Decode(w, r, &in) {
-		return
+func saveLanguages(ctx context.Context, tx pgx.Tx, id int64, languages map[string]Variant) error {
+	if languages == nil {
+		return nil
 	}
-	if !in.valid() {
-		httpapi.Error(w, 400, "invalid problem fields")
-		return
-	}
-	examples, _ := json.Marshal(in.Examples)
-	constraints, _ := json.Marshal(in.Constraints)
-	p, err := scan(h.db.QueryRow(r.Context(), `INSERT INTO problems(slug,title,description,difficulty,topic,examples,constraints,starter,function_name,created_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING `+columns, in.Slug, in.Title, in.Description, in.Difficulty, in.Topic, examples, constraints, in.Starter, in.FunctionName, auth.Current(r).ID))
+	data, err := json.Marshal(languages)
 	if err != nil {
-		fail(w, err)
-		return
+		return err
 	}
-	w.Header().Set("Location", "/api/problems/"+p.Slug)
-	httpapi.JSON(w, 201, p)
+	_, err = tx.Exec(ctx, `UPDATE problems SET languages=languages || $2::jsonb WHERE id=$1`, id, data)
+	return err
 }
-func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Create(w http.ResponseWriter, r *http.Request) { h.write(w, r, true) }
+func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { h.write(w, r, false) }
+func (h *Handler) write(w http.ResponseWriter, r *http.Request, create bool) {
 	var in Input
 	if !httpapi.Decode(w, r, &in) {
 		return
 	}
-	if !in.valid() {
-		httpapi.Error(w, 400, "invalid problem fields")
+	if !in.valid(create) {
+		httpapi.Error(w, 400, "invalid problem fields or language data; creation requires at least one complete language")
 		return
 	}
-	examples, _ := json.Marshal(in.Examples)
-	constraints, _ := json.Marshal(in.Constraints)
-	p, err := scan(h.db.QueryRow(r.Context(), `UPDATE problems SET slug=$1,title=$2,description=$3,difficulty=$4,topic=$5,examples=$6,constraints=$7,starter=$8,function_name=$9,updated_at=now() WHERE slug=$10 AND deleted_at IS NULL RETURNING `+columns, in.Slug, in.Title, in.Description, in.Difficulty, in.Topic, examples, constraints, in.Starter, in.FunctionName, r.PathValue("slug")))
+	tx, err := h.db.Begin(r.Context())
 	if err != nil {
 		fail(w, err)
 		return
 	}
-	httpapi.JSON(w, 200, p)
+	defer tx.Rollback(r.Context())
+	var id int64
+	if create {
+		err = tx.QueryRow(r.Context(), `INSERT INTO problems(slug,title,short_description,description,difficulty,topic,created_by) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id`, in.Slug, in.Title, in.ShortDescription, in.Description, in.Difficulty, in.Category, auth.Current(r).ID).Scan(&id)
+	} else {
+		err = tx.QueryRow(r.Context(), `UPDATE problems SET slug=$1,title=$2,short_description=$3,description=$4,difficulty=$5,topic=$6,updated_at=now() WHERE slug=$7 AND deleted_at IS NULL RETURNING id`, in.Slug, in.Title, in.ShortDescription, in.Description, in.Difficulty, in.Category, r.PathValue("slug")).Scan(&id)
+	}
+	if err != nil {
+		fail(w, err)
+		return
+	}
+	if err = saveLanguages(r.Context(), tx, id, in.Languages); err != nil {
+		fail(w, err)
+		return
+	}
+	if err = tx.Commit(r.Context()); err != nil {
+		fail(w, err)
+		return
+	}
+	status := 200
+	if create {
+		status = 201
+		w.Header().Set("Location", "/api/problems/"+in.Slug)
+	}
+	httpapi.JSON(w, status, in.Summary)
 }
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	result, err := h.db.Exec(r.Context(), `UPDATE problems SET deleted_at=now(),updated_at=now() WHERE slug=$1 AND deleted_at IS NULL`, r.PathValue("slug"))
