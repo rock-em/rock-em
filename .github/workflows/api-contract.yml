@@ -1,0 +1,26 @@
+name: API Contract
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  generated-code:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: backend/go.mod
+          cache-dependency-path: backend/go.sum
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: tools/openapi/package-lock.json
+      - run: npm ci --prefix tools/openapi
+      - run: ./scripts/generate-api.sh
+      - name: Check generated files are current
+        run: git diff --exit-code -- backend/internal/apigen/api.gen.go frontend/src/api/schema.d.ts
