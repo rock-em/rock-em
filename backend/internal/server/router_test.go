@@ -73,7 +73,7 @@ func TestAccountAndProblemLifecycle(t *testing.T) {
 
 	check(call("POST", "/api/auth/login", fmt.Sprintf(`{"email":%q,"password":"incorrect-password"}`, emails[1]), nil), 401)
 	slug := strings.ToLower(prefix) + "-problem"
-	body := fmt.Sprintf(`{"slug":%q,"title":"Two Sum","description":"Find a pair","difficulty":"easy","topic":"arrays","examples":[{"input":"[1,2]","output":"3"}],"constraints":["n > 0"],"starter":"function solve() {}","functionName":"solve"}`, slug)
+	body := fmt.Sprintf(`{"slug":%q,"title":"Two Sum","shortDescription":"Find a pair","description":"Find a pair","difficulty":"easy","category":"arrays","languages":{"python":{"requirements":["Return zero-based indices."],"examples":[{"input":"[1,2]","output":"3"}],"constraints":["n > 0"],"tests":[{"input":[[1,2],3],"expected":[0,1]}],"starter":"def solve(nums, target): pass","functionName":"solve","indexBase":0}}}`, slug)
 	check(call("POST", "/api/problems", body, nil), 401)
 	check(call("POST", "/api/problems", body, user), 403)
 	if _, err := db.Exec(t.Context(), `UPDATE users SET role='admin' WHERE email=$1`, emails[0]); err != nil {
@@ -94,6 +94,32 @@ func TestAccountAndProblemLifecycle(t *testing.T) {
 	check(call("GET", "/api/problems?limit=1000", "", nil), 400)
 	check(call("PUT", "/api/problems/"+slug, body, user), 403)
 	check(call("PUT", "/api/problems/"+slug, strings.Replace(body, "Two Sum", "Pair Sum", 1), admin), 200)
+	var edited map[string]any
+	if err := json.Unmarshal([]byte(body), &edited); err != nil {
+		t.Fatal(err)
+	}
+	edited["languages"] = map[string]any{"julia": map[string]any{
+		"requirements": []string{"Return one-based indices."}, "constraints": []string{"length(nums) >= 2"},
+		"tests":   []any{map[string]any{"input": []any{[]int{1, 2}, 3}, "expected": []int{1, 2}}},
+		"starter": "function solve!(nums, target)\nend", "functionName": "solve!", "indexBase": 1,
+	}}
+	update, _ := json.Marshal(edited)
+	check(call("PUT", "/api/problems/"+slug, string(update), user), 403)
+	check(call("PUT", "/api/problems/"+slug, string(update), admin), 200)
+	check(call("GET", "/api/problems/"+slug+"?language=julia", "", nil), 200)
+	check(call("GET", "/api/problems/"+slug+"/languages", "", nil), 200)
+	check(call("DELETE", "/api/problems/"+slug+"/languages/julia", "", user), 403)
+	check(call("DELETE", "/api/problems/"+slug+"/languages/julia", "", admin), 204)
+	check(call("GET", "/api/problems/"+slug+"?language=julia", "", nil), 404)
+	check(call("GET", "/api/problems/"+slug, "", nil), 200) // omitted Python variant preserved
+	edited["title"] = "should not persist"
+	edited["languages"].(map[string]any)["julia"].(map[string]any)["indexBase"] = -1
+	invalid, _ := json.Marshal(edited)
+	check(call("PUT", "/api/problems/"+slug, string(invalid), admin), 400)
+	unchanged := call("GET", "/api/problems/"+slug, "", nil)
+	if strings.Contains(unchanged.Body.String(), "should not persist") {
+		t.Fatal("invalid update changed metadata")
+	}
 	check(call("PATCH", "/api/me/problems/"+slug, `{"bookmarked":true}`, user), 200)
 	w := call("PATCH", "/api/me/problems/"+slug, `{"status":"in_progress"}`, user)
 	check(w, 200)
