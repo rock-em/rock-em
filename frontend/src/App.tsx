@@ -1,5 +1,7 @@
+import { PageLink } from './PageLink';
 import { useState, type FormEvent } from "react";
 import Account from "./Account";
+import { navigateTo, usePathname } from "./navigation";
 import ChromeSculpture from "./ChromeSculpture";
 import { generateProblem, type GeneratedProblem, type Level } from "./generateProblem";
 import TopicLearningPath from "./TopicLearningPath";
@@ -228,12 +230,14 @@ async function verifyGeneratedProblem(generated: GeneratedProblem, id: number): 
 }
 
 function Practice() {
+  const path = usePathname();
   const [generated, setGenerated] = useState<Problem[]>([]);
   const problems = [...baseProblems, ...generated];
   const topics = [...new Set(problems.map((problem) => problem.topic))];
   const [topicIndex, setTopicIndex] = useState(0);
   const [search, setSearch] = useState("");
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const problemMatch = path.match(/^\/problems\/(\d+)$/);
+  const selectedId = problemMatch ? Number(problemMatch[1]) : null;
   const [solutions, setSolutions] = useState<Record<number, string>>({});
   const [completed, setCompleted] = useState<number[]>(baseProblems.filter((p) => p.solved).map((p) => p.id));
   const [results, setResults] = useState<TestResult[] | null>(null);
@@ -257,8 +261,8 @@ function Practice() {
 
   function nextTopic() { setTopicIndex((prev) => (prev + 1) % topics.length); setSearch(""); }
   function previousTopic() { setTopicIndex((prev) => (prev + topics.length - 1) % topics.length); setSearch(""); }
-  function openProblem(id: number) { setSelectedId(id); setResults(null); setMessage(""); window.scrollTo(0, 0); }
-  function goBack() { setSelectedId(null); setResults(null); setMessage(""); window.scrollTo(0, 0); }
+  function openProblem(id: number) { setResults(null); setMessage(""); navigateTo(`/problems/${id}`); }
+  function goBack() { setResults(null); setMessage(""); navigateTo("/"); }
 
   async function createProblem(event: FormEvent) {
     event.preventDefault();
@@ -395,61 +399,36 @@ if (submit && passed) {
     );
   }
 
-  return (
-    <main className="page">
-      <section className="intro">
-        <h1 className="sr-only">Programming practice</h1>
-        <p>A place to practice programming that is nice on the eyes :D</p>
-        <div className="summary">
-          <span><strong>Problems</strong> · {problems.length}</span>
-          <span><strong>Solved</strong> · {completed.length}</span>
-          <span><strong>Topics</strong> · {topics.length}</span>
-        </div>
-      </section>
-      <section className="problem-browser">
-        <div className="topic-carousel">
-          <button className="arrow" onClick={previousTopic} aria-label="Previous topic">←</button>
-          <ChromeSculpture key={currentTopic} topic={currentTopic} />
-          <button className="arrow" onClick={nextTopic} aria-label="Next topic">→</button>
-        </div>
-        <div className="topic-meta">
-          {solvedCount} / {totalTopicProblems} solved <span> · </span> {topicIndex + 1} of {topics.length}
-        </div>
+  if (path === '/learn') {
+    return <main className="page utility-page">
+      <h1>Learning paths</h1>
+      <p className="account-muted">Build the concepts behind each topic, one step at a time.</p>
+      <label className="topic-picker">Topic
+        <select value={currentTopic} onChange={(event) => { setTopicIndex(topics.indexOf(event.target.value)); setSearch(""); }}>
+          {topics.map((topic) => <option key={topic}>{topic}</option>)}
+        </select>
+      </label>
+      <TopicLearningPath key={currentTopic} topic={currentTopic} problems={problems.filter((problem) => problem.topic === currentTopic)} completedIds={completed} onOpenProblem={openProblem} />
+    </main>;
+  }
 
+  if (path === '/progress') {
+    return <main className="page utility-page">
+      <h1>Practice review</h1>
+      <p className="account-muted">See your progress and choose what to revisit next.</p>
+      <div className="summary">
+        <span><strong>Problems</strong> · {problems.length}</span>
+        <span><strong>Solved</strong> · {completed.length}</span>
+        <span><strong>Topics</strong> · {topics.length}</span>
+      </div>
+      <AdaptivePractice problems={problems} onSelectProblem={(problem) => openProblem(Number(problem.id))} />
+    </main>;
+  }
 
-        <TopicLearningPath
-          key={currentTopic}
-          topic={currentTopic}
-          problems={problems.filter(
-            (problem) => problem.topic === currentTopic
-          )}
-          completedIds={completed}
-          onOpenProblem={openProblem}
-        />
-
-
-        <input className="search" type="text" placeholder={`Search ${currentTopic.toLowerCase()}...`} value={search} onChange={(event) => setSearch(event.target.value)} />
-        <div className="problem-list" key={`${currentTopic}-${search}`}>
-          {topicProblems.length ? topicProblems.map((problem) => (
-            <button type="button" className="problem-row" key={problem.id} onClick={() => openProblem(problem.id)}>
-              <span className="problem-left">
-                <span className="problem-number">{completed.includes(problem.id) ? "✓" : problem.id}</span>
-                <span className="problem-name">{problem.title}</span>
-              </span>
-              <span className="difficulty">{problem.difficulty}</span>
-            </button>
-          )) : <p className="no-results">No problems found.</p>}
-        </div>
-      </section>
-
-    <AdaptivePractice
-    problems={problems}
-    onSelectProblem={(problem) => openProblem(Number(problem.id))}
-    />
-
-      
+  if (path === '/generate') {
+    return <main className="page utility-page">
       <section className="generator">
-        <h2>Generate a problem</h2>
+        <h1>Generate a problem</h1>
         <p>Pick something you want to learn and get a fresh problem with test cases, not a repeat of a classic.</p>
         <form className="generator-form" onSubmit={(event) => void createProblem(event)}>
           <label>
@@ -473,12 +452,57 @@ if (submit && passed) {
         {generating && <p className="generator-status" role="status">Writing the problem and checking its test cases. This can take a minute.</p>}
         {genError && <p className="generator-status generator-error" role="alert">{genError}</p>}
       </section>
-      <section>
-        <h2>About</h2>
-        <p>rock em is an open source program for practicing programming problems!</p>
+    </main>;
+  }
+
+  if (path === '/about') {
+    return <main className="page utility-page about-page">
+      <h1>About rock em</h1>
+      <p>A place to practice programming that is nice on the eyes :D</p>
+      <p>rock em is an open source program for practicing programming problems. Browse by topic, follow a learning path, or generate something new to work on.</p>
+      <PageLink href="/">Browse problems →</PageLink>
+    </main>;
+  }
+
+  // Account pages keep this component mounted so drafts and generated problems
+  // survive navigation, but do not run an invisible sculpture in the background.
+  if (['/sign-in', '/sign-up', '/forgot-password', '/reset-password'].includes(path)) return null;
+  if (path !== '/') {
+    return <main className="page utility-page"><h1>{problemMatch ? 'Problem unavailable' : 'Page not found'}</h1>
+      <p>{problemMatch ? 'This problem may have been generated in a previous session.' : 'That page does not exist.'}</p>
+      <PageLink href="/">Back to problems</PageLink>
+    </main>;
+  }
+
+  return <main className="page browse-page">
+    <h1 className="sr-only">Programming practice</h1>
+      <section className="problem-browser">
+        <div className="topic-carousel">
+          <button className="arrow" onClick={previousTopic} aria-label="Previous topic">←</button>
+          <ChromeSculpture key={currentTopic} topic={currentTopic} />
+          <button className="arrow" onClick={nextTopic} aria-label="Next topic">→</button>
+        </div>
+        <div className="topic-meta">
+          {solvedCount} / {totalTopicProblems} solved <span> · </span> {topicIndex + 1} of {topics.length}
+        </div>
+
+
+        <input aria-label={`Search ${currentTopic} problems`} className="search" type="text" placeholder={`Search ${currentTopic.toLowerCase()}...`} value={search} onChange={(event) => setSearch(event.target.value)} />
+        <div className="problem-list" key={`${currentTopic}-${search}`}>
+          {topicProblems.length ? topicProblems.map((problem) => (
+            <button type="button" className="problem-row" key={problem.id} onClick={() => openProblem(problem.id)}>
+              <span className="problem-left">
+                <span className="problem-number">{completed.includes(problem.id) ? "✓" : problem.id}</span>
+                <span className="problem-name">{problem.title}</span>
+              </span>
+              <span className="difficulty">{problem.difficulty}</span>
+            </button>
+          )) : <p className="no-results">No problems found.</p>}
+        </div>
       </section>
-    </main>
-  );
+
+  </main>;
+
 }
 
 export default function App() {
