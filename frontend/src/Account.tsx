@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
+import PasswordReset from './PasswordReset';
 
 type User = { displayName: string; email: string; role: "user" | "admin" };
-type Page = 'sign-in' | 'sign-up' | null;
-const currentPage = (): Page => window.location.pathname === '/sign-in' ? 'sign-in' : window.location.pathname === '/sign-up' ? 'sign-up' : null;
+type Page = 'sign-in' | 'sign-up' | 'forgot-password' | 'reset-password' | null;
+const currentPage = (): Page => {
+  const path = window.location.pathname.slice(1);
+  return path === 'sign-in' || path === 'sign-up' || path === 'forgot-password' || path === 'reset-password' ? path : null;
+};
 
 async function accountRequest(path: string, body?: unknown): Promise<User | null> {
   const response = await fetch(`/api/auth/${({ session: "me", "sign-in": "login", "sign-up": "register", "sign-out": "logout" })[path as "session" | "sign-in" | "sign-up" | "sign-out"]}`, {
@@ -113,7 +117,7 @@ export default function Account({ children }: { children: ReactNode }) {
     </header>
     {page ? <main className="auth-page" key={page}>
       {link(null, '← Back to problems', 'auth-back')}
-      {user ? <><h1>You’re signed in</h1><p className="account-muted">Continue practicing as {user.displayName}.</p>{link(null, 'Browse problems →')}</> : <>
+      {page === 'forgot-password' || page === 'reset-password' ? <PasswordReset resetting={page === 'reset-password'} onReset={() => setUser(null)} signIn={() => navigate('sign-in')} /> : user ? <><h1>You’re signed in</h1><p className="account-muted">Continue practicing as {user.displayName}.</p>{link(null, 'Browse problems →')}</> : <>
         <h1>{page === 'sign-up' ? 'A little practice, every day.' : 'Welcome back.'}</h1>
         <p className="account-muted">{page === 'sign-up' ? 'Create your rock em account.' : 'Sign in to your rock em account.'}</p>
         <form onSubmit={(event) => void submit(event)} className="auth-form">
@@ -121,6 +125,7 @@ export default function Account({ children }: { children: ReactNode }) {
           <label>Email<input name="email" type="email" autoComplete="email" required maxLength={254} /></label>
           <label>Password<span className="password-field"><input name="password" type={showPassword ? 'text' : 'password'} autoComplete={page === 'sign-up' ? 'new-password' : 'current-password'} minLength={page === 'sign-up' ? 12 : undefined} maxLength={72} required aria-describedby={page === 'sign-up' ? 'password-hint' : undefined} /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>{showPassword ? 'Hide' : 'Show'}</button></span></label>
           {page === 'sign-up' && <span id="password-hint" className="password-hint">Use 12–72 bytes (12–72 characters for plain English text).</span>}
+          {page === 'sign-in' && <div className="forgot-password-link">{link('forgot-password', 'Forgot password?')}</div>}
           {error && <p className="auth-error" role="alert">{error}</p>}
           <button className="auth-submit" disabled={busy || checking}>{busy ? 'Please wait…' : page === 'sign-up' ? 'Create account →' : 'Sign in →'}</button>
         </form>
