@@ -1,71 +1,132 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 
-type User = { id: number; email: string; displayName: string; role: "user" | "admin" };
+type User = { displayName: string; email: string; role: "user" | "admin" };
+type Page = 'sign-in' | 'sign-up' | null;
+const currentPage = (): Page => window.location.pathname === '/sign-in' ? 'sign-in' : window.location.pathname === '/sign-up' ? 'sign-up' : null;
 
-export default function Account() {
+async function accountRequest(path: string, body?: unknown): Promise<User | null> {
+  const response = await fetch(`/api/auth/${({ session: "me", "sign-in": "login", "sign-up": "register", "sign-out": "logout" })[path as "session" | "sign-in" | "sign-up" | "sign-out"]}`, {
+    method: body === undefined ? 'GET' : 'POST',
+    credentials: 'include',
+    headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (path === 'session' && response.status === 401) return null;
+  if (path === 'sign-out' && response.ok) return null;
+  if (response.status === 404 || !response.headers.get('content-type')?.includes('application/json')) {
+    throw new Error('Account access is not available yet. Please try again later.');
+  }
+  if (!response.ok) {
+    if (response.status === 401) throw new Error('The email or password is incorrect. Please try again.');
+    if (response.status === 409) throw new Error('An account with this email already exists. Try signing in.');
+    if (response.status === 400) {
+      const data = await response.json();
+      throw new Error(typeof data.error === 'string' ? data.error : 'Please check your account details.');
+    }
+    throw new Error('Unable to complete your request. Please try again.');
+  }
+  const data = await response.json();
+  if (typeof data?.displayName !== 'string' || typeof data?.email !== 'string') throw new Error('Unable to load your account. Please try again.');
+  return data;
+}
+
+export default function Account({ children }: { children: ReactNode }) {
+  const [page, setPage] = useState<Page>(currentPage);
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [register, setRegister] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const profile = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
-    const abort = new AbortController();
-    fetch("/api/auth/me", { signal: abort.signal })
-      .then(async response => {
-        if (response.ok) setUser(await response.json());
-        else if (response.status !== 401) setError("Account service unavailable. Please try again.");
-      })
-      .catch(() => { if (!abort.signal.aborted) setError("Could not reach the account service."); })
-      .finally(() => { if (!abort.signal.aborted) setLoading(false); });
-    return () => abort.abort();
+    let active = true;
+    accountRequest('session').then((next) => { if (active) setUser(next); }).catch(() => {}).finally(() => { if (active) setChecking(false); });
+    const onPop = () => { setPage(currentPage()); setError(''); setShowPassword(false); };
+    const dismiss = (event: PointerEvent) => {
+      if (profile.current && !profile.current.contains(event.target as Node)) profile.current.open = false;
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && profile.current?.open) {
+        profile.current.open = false;
+        profile.current.querySelector('summary')?.focus();
+      }
+    };
+    window.addEventListener('popstate', onPop);
+    document.addEventListener('pointerdown', dismiss);
+    document.addEventListener('keydown', escape);
+    return () => { active = false; window.removeEventListener('popstate', onPop); document.removeEventListener('pointerdown', dismiss); document.removeEventListener('keydown', escape); };
   }, []);
+
+  function navigate(next: Page) {
+    window.history.pushState(null, '', next ? `/${next}` : '/');
+    setPage(next);
+    setError('');
+    setShowPassword(false);
+    window.scrollTo(0, 0);
+  }
+
+  function link(next: Page, label: string, className?: string) {
+    return <a className={className} href={next ? `/${next}` : '/'} onClick={(event) => {
+      if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      event.preventDefault(); navigate(next);
+    }}>{label}</a>;
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = event.currentTarget;
-    const values = new FormData(form);
-    setBusy(true); setError("");
+    if (busy || checking) return;
+    const data = new FormData(event.currentTarget);
+    setBusy(true); setError('');
     try {
-      const payload = {
-        email: values.get("email"), password: values.get("password"),
-        ...(register ? { displayName: values.get("displayName") } : {}),
-      };
-      const response = await fetch(`/api/auth/${register ? "register" : "login"}`, {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+      const next = await accountRequest(page!, {
+        email: String(data.get('email')).trim(), password: data.get('password'),
+        ...(page === 'sign-up' ? { displayName: String(data.get('name')).trim() } : {}),
       });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.error ?? "Unable to sign in.");
-      setUser(body); form.reset();
-    } catch (err) { setError(err instanceof Error ? err.message : "Unable to sign in."); }
+      setUser(next); navigate(null);
+    } catch (failure) { setError(failure instanceof Error ? failure.message : 'Unable to connect. Please try again.'); }
     finally { setBusy(false); }
   }
 
-  async function logout() {
-    setBusy(true); setError("");
-    try {
-      const response = await fetch("/api/auth/logout", { method: "POST" });
-      if (!response.ok) throw new Error("Unable to sign out. Please try again.");
-      setUser(null);
-    } catch (err) { setError(err instanceof Error ? err.message : "Unable to sign out."); }
+  async function signOut() {
+    setBusy(true); setError('');
+    try { await accountRequest('sign-out', {}); setUser(null); navigate(null); }
+    catch { setError('Unable to sign out. Please try again.'); }
     finally { setBusy(false); }
   }
 
-  if (loading) return <p role="status">Checking account…</p>;
-  return <section aria-label="Account" className="account">
-    {user ? <p>Signed in as {user.displayName}{user.role === "admin" ? " · Admin" : ""} <button disabled={busy} onClick={logout}>Sign out</button></p> :
-      <details>
-        <summary>Sign in or create an account</summary>
-        <p>Sign in to generate practice problems. You can browse without an account.</p>
-        <form onSubmit={submit}>
-          {register && <label>Display name <input name="displayName" autoComplete="nickname" required maxLength={80} /></label>}
-          <label>Email <input name="email" type="email" autoComplete="email" required maxLength={254} /></label>
-          <label>Password <input name="password" type="password" autoComplete={register ? "new-password" : "current-password"} required minLength={register ? 12 : undefined} maxLength={72} /></label>
-          {register && <p>Use a password between 12 and 72 bytes.</p>}
-          <button disabled={busy} type="submit">{busy ? "Please wait…" : register ? "Create account" : "Sign in"}</button>
-          <button disabled={busy} type="button" onClick={() => { setRegister(!register); setError(""); }}>{register ? "Already have an account?" : "Create an account"}</button>
+  return <>
+    <header className="site-header">
+      {link(null, 'rock em', 'site-brand')}
+      <nav aria-label="Account" className="account-nav">
+        {checking ? <span className="account-muted" role="status">Loading account…</span> : user ?
+          <details className="profile" ref={profile}>
+            <summary><span className="avatar" aria-hidden="true">{user.displayName.trim().charAt(0).toUpperCase() || '?'}</span><span className="profile-name">{user.displayName}</span></summary>
+            <div className="profile-panel">
+              <strong>{user.displayName}</strong>{user.role === "admin" && <span className="account-muted">Admin</span>}<span className="account-muted">{user.email}</span>
+              <button disabled={busy} onClick={() => void signOut()}>{busy ? 'Signing out…' : 'Sign out'}</button>
+              {error && <p role="alert" className="auth-error">{error}</p>}
+            </div>
+          </details> : <>{link('sign-in', 'Sign in')}{link('sign-up', 'Sign up', 'account-button')}</>}
+      </nav>
+    </header>
+    {page ? <main className="auth-page" key={page}>
+      {link(null, '← Back to problems', 'auth-back')}
+      {user ? <><h1>You’re signed in</h1><p className="account-muted">Continue practicing as {user.displayName}.</p>{link(null, 'Browse problems →')}</> : <>
+        <h1>{page === 'sign-up' ? 'A little practice, every day.' : 'Welcome back.'}</h1>
+        <p className="account-muted">{page === 'sign-up' ? 'Create your rock em account.' : 'Sign in to your rock em account.'}</p>
+        <form onSubmit={(event) => void submit(event)} className="auth-form">
+          {page === 'sign-up' && <label>Name<input name="name" autoComplete="name" required maxLength={80} pattern=".*\S.*" /></label>}
+          <label>Email<input name="email" type="email" autoComplete="email" required maxLength={254} /></label>
+          <label>Password<span className="password-field"><input name="password" type={showPassword ? 'text' : 'password'} autoComplete={page === 'sign-up' ? 'new-password' : 'current-password'} minLength={page === 'sign-up' ? 12 : undefined} maxLength={72} required aria-describedby={page === 'sign-up' ? 'password-hint' : undefined} /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>{showPassword ? 'Hide' : 'Show'}</button></span></label>
+          {page === 'sign-up' && <span id="password-hint" className="password-hint">Use 12–72 bytes (12–72 characters for plain English text).</span>}
+          {error && <p className="auth-error" role="alert">{error}</p>}
+          <button className="auth-submit" disabled={busy || checking}>{busy ? 'Please wait…' : page === 'sign-up' ? 'Create account →' : 'Sign in →'}</button>
         </form>
-      </details>}
-    {error && <p role="alert">{error}</p>}
-  </section>;
+        <p className="auth-switch">{page === 'sign-up' ? 'Already have an account? ' : 'New here? '}{link(page === 'sign-up' ? 'sign-in' : 'sign-up', page === 'sign-up' ? 'Sign in' : 'Create an account')}</p>
+      </>}
+    </main> : null}
+    <div hidden={page !== null}>{children}</div>
+  </>;
 }
