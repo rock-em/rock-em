@@ -5,12 +5,13 @@ import App from './App'
 afterEach(() => vi.unstubAllGlobals())
 
 describe('App', () => {
-  it('renders the Rock Em heading', () => {
+  it('renders one brand link and an accessible practice heading', () => {
     vi.stubGlobal('fetch', vi.fn(() => new Promise(() => {})))
     render(<App />)
 
     expect(
-      screen.getByRole('heading', { name: /rock em/i }),
+      screen.getByRole('heading', { name: 'Programming practice' }),
     ).toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'rock em' })).toHaveLength(1)
   })
 })
