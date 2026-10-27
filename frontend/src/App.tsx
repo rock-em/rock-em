@@ -227,7 +227,7 @@ async function verifyGeneratedProblem(generated: GeneratedProblem, id: number): 
   return { ...candidate, tests };
 }
 
-function App() {
+function Practice() {
   const [generated, setGenerated] = useState<Problem[]>([]);
   const problems = [...baseProblems, ...generated];
   const topics = [...new Set(problems.map((problem) => problem.topic))];
@@ -407,7 +407,6 @@ if (submit && passed) {
           <span><strong>Topics</strong> · {topics.length}</span>
         </div>
       </section>
-      <Account />
       <section className="problem-browser">
         <div className="topic-carousel">
           <button className="arrow" onClick={previousTopic} aria-label="Previous topic">←</button>
@@ -483,4 +482,6 @@ if (submit && passed) {
   );
 }
 
-export default App;
+export default function App() {
+  return <Account><Practice /></Account>;
+}
