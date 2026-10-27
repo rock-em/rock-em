@@ -48,7 +48,7 @@ func TestClaudeGeneratorParsesStructuredOutput(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if problem.FunctionName != "longestLateRun" || problem.Difficulty != "Easy" {
+	if problem.FunctionName != "longestLateRun" || problem.Difficulty != "easy" {
 		t.Errorf("unexpected problem: %+v", problem)
 	}
 

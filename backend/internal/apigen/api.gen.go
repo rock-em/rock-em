@@ -25,11 +25,11 @@ const (
 	SessionCookieScopes = "sessionCookie.Scopes"
 )
 
-// Defines values for CreateProblemInputDifficulty.
+// Defines values for Difficulty.
 const (
-	CreateProblemInputDifficultyEasy   CreateProblemInputDifficulty = "easy"
-	CreateProblemInputDifficultyHard   CreateProblemInputDifficulty = "hard"
-	CreateProblemInputDifficultyMedium CreateProblemInputDifficulty = "medium"
+	Easy   Difficulty = "easy"
+	Hard   Difficulty = "hard"
+	Medium Difficulty = "medium"
 )
 
 // Defines values for GenerateInputLevel.
@@ -39,31 +39,10 @@ const (
 	Intermediate GenerateInputLevel = "intermediate"
 )
 
-// Defines values for GeneratedProblemDifficulty.
-const (
-	GeneratedProblemDifficultyEasy   GeneratedProblemDifficulty = "Easy"
-	GeneratedProblemDifficultyHard   GeneratedProblemDifficulty = "Hard"
-	GeneratedProblemDifficultyMedium GeneratedProblemDifficulty = "Medium"
-)
-
 // Defines values for HealthStatus.
 const (
 	Ok        HealthStatus = "ok"
 	Unhealthy HealthStatus = "unhealthy"
-)
-
-// Defines values for ProblemDetailDifficulty.
-const (
-	ProblemDetailDifficultyEasy   ProblemDetailDifficulty = "easy"
-	ProblemDetailDifficultyHard   ProblemDetailDifficulty = "hard"
-	ProblemDetailDifficultyMedium ProblemDetailDifficulty = "medium"
-)
-
-// Defines values for ProblemInputDifficulty.
-const (
-	ProblemInputDifficultyEasy   ProblemInputDifficulty = "easy"
-	ProblemInputDifficultyHard   ProblemInputDifficulty = "hard"
-	ProblemInputDifficultyMedium ProblemInputDifficulty = "medium"
 )
 
 // Defines values for ProblemStateStatus.
@@ -71,13 +50,6 @@ const (
 	ProblemStateStatusCompleted  ProblemStateStatus = "completed"
 	ProblemStateStatusInProgress ProblemStateStatus = "in_progress"
 	ProblemStateStatusNotStarted ProblemStateStatus = "not_started"
-)
-
-// Defines values for ProblemSummaryDifficulty.
-const (
-	ProblemSummaryDifficultyEasy   ProblemSummaryDifficulty = "easy"
-	ProblemSummaryDifficultyHard   ProblemSummaryDifficulty = "hard"
-	ProblemSummaryDifficultyMedium ProblemSummaryDifficulty = "medium"
 )
 
 // Defines values for StateInputStatus.
@@ -93,13 +65,6 @@ const (
 	UserRoleUser  UserRole = "user"
 )
 
-// Defines values for ListProblemsParamsDifficulty.
-const (
-	ListProblemsParamsDifficultyEasy   ListProblemsParamsDifficulty = "easy"
-	ListProblemsParamsDifficultyHard   ListProblemsParamsDifficulty = "hard"
-	ListProblemsParamsDifficultyMedium ListProblemsParamsDifficulty = "medium"
-)
-
 // CodeInput defines model for CodeInput.
 type CodeInput struct {
 	Code string `json:"code"`
@@ -107,17 +72,17 @@ type CodeInput struct {
 
 // CreateProblemInput defines model for CreateProblemInput.
 type CreateProblemInput struct {
-	Category         string                       `json:"category"`
-	Description      string                       `json:"description"`
-	Difficulty       CreateProblemInputDifficulty `json:"difficulty"`
-	Languages        map[string]LanguageData      `json:"languages"`
-	ShortDescription string                       `json:"shortDescription"`
-	Slug             string                       `json:"slug"`
-	Title            string                       `json:"title"`
+	Category         string                  `json:"category"`
+	Description      string                  `json:"description"`
+	Difficulty       Difficulty              `json:"difficulty"`
+	Languages        map[string]LanguageData `json:"languages"`
+	ShortDescription string                  `json:"shortDescription"`
+	Slug             string                  `json:"slug"`
+	Title            string                  `json:"title"`
 }
 
-// CreateProblemInputDifficulty defines model for CreateProblemInput.Difficulty.
-type CreateProblemInputDifficulty string
+// Difficulty defines model for Difficulty.
+type Difficulty string
 
 // Error defines model for Error.
 type Error struct {
@@ -154,20 +119,17 @@ type GenerateInputLevel string
 
 // GeneratedProblem defines model for GeneratedProblem.
 type GeneratedProblem struct {
-	Constraints       []string                   `json:"constraints"`
-	Description       string                     `json:"description"`
-	Difficulty        GeneratedProblemDifficulty `json:"difficulty"`
-	Examples          []Example                  `json:"examples"`
-	FunctionName      string                     `json:"functionName"`
-	ReferenceSolution string                     `json:"referenceSolution"`
-	Starter           string                     `json:"starter"`
-	Tests             []TestCase                 `json:"tests"`
-	Title             string                     `json:"title"`
-	Topic             string                     `json:"topic"`
+	Constraints       []string   `json:"constraints"`
+	Description       string     `json:"description"`
+	Difficulty        Difficulty `json:"difficulty"`
+	Examples          []Example  `json:"examples"`
+	FunctionName      string     `json:"functionName"`
+	ReferenceSolution string     `json:"referenceSolution"`
+	Starter           string     `json:"starter"`
+	Tests             []TestCase `json:"tests"`
+	Title             string     `json:"title"`
+	Topic             string     `json:"topic"`
 }
-
-// GeneratedProblemDifficulty defines model for GeneratedProblem.Difficulty.
-type GeneratedProblemDifficulty string
 
 // Health defines model for Health.
 type Health struct {
@@ -202,13 +164,13 @@ type PasswordInput struct {
 
 // ProblemDetail defines model for ProblemDetail.
 type ProblemDetail struct {
-	Category     string                  `json:"category"`
-	Constraints  []string                `json:"constraints"`
-	Description  string                  `json:"description"`
-	Difficulty   ProblemDetailDifficulty `json:"difficulty"`
-	Examples     []Example               `json:"examples"`
-	FunctionName string                  `json:"functionName"`
-	IndexBase    int                     `json:"indexBase"`
+	Category     string     `json:"category"`
+	Constraints  []string   `json:"constraints"`
+	Description  string     `json:"description"`
+	Difficulty   Difficulty `json:"difficulty"`
+	Examples     []Example  `json:"examples"`
+	FunctionName string     `json:"functionName"`
+	IndexBase    int        `json:"indexBase"`
 
 	// Language Canonical lowercase language name, e.g. python or javascript. URL-encode plus signs.
 	Language         string     `json:"language"`
@@ -220,22 +182,16 @@ type ProblemDetail struct {
 	Title            string     `json:"title"`
 }
 
-// ProblemDetailDifficulty defines model for ProblemDetail.Difficulty.
-type ProblemDetailDifficulty string
-
 // ProblemInput defines model for ProblemInput.
 type ProblemInput struct {
 	Category         string                   `json:"category"`
 	Description      string                   `json:"description"`
-	Difficulty       ProblemInputDifficulty   `json:"difficulty"`
+	Difficulty       Difficulty               `json:"difficulty"`
 	Languages        *map[string]LanguageData `json:"languages,omitempty"`
 	ShortDescription string                   `json:"shortDescription"`
 	Slug             string                   `json:"slug"`
 	Title            string                   `json:"title"`
 }
-
-// ProblemInputDifficulty defines model for ProblemInput.Difficulty.
-type ProblemInputDifficulty string
 
 // ProblemState defines model for ProblemState.
 type ProblemState struct {
@@ -250,15 +206,12 @@ type ProblemStateStatus string
 
 // ProblemSummary defines model for ProblemSummary.
 type ProblemSummary struct {
-	Category         string                   `json:"category"`
-	Difficulty       ProblemSummaryDifficulty `json:"difficulty"`
-	ShortDescription string                   `json:"shortDescription"`
-	Slug             string                   `json:"slug"`
-	Title            string                   `json:"title"`
+	Category         string     `json:"category"`
+	Difficulty       Difficulty `json:"difficulty"`
+	ShortDescription string     `json:"shortDescription"`
+	Slug             string     `json:"slug"`
+	Title            string     `json:"title"`
 }
-
-// ProblemSummaryDifficulty defines model for ProblemSummary.Difficulty.
-type ProblemSummaryDifficulty string
 
 // RegisterInput defines model for RegisterInput.
 type RegisterInput struct {
@@ -311,16 +264,13 @@ type ListSavedProblemsParams struct {
 
 // ListProblemsParams defines parameters for ListProblems.
 type ListProblemsParams struct {
-	Limit      *int                          `form:"limit,omitempty" json:"limit,omitempty"`
-	Offset     *int                          `form:"offset,omitempty" json:"offset,omitempty"`
-	Q          *string                       `form:"q,omitempty" json:"q,omitempty"`
-	Category   *string                       `form:"category,omitempty" json:"category,omitempty"`
-	Topic      *string                       `form:"topic,omitempty" json:"topic,omitempty"`
-	Difficulty *ListProblemsParamsDifficulty `form:"difficulty,omitempty" json:"difficulty,omitempty"`
+	Limit      *int        `form:"limit,omitempty" json:"limit,omitempty"`
+	Offset     *int        `form:"offset,omitempty" json:"offset,omitempty"`
+	Q          *string     `form:"q,omitempty" json:"q,omitempty"`
+	Category   *string     `form:"category,omitempty" json:"category,omitempty"`
+	Topic      *string     `form:"topic,omitempty" json:"topic,omitempty"`
+	Difficulty *Difficulty `form:"difficulty,omitempty" json:"difficulty,omitempty"`
 }
-
-// ListProblemsParamsDifficulty defines parameters for ListProblems.
-type ListProblemsParamsDifficulty string
 
 // GetProblemParams defines parameters for GetProblem.
 type GetProblemParams struct {
@@ -1320,50 +1270,50 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"H4sIAAAAAAAC/+xcW3MbtxX+Kxg0D22zIqlb4jIPHcdyY7dK4pHi6YNH1RzuHpKwdoE1gKXEavjfO1js",
-	"fcGrRJW0mZeIe8HlnO9858MB1o/UF1EsOHKtaP+RKn+MEaR/vhEBvudxos0PCAKmmeAQfpAiRqkZKtof",
-	"QqjQo3HlkmkwQPP/CB4ukY/0mPaPe+Y/j+ppjLRPlZaMj+hs5lGJXxImMaD9T/bFm+IpMfiMvqYzj76R",
-	"CBo/SDEIMdpoSKBxJOS0OayTnkcjxovfrRF6NEDlSxabjhpvn9s5LXufDYfMT0Kddo48icxUEdSUejTC",
-	"gCUR9egYZFCZevl6CHyUwMhOwz3jR/qdxCHt0z91S192M0d2L7MGLkCDaTCCh+rLpyfpDKqXjh0eUGMh",
-	"9cVcU5ysYAgVJiOX/WPQGiWnffqfT3D0397R326+//Pf+0fFj7/89TvqaE8zHeLa42hALh1U3pZjmjX/",
-	"eSWO6riousmF37dSCrlhFLXmjXlji7HCNEbpHzUA0zfABWc+hCQU9yh9UEjy9wiHCD2CnVGHxFM9FpwI",
-	"ST7DBGwLHfLx6vIIuRkaicNEEcVGXHVoy4k3mfNuvz+6eex5p8cztwvtBZASpi3X2Hk6zfkAUWx9v4ZB",
-	"8SEOgUOO3tZgWM4rrTsi0e5bjRHbForn3UNHPzFD2C6xlljYcQTkpLBSlBZz8uanil+QowS9UeIKcYJh",
-	"laUHOGKco6QGHRqloWvQpn8IJsB9dHO2HmPkZKb2kyJm/tpJqWEd28giYwRZ6lwbb1xpCSyTBgWjLInj",
-	"Vs5cMSe+tTnx1zwnvpuXE9HGf31Qi3JgThiOoQ4T7ptx/gaRm24lDlEi9/FahMncGSkNUqObljUqvfpY",
-	"/0Cl34ByDrZIefOBtAQqWZ6zjzeSWz2jFUb2ajhoWKycuctS+dxd2HyHEBp4r4VIpUEnqgoacUc9mvBx",
-	"2trUAZcmldgWXCOqKaXniZQ6AbgYIIKH9/bp817b4U9BetnySW857tdUxYwH+PCzgal9l0XGHSfHZz+e",
-	"vTr94ezHtAF7sezccOgIJS1dEuFzW6wSiGtL9c0DtRzTcdZP/nOJyCmjpxFWpYEXBdGlGLGNpARGwEIn",
-	"k8Sg1L2Qgbk5FDICTfvlxWXhZduttOIa9Yfs5kYaKJESuf6w3ig9yvF+2TsVvPx4UgfLydKla2NY9Q6d",
-	"RrAp+QJ15omXWc5ui6k2S/krL4O/WiLcE52+Pb7evcLCrqeQHS190AZKFkhIayVvley3gDoPhcDnLgQe",
-	"yn5rYX8BNq816HULVAMh7iKQdxhUMuhAiBCBL6iVeI5VERf61gZXkEbTbSzFSKKyoWiCUs+pXSRxABqD",
-	"17qmksy1I83S2FzJspW5FOOrNr7IdEkUgY3QFwrspwXmIUbqMeJy7RWOmNIoN6HsgKk4hKlDn71abtli",
-	"nVO1xPmZt/665ymrg3xVVJ3KkjVSSiCrmau9fbMmrzwbfcwcEyk0ztrVevR1OuRqbT6XVcs2D/JSfNGM",
-	"y8YfFcqngXE+3toLhTqyGNc/nFFnaUTY2M2dkahUIUEQMb68vsWMx9x4Sxtu28EgAP1EMj29NlIhq7Sh",
-	"UkzwN0LcsXQ4zNCQb396lKcGoFL4dxjdZg+X04GY/QuNV1LfDYVjdWMXzIQZNBnBiAF5/eG9XazgQxwy",
-	"n+lwSixwyXnvmCgfhkMRBoyPOuQ3YZY4ZILS9GwuFVzVp1fCvyNvI9Mg9Wj2DO3TXue400t3dGLkEDPa",
-	"p6edXufULovG6cS7ELMuJHrcDcWIpWweC6XbM7hGrQhw8k7r+HceTklmBWKN1CH58p+EKVGQkEXMvCKR",
-	"RAgqkRgQxsnHP/5x9IoMphrT9ZlBW7pJ9T6gfVvgyZQ1Kv2zCKZZvVEjt9QQG1ulb3Q/K5t+rORbKgjL",
-	"4tGsDiMtE0wvqFhwZQFx0us9W89p4KV9Nkya+L5hmfTGEJJQP1uXdgvW0Wd+o4wC2v9041GVy5DMB+aJ",
-	"GjaEZaQcHC2/iZSAGjY8c+BoVyctEt2YtSW9ETomnMXzR5VtBXyryGkx56ebWc2wVUPVrVtVIFm6a9h4",
-	"DHyElRrjNlihXpxdiRh2GdTL/VE3at0lMtOt/+cskMvnLbm8rs5XcvnxN5oLCk8UOBkX+5hOXsy2ObdI",
-	"iVkPi0143jt9gQ4vQMMAFJKEwwRYCANbgd8hBxaDz9wXYTeQMNSq+2gWvLOKIxvG1MmgTyTqRHKV6tF7",
-	"psckrbCb9VJFyHbIhUBlrhIFE0yf8QimR3/yX356pJF8FgPlESGJHwKLiLIe65DXiR4j15l5CFMkj8g2",
-	"O/yC+sJMIVWxEiLUKFVKfalmN8q2VOzZqr4e317F7q3lRdbMlwTTAljWTqXqW75b+JnaTQnq7e6ehskC",
-	"tZg8f0ZSmwvQ/cmLBapmXq5G9iUgrmGCh4jYMCKeX16U58hXkBaHKKxFYQnlasaKbaVczVUdl0xp82p+",
-	"8E/NiYQmhI02deP3vOeV29v5DmX2q13FmhcjYjhUOKeHRgfFntrczfMWg6+rqlbao61t6LTLjnuMrTZI",
-	"XBir6KIYtD9ug820UbPSVlh3S+RUqbO/cBGsDqx9J6nGbDIcrURUXzVHzenkS639JefE5zVS2ZZ2tnV8",
-	"snpb+YngJzdU2xQsW1tzW/VluT1D8j6xe4vJSxL35pSqriy1KQKEC45RrKeF1FQkgpiIIcm390oRGoCG",
-	"DrnKdP6lyBT4GCFAaW7krQYR40SKENuKvPYB35aqWI6PBF+4lNWE016XqWseaxF6d5R9WjK/Mvr2gSnN",
-	"+Ij8EyZwnd44EjyckgAjQbL3hfSIQkP7GslQiojoMRKlhcSA+KAhFCNXxcN2vl1A1T8lemF10Pp0Z8+L",
-	"CXWHtfFUqswADf+08bQa01ykb5fA2JYS/Xo2QOoWm3nu8ueFnYQiWmS1iA75lSllArxIFXkx6Kx3VikG",
-	"5bdvudC3RV2YAA9Idmy+TEM/EY4TlESxELkOp2QIYajIAPw7Z+Fzq47+ZkqfW1jWZN817I2EqmBpXsHz",
-	"CuMQfFRGI0WCkwg1GHH0E4lQGgmlEjNyDCqqajAldzjtkN8jpnXtDkgksUSFcoLBijLqY3p+cvvktoVd",
-	"5bVlWe8gyxxkXUfAvDTarR0Wd29nCWnweIdTZWS/UV31tUCmwQQneswUyXrokLfpusE8kbP9p5siFXRB",
-	"+mM2wSB/vpoSHKebynXLZTHiF8rZGy4n9+dfU9i/tWuJgeXA7j7mfz63aLws0/sWNUW9mfY3NI6m9klP",
-	"fD2KuIDDXEzeC3mnYvBxP88O/LsY/kFEH84PPOf5gRJZRezIhKsFh+l2Nk5sOewq2dZZ7Ma/C3TYKN+s",
-	"XmkcVMNa95EFe3qmy4JtOSOz4ElK+ICjJm3VQKSSQcTSN9Qewijd4q/MYKUd1izFr5/S9/v0yCEQ2qdD",
-	"KtCZu62460m7nMQhd+9y7q74ycW+e5zJawg8JPQXT+g1ZM1m/wsAAP//zlYOQvNYAAA=",
+	"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",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file

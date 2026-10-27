@@ -15,9 +15,9 @@ const (
 )
 
 var levels = map[string]string{
-	"beginner":     "Easy",
-	"intermediate": "Medium",
-	"advanced":     "Hard",
+	"beginner":     "easy",
+	"intermediate": "medium",
+	"advanced":     "hard",
 }
 
 var identifier = regexp.MustCompile(`^[A-Za-z_$][A-Za-z0-9_$]*$`)

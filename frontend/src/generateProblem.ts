@@ -1,3 +1,5 @@
+import type { components } from "./api/schema";
+
 export type Level = "beginner" | "intermediate" | "advanced";
 
 export type GenerateRequest = { topic: string; theme: string; level: Level };
@@ -26,5 +28,7 @@ export async function generateProblem(request: GenerateRequest): Promise<Generat
     if (response.status === 401) throw new Error("Sign in above to generate a practice problem.");
     throw new Error(body?.error ?? `Request failed with status ${response.status}`);
   }
-  return body as GeneratedProblem;
+  const problem = body as components["schemas"]["GeneratedProblem"];
+  const labels = { easy: "Easy", medium: "Medium", hard: "Hard" } as const;
+  return { ...problem, difficulty: labels[problem.difficulty] };
 }

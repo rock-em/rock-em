@@ -439,16 +439,14 @@ export interface components {
             slug: string;
             title: string;
             shortDescription: string;
-            /** @enum {string} */
-            difficulty: "easy" | "medium" | "hard";
+            difficulty: components["schemas"]["Difficulty"];
             category: string;
         };
         ProblemDetail: {
             slug: string;
             title: string;
             shortDescription: string;
-            /** @enum {string} */
-            difficulty: "easy" | "medium" | "hard";
+            difficulty: components["schemas"]["Difficulty"];
             category: string;
             description: string;
             /** @description Canonical lowercase language name, e.g. python or javascript. URL-encode plus signs. */
@@ -465,8 +463,7 @@ export interface components {
             slug: string;
             title: string;
             shortDescription: string;
-            /** @enum {string} */
-            difficulty: "easy" | "medium" | "hard";
+            difficulty: components["schemas"]["Difficulty"];
             category: string;
             description: string;
             languages?: {
@@ -495,8 +492,7 @@ export interface components {
         GeneratedProblem: {
             title: string;
             topic: string;
-            /** @enum {string} */
-            difficulty: "Easy" | "Medium" | "Hard";
+            difficulty: components["schemas"]["Difficulty"];
             description: string;
             examples: components["schemas"]["Example"][];
             constraints: string[];
@@ -522,14 +518,15 @@ export interface components {
             slug: string;
             title: string;
             shortDescription: string;
-            /** @enum {string} */
-            difficulty: "easy" | "medium" | "hard";
+            difficulty: components["schemas"]["Difficulty"];
             category: string;
             description: string;
             languages: {
                 [key: string]: components["schemas"]["LanguageData"];
             };
         };
+        /** @enum {string} */
+        Difficulty: "easy" | "medium" | "hard";
     };
     responses: never;
     parameters: never;
@@ -738,7 +735,7 @@ export interface operations {
                 q?: string;
                 category?: string;
                 topic?: string;
-                difficulty?: "easy" | "medium" | "hard";
+                difficulty?: components["schemas"]["Difficulty"];
             };
             header?: never;
             path?: never;
