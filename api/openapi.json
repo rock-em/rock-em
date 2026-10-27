@@ -1148,6 +1148,87 @@
         ],
         "description": "Stub: returns 501 with code not_implemented. Does not save code, execute code, create jobs, or claim success. Authentication is required."
       }
+    },
+    "/api/auth/forgot-password": {
+      "post": {
+        "operationId": "ForgotPassword",
+        "summary": "ForgotPassword",
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "message"
+                  ],
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordInput"
+              }
+            }
+          }
+        },
+        "description": "Request an expiring reset email without disclosing account existence."
+      }
+    },
+    "/api/auth/reset-password": {
+      "post": {
+        "operationId": "ResetPassword",
+        "summary": "ResetPassword",
+        "responses": {
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "Password reset"
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordInput"
+              }
+            }
+          }
+        },
+        "description": "Consume a single-use reset token, change the password, and revoke all sessions."
+      }
     }
   },
   "components": {
@@ -1792,6 +1873,39 @@
           "medium",
           "hard"
         ]
+      },
+      "ForgotPasswordInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          }
+        }
+      },
+      "ResetPasswordInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "token",
+          "newPassword"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "newPassword": {
+            "type": "string",
+            "format": "password",
+            "description": "12\u201372 UTF-8 bytes"
+          }
+        }
       }
     }
   }

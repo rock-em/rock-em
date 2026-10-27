@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rock-em/rock-em/backend/internal/auth"
 	"github.com/rock-em/rock-em/backend/internal/generator"
 	"github.com/rock-em/rock-em/backend/internal/server"
 )
@@ -40,7 +41,16 @@ func main() {
 	// Secure by default. Disable only for local HTTP development.
 	secureCookies := os.Getenv("AUTH_COOKIE_SECURE") != "false"
 	generatorHandler := generator.NewHandler(generator.NewClaudeGenerator())
-	mux := server.New(db, secureCookies, generatorHandler.Generate)
+	var resetSender auth.ResetSender
+	if os.Getenv("SMTP_ADDR") != "" {
+		resetSender, err = auth.SMTPResetSender(os.Getenv("SMTP_ADDR"), os.Getenv("SMTP_USERNAME"), os.Getenv("SMTP_PASSWORD"), os.Getenv("SMTP_FROM"), os.Getenv("PUBLIC_ORIGIN"))
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		log.Print("password reset email delivery is not configured")
+	}
+	mux := server.New(db, secureCookies, generatorHandler.Generate, resetSender)
 
 	server := &http.Server{
 		Addr:              "127.0.0.1:8080",
