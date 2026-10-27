@@ -1,0 +1,11 @@
+{
+  "name": "rockem-openapi-tools",
+  "private": true,
+  "scripts": {
+    "generate": "openapi-typescript ../../api/openapi.json -o ../../frontend/src/api/schema.d.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3"
+  }
+}
