@@ -146,7 +146,7 @@ jobs:
             --retry-delay 2 \
             https://rockem.xyz/api/health
 
-          for route in sign-in sign-up forgot-password reset-password learn progress generate about problems/1; do
+          for route in sign-in sign-up forgot-password reset-password learn progress generate about problems/two-sum; do
             curl --fail --show-error --silent --retry 3 --retry-delay 2 \
               "https://rockem.xyz/${route}" > /dev/null
           done

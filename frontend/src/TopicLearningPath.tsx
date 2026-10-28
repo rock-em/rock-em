@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import "./TopicLearningPath.css";
 
 type TopicProblem = {
-  id: number;
+  id: string;
   title: string;
   difficulty: "Easy" | "Medium" | "Hard";
 };
@@ -10,8 +10,8 @@ type TopicProblem = {
 type Props = {
   topic: string;
   problems: TopicProblem[];
-  completedIds: number[];
-  onOpenProblem: (id: number) => void;
+  completedIds: string[];
+  onOpenProblem: (id: string) => void;
 };
 
 type Guide = { intro: string; concepts: { title: string; detail: string }[] };

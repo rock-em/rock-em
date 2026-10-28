@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import ProblemLanguageSelect from "./ProblemLanguageSelect";
-import { CatalogError, chooseProblemLanguage, getProblemDetail, getProblemLanguages } from "./problemCatalog";
+import { CatalogError, getProblemCatalog, chooseProblemLanguage, getProblemDetail, getProblemLanguages } from "./problemCatalog";
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 const languages = ["python", "julia"];
@@ -51,5 +51,19 @@ describe("problem language discovery", () => {
       expect((error as CatalogError).code).toBe("language_not_available");
       expect((error as CatalogError).languages).toEqual(languages);
     }
+  });
+});
+
+
+describe("catalog pagination", () => {
+  it("loads every page of summaries without fetching problem details", async () => {
+    const first = Array.from({ length: 100 }, (_, index) => ({ slug: `task-${index}`, title: `Task ${index}`, category: 'API topic', difficulty: 'easy', shortDescription: 'Summary' }));
+    const fetch = vi.fn().mockResolvedValueOnce(new Response(JSON.stringify(first))).mockResolvedValueOnce(new Response(JSON.stringify([{ ...first[0], slug: 'last-task' }])));
+    vi.stubGlobal('fetch', fetch);
+    const problems = await getProblemCatalog();
+    expect(problems).toHaveLength(101);
+    expect(problems.at(-1)?.slug).toBe('last-task');
+    expect(new URL(fetch.mock.calls[1][0].url).searchParams.get('offset')).toBe('100');
+    expect(new URL(fetch.mock.calls[0][0].url).pathname).toBe('/api/problems');
   });
 });

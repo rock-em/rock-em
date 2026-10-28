@@ -29,3 +29,15 @@ export function chooseProblemLanguage(languages: string[], preferred?: string | 
   if (preferred && languages.includes(preferred)) return preferred;
   return languages.includes("python") ? "python" : null;
 }
+
+export async function getProblemCatalog(signal?: AbortSignal): Promise<ProblemSummary[]> {
+  const problems: ProblemSummary[] = [];
+  const limit = 100;
+  for (let offset = 0; offset <= 1000000; offset += limit) {
+    const { data, error, response } = await api.GET('/api/problems', { params: { query: { limit, offset } }, signal });
+    if (!data) return failure(error, response.status);
+    problems.push(...data);
+    if (data.length < limit) return [...new Map(problems.map(problem => [problem.slug, problem])).values()];
+  }
+  throw new Error('The catalog is too large to load. Please try again later.');
+}
