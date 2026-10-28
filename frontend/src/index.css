@@ -694,3 +694,6 @@ h2 {
   .account-nav { gap: 10px; }
   .account-button { padding: 7px 10px; }
 }
+
+.editor-heading label { margin-right: 8px; font-size: 13px; color: #666; }
+.editor-heading select { margin-top: 6px; padding: 4px 8px; font: inherit; font-size: 13px; border: 1px solid #ccc; border-radius: 3px; background: #fff; color: #222; }
