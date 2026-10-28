@@ -53,7 +53,7 @@ export default function PasswordReset({ resetting, onReset, signIn }: Props) {
         <form className="auth-form" onSubmit={(event) => void submit(event)}>
           {resetting ? <>
             <label>New password<input name="password" type="password" autoComplete="new-password" required minLength={12} maxLength={72} aria-describedby="reset-password-hint" /></label>
-            <span className="password-hint" id="reset-password-hint">Use 12–72 bytes (12–72 characters for plain English text).</span>
+            <span className="password-hint" id="reset-password-hint">Minimum 12 characters.</span>
             <label>Confirm new password<input name="confirm" type="password" autoComplete="new-password" required minLength={12} maxLength={72} /></label>
           </> : <label>Email<input name="email" type="email" autoComplete="email" required maxLength={254} /></label>}
           {error && <p className="auth-error" role="alert">{error}{resetting && <> <a href="/forgot-password">Request a new link</a>.</>}</p>}
