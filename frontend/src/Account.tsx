@@ -125,7 +125,7 @@ export default function Account({ children }: { children: ReactNode }) {
           {page === 'sign-up' && <label>Name<input name="name" autoComplete="name" required maxLength={80} pattern=".*\S.*" /></label>}
           <label>Email<input name="email" type="email" autoComplete="email" required maxLength={254} /></label>
           <label>Password<span className="password-field"><input name="password" type={showPassword ? 'text' : 'password'} autoComplete={page === 'sign-up' ? 'new-password' : 'current-password'} minLength={page === 'sign-up' ? 12 : undefined} maxLength={72} required aria-describedby={page === 'sign-up' ? 'password-hint' : undefined} /><button type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>{showPassword ? 'Hide' : 'Show'}</button></span></label>
-          {page === 'sign-up' && <span id="password-hint" className="password-hint">Use 12–72 bytes (12–72 characters for plain English text).</span>}
+          {page === 'sign-up' && <span id="password-hint" className="password-hint">Minimum 12 characters.</span>}
           {page === 'sign-in' && <div className="forgot-password-link">{link('forgot-password', 'Forgot password?')}</div>}
           {error && <p className="auth-error" role="alert">{error}</p>}
           <button className="auth-submit" disabled={busy || checking}>{busy ? 'Please wait…' : page === 'sign-up' ? 'Create account →' : 'Sign in →'}</button>
