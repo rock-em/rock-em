@@ -364,20 +364,39 @@ h2 {
   text-decoration: underline;
 }
 
-.code-editor {
-  display: block;
-  width: 100%;
+.code-editor .cm-editor {
+  font-size: 14px;
+  tab-size: 2;
+}
+
+/* CodeMirror's documented way to give the editor a minimum height with a full-length gutter. */
+.code-editor .cm-content,
+.code-editor .cm-gutter {
   min-height: 420px;
+}
+
+.code-editor .cm-content {
+  padding: 20px 0;
+}
+
+.code-editor .cm-line {
+  padding: 0 20px 0 12px;
+}
+
+/* Shown while the editor chunk loads; mirrors the editor's box so the page does not jump. */
+.code-loading {
+  margin: 0;
   padding: 20px;
-  resize: vertical;
-  border: 0;
-  outline-offset: -3px;
   background: #fcfcfc;
   color: #222;
   font-family: Consolas, "Courier New", monospace;
   font-size: 14px;
   line-height: 1.7;
-  tab-size: 2;
+  white-space: pre-wrap;
+}
+
+.code-editor.code-loading {
+  min-height: 420px;
 }
 
 .editor-actions {
@@ -537,7 +556,9 @@ h2 {
     display: none;
   }
 
-  .code-editor {
+  .code-editor .cm-content,
+  .code-editor .cm-gutter,
+  .code-editor.code-loading {
     min-height: 320px;
   }
 }
@@ -609,11 +630,20 @@ h2 {
   color: #0645ad;
 }
 
-.reference-solution pre {
-  padding: 14px;
-  background: #f8f8f8;
-  overflow-x: auto;
+.reference-solution .code-block {
+  margin-top: 10px;
+}
+
+.reference-solution .cm-editor {
   font-size: 13px;
+}
+
+.reference-solution .cm-content {
+  padding: 14px 0;
+}
+
+.reference-solution .cm-line {
+  padding: 0 14px;
 }
 
 

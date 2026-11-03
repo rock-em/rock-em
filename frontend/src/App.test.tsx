@@ -3,6 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
 
 vi.mock('./ChromeSculpture', () => ({ default: ({ topic }: { topic: string }) => <div aria-label={`Sculpture for ${topic}`}>{topic}</div> }))
+// jsdom cannot type into CodeMirror's contenteditable, so drive drafts through a plain textarea.
+vi.mock('./CodeEditor', () => ({
+  default: ({ label, value, onChange, readOnly }: { label: string; value: string; onChange?: (value: string) => void; readOnly?: boolean }) =>
+    <textarea aria-label={label} value={value} readOnly={readOnly} onChange={event => onChange?.(event.target.value)} />,
+}))
 const catalog = [
   { slug: 'array-api-task', title: 'Array API Task', category: 'Arrays', difficulty: 'easy', shortDescription: 'From the server' },
   { slug: 'stack-api-task', title: 'Stack API Task', category: 'Stack', difficulty: 'medium', shortDescription: 'From the server' },

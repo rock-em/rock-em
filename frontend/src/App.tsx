@@ -1,5 +1,5 @@
 import { PageLink } from './PageLink';
-import { useState, type FormEvent } from "react";
+import { lazy, Suspense, useState, type FormEvent } from "react";
 import Account from "./Account";
 import { navigateTo, usePathname } from "./navigation";
 import { useProblemCatalog, useProblemDetail } from "./useProblemCatalog";
@@ -11,6 +11,9 @@ import TopicLearningPath from "./TopicLearningPath";
 import AdaptivePractice from "./AdaptivePractice";
 import { recordPracticeAttempt } from "./practiceProgress";
 import "./index.css";
+
+// CodeMirror is only needed on problem pages, so keep it out of the initial bundle.
+const CodeEditor = lazy(() => import("./CodeEditor"));
 
 
 type Difficulty = "Easy" | "Medium" | "Hard";
@@ -28,6 +31,7 @@ type Problem = {
   starter: string;
   tests: TestCase[];
   compare?: "exact" | "unordered";
+  indentUnit?: string;
   referenceSolution?: string;
   generated?: boolean;
 };
@@ -251,7 +255,9 @@ if (submit && passed) {
             {selected.referenceSolution && (
               <details className="reference-solution">
                 <summary>Reference solution</summary>
-                <pre><code>{selected.referenceSolution}</code></pre>
+                <Suspense fallback={<pre className="code-block code-loading">{selected.referenceSolution}</pre>}>
+                  <CodeEditor key={draftKey} className="code-block" label="Reference solution" language={selected.language} value={selected.referenceSolution} readOnly />
+                </Suspense>
               </details>
             )}
           </section>
@@ -261,27 +267,17 @@ if (submit && passed) {
               <div><strong>Your solution</strong><ProblemLanguageSelect languages={selected.generated ? ['javascript'] : detail.languages} value={selected.language} onChange={(language) => setLanguagePreferences(old => ({ ...old, [selected.id]: language }))} /></div>
               <button className="reset-button" onClick={() => { setSolutions((old) => ({ ...old, [draftKey]: selected.starter })); setResults(null); setMessage(""); }}>Reset code</button>
             </div>
-            <label className="sr-only" htmlFor="solution-code">{selected.language} solution</label>
-            <textarea
-              id="solution-code"
-              className="code-editor"
-              spellCheck={false}
-              autoCapitalize="off"
-              autoCorrect="off"
-              value={solutions[draftKey] ?? selected.starter}
-              onChange={(event) => { setSolutions((old) => ({ ...old, [draftKey]: event.target.value })); setResults(null); setMessage(""); }}
-              onKeyDown={(event) => {
-                if (event.key === "Tab") {
-                  event.preventDefault();
-                  const target = event.currentTarget;
-                  const start = target.selectionStart;
-                  const end = target.selectionEnd;
-                  const next = target.value.slice(0, start) + "  " + target.value.slice(end);
-                  setSolutions((old) => ({ ...old, [draftKey]: next }));
-                  requestAnimationFrame(() => { target.selectionStart = start + 2; target.selectionEnd = start + 2; });
-                }
-              }}
-            />
+            <Suspense fallback={<pre className="code-editor code-loading">{solutions[draftKey] ?? selected.starter}</pre>}>
+              <CodeEditor
+                key={draftKey}
+                className="code-editor"
+                label={`${selected.language} solution`}
+                language={selected.language}
+                indentUnit={selected.indentUnit}
+                value={solutions[draftKey] ?? selected.starter}
+                onChange={(code) => { setSolutions((old) => ({ ...old, [draftKey]: code })); setResults(null); setMessage(""); }}
+              />
+            </Suspense>
             <div className="editor-actions">
               <button className="run-button" disabled={running || selected.language !== "javascript" || !selected.tests.length} onClick={() => void checkSolution(false)}>{running ? "Running…" : "Run tests"}</button>
               <button className="submit-button" disabled={running || selected.language !== "javascript" || !selected.tests.length} onClick={() => void checkSolution(true)}>Submit →</button>
