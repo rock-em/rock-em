@@ -73,7 +73,7 @@ func TestAccountAndProblemLifecycle(t *testing.T) {
 
 	check(call("POST", "/api/auth/login", fmt.Sprintf(`{"email":%q,"password":"incorrect-password"}`, emails[1]), nil), 401)
 	slug := strings.ToLower(prefix) + "-problem"
-	body := fmt.Sprintf(`{"slug":%q,"title":"Two Sum","shortDescription":"Find a pair","description":"Find a pair","difficulty":"easy","category":"arrays","languages":{"python":{"requirements":["Return zero-based indices."],"examples":[{"input":"[1,2]","output":"3"}],"constraints":["n > 0"],"tests":[{"input":[[1,2],3],"expected":[0,1]}],"starter":"def solve(nums, target): pass","functionName":"solve","indexBase":0}}}`, slug)
+	body := fmt.Sprintf(`{"slug":%q,"title":"Two Sum","shortDescription":"Find a pair","description":"Find a pair","difficulty":"easy","category":"arrays","topics":["Hash Table"],"constraints":["n > 0"],"signature":{"function":"twoSum","params":[{"name":"nums","type":"int[]"},{"name":"target","type":"int"}],"returns":"int[]"},"compare":"unordered","tests":[{"kind":"example","args":[[1,2],3],"expected":[0,1],"explanation":"1 + 2 = 3"},{"kind":"hidden","args":[[3,3],6],"expected":[0,1]}]}`, slug)
 	check(call("POST", "/api/problems", body, nil), 401)
 	check(call("POST", "/api/problems", body, user), 403)
 	if _, err := db.Exec(t.Context(), `UPDATE users SET role='admin' WHERE email=$1`, emails[0]); err != nil {
@@ -98,22 +98,32 @@ func TestAccountAndProblemLifecycle(t *testing.T) {
 	if err := json.Unmarshal([]byte(body), &edited); err != nil {
 		t.Fatal(err)
 	}
-	edited["languages"] = map[string]any{"julia": map[string]any{
-		"requirements": []string{"Return one-based indices."}, "constraints": []string{"length(nums) >= 2"},
-		"tests":   []any{map[string]any{"input": []any{[]int{1, 2}, 3}, "expected": []int{1, 2}}},
-		"starter": "function solve!(nums, target)\nend", "functionName": "solve!", "indexBase": 1,
-	}}
+	edited["starters"] = map[string]string{"python": "def twoSum(nums, target):\n    return []\n"}
 	update, _ := json.Marshal(edited)
 	check(call("PUT", "/api/problems/"+slug, string(update), user), 403)
 	check(call("PUT", "/api/problems/"+slug, string(update), admin), 200)
-	check(call("GET", "/api/problems/"+slug+"?language=julia", "", nil), 200)
+	w := call("GET", "/api/problems/"+slug+"?language=python", "", nil)
+	check(w, 200)
+	if !strings.Contains(w.Body.String(), "return []") || strings.Contains(w.Body.String(), "[3,3]") || !strings.Contains(w.Body.String(), `"category":"Arrays","topics":["Arrays","Hash Table"]`) {
+		t.Fatalf("override, hidden test or topics wrong: %s", w.Body.String())
+	}
+	if w := call("GET", "/api/problems?topic=hash-table&q=Two+Sum", "", nil); !strings.Contains(w.Body.String(), slug) {
+		t.Fatalf("secondary topic filter missed problem: %s", w.Body.String())
+	}
 	check(call("GET", "/api/problems/"+slug+"/languages", "", nil), 200)
-	check(call("DELETE", "/api/problems/"+slug+"/languages/julia", "", user), 403)
-	check(call("DELETE", "/api/problems/"+slug+"/languages/julia", "", admin), 204)
-	check(call("GET", "/api/problems/"+slug+"?language=julia", "", nil), 404)
-	check(call("GET", "/api/problems/"+slug, "", nil), 200) // omitted Python variant preserved
+	check(call("DELETE", "/api/problems/"+slug+"/languages/python", "", user), 403)
+	check(call("DELETE", "/api/problems/"+slug+"/languages/python", "", admin), 204)
+	check(call("DELETE", "/api/problems/"+slug+"/languages/python", "", admin), 404)
+	w = call("GET", "/api/problems/"+slug+"?language=python", "", nil)
+	if !strings.Contains(w.Body.String(), "def two_sum(nums: list[int], target: int)") {
+		t.Fatalf("generated starter not restored: %s", w.Body.String())
+	}
+	edited["starters"] = map[string]string{"cobol": "PROCEDURE DIVISION."}
+	unknown, _ := json.Marshal(edited)
+	check(call("PUT", "/api/problems/"+slug, string(unknown), admin), 400)
+	edited["starters"] = nil
 	edited["title"] = "should not persist"
-	edited["languages"].(map[string]any)["julia"].(map[string]any)["indexBase"] = -1
+	edited["tests"] = []any{map[string]any{"kind": "public", "args": []any{[]int{1, 2}}, "expected": []int{0, 1}}}
 	invalid, _ := json.Marshal(edited)
 	check(call("PUT", "/api/problems/"+slug, string(invalid), admin), 400)
 	unchanged := call("GET", "/api/problems/"+slug, "", nil)
@@ -121,7 +131,7 @@ func TestAccountAndProblemLifecycle(t *testing.T) {
 		t.Fatal("invalid update changed metadata")
 	}
 	check(call("PATCH", "/api/me/problems/"+slug, `{"bookmarked":true}`, user), 200)
-	w := call("PATCH", "/api/me/problems/"+slug, `{"status":"in_progress"}`, user)
+	w = call("PATCH", "/api/me/problems/"+slug, `{"status":"in_progress"}`, user)
 	check(w, 200)
 	var state struct{ Bookmarked bool }
 	if err := json.Unmarshal(w.Body.Bytes(), &state); err != nil || !state.Bookmarked {

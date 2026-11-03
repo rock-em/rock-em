@@ -39,7 +39,7 @@ func TestGetReturnsProblem(t *testing.T) {
 		}
 	})
 
-	_, err = db.Exec(t.Context(), `UPDATE problems SET languages='{"python":{"requirements":[],"examples":[],"constraints":[],"tests":[{"input":[[1,2],3],"expected":[0,1]}],"starter":"def two_sum(nums, target): pass","functionName":"two_sum","indexBase":0}}' WHERE slug='test-two-sum'`)
+	_, err = db.Exec(t.Context(), `UPDATE problems SET signature='{"function":"twoSum","params":[{"name":"nums","type":"int[]"},{"name":"target","type":"int"}],"returns":"int[]"}' WHERE slug='test-two-sum'`)
 	if err != nil {
 		t.Fatal(err)
 	}

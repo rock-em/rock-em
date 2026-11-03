@@ -25,6 +25,20 @@ export async function getProblemDetail(slug: string, language: string, signal?: 
   if (!data) return failure(error, response.status);
   return data;
 }
+const show = (value: unknown) => JSON.stringify(value);
+
+// Examples and tests are stored once as JSON values; render them the same way
+// for every language, named by the signature's parameters.
+export function toPracticeFields(detail: ProblemDetail) {
+  return {
+    examples: detail.examples.map(example => ({
+      input: detail.signature.params.map((param, index) => `${param.name} = ${show(example.args[index])}`).join(", "),
+      output: show(example.expected),
+      explanation: example.explanation,
+    })),
+    tests: detail.tests.map(test => ({ input: test.args, expected: test.expected })),
+  };
+}
 export function chooseProblemLanguage(languages: string[], preferred?: string | null): string | null {
   if (preferred && languages.includes(preferred)) return preferred;
   return languages.includes("python") ? "python" : null;

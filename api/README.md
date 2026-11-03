@@ -25,7 +25,7 @@ The Go API actually uses the generated router. `backend/internal/server/api.go`
 implements its interface and delegates to existing auth and business handlers.
 Generated security annotations alone do not enforce authorization: those adapters
 explicitly apply account/admin checks. Handler validation still enforces semantic
-rules, such as complete language data and account ownership. Contract tests
+rules, such as tests matching the signature and account ownership. Contract tests
 validate the spec and representative responses. CI checks regeneration drift.
 
 ## Frontend examples
@@ -51,7 +51,7 @@ throwing wrappers. The picker accepts strings directly; no registry/label lookup
 
 ## Implemented and stubbed
 
-Accounts, public problem listing/detail/languages, admin problem CRUD/language
+Accounts, public problem listing/detail/languages, admin problem CRUD/starter override
 removal, saved state, health, and the existing JavaScript generator are implemented.
 
 The following authenticated routes are deliberately stubs returning **501** with

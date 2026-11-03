@@ -341,12 +341,12 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateProblemInput"
+                "$ref": "#/components/schemas/ProblemInput"
               }
             }
           }
         },
-        "description": "Requires a nonempty languages map of complete language data. Returns Location header. Requires admin role."
+        "description": "Requires a signature and at least one test whose values match it. Returns Location header. Requires admin role."
       }
     },
     "/api/problems/{slug}": {
@@ -397,7 +397,7 @@
             }
           }
         ],
-        "description": "Defaults to python. Missing language returns 404 with code language_not_available and current languages; never silently falls back."
+        "description": "Defaults to python. A missing or disabled language returns 404 with code language_not_available and current languages; never silently falls back."
       },
       "put": {
         "operationId": "UpdateProblem",
@@ -449,7 +449,7 @@
             }
           }
         },
-        "description": "Replaces common metadata; merges supplied languages by key. Omitted languages are preserved. Requires admin role."
+        "description": "Replaces metadata, topics, signature and tests. Supplied starter overrides merge by key; omitted overrides are preserved. Requires admin role."
       },
       "delete": {
         "operationId": "DeleteProblem",
@@ -529,7 +529,7 @@
             }
           }
         ],
-        "description": "Sorted keys of the languages map stored on this problem. Empty map returns []. Missing/archived problem returns 404."
+        "description": "Sorted enabled languages that can run this problem. A problem without a signature returns []. Missing/archived problem returns 404."
       }
     },
     "/api/problems/{slug}/languages/{language}": {
@@ -576,7 +576,7 @@
             }
           }
         ],
-        "description": " Requires admin role."
+        "description": "Removes this language's starter override so the generated starter is served again. 404 when there is no override. Requires admin role."
       }
     },
     "/api/me/problems": {
@@ -1389,64 +1389,6 @@
         ],
         "additionalProperties": false
       },
-      "LanguageData": {
-        "type": "object",
-        "properties": {
-          "requirements": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "maxLength": 2000
-            },
-            "maxItems": 50
-          },
-          "examples": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Example"
-            },
-            "maxItems": 20
-          },
-          "constraints": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "maxLength": 2000
-            },
-            "maxItems": 50
-          },
-          "tests": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TestCase"
-            },
-            "minItems": 1,
-            "maxItems": 100
-          },
-          "starter": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 50000
-          },
-          "functionName": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 120
-          },
-          "indexBase": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
-          }
-        },
-        "required": [
-          "starter",
-          "functionName",
-          "indexBase",
-          "tests"
-        ],
-        "additionalProperties": false
-      },
       "ProblemSummary": {
         "type": "object",
         "properties": {
@@ -1509,59 +1451,72 @@
             "minLength": 1,
             "maxLength": 120
           },
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "minItems": 1,
+            "maxItems": 10,
+            "description": "All topic names, primary (category) first."
+          },
           "description": {
             "type": "string"
+          },
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "maxItems": 50
+          },
+          "signature": {
+            "$ref": "#/components/schemas/Signature"
+          },
+          "compare": {
+            "$ref": "#/components/schemas/Compare"
+          },
+          "examples": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemTest"
+            },
+            "maxItems": 20
+          },
+          "tests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemTest"
+            },
+            "maxItems": 100,
+            "description": "Examples followed by public tests. Hidden tests are omitted."
           },
           "language": {
             "type": "string",
             "pattern": "^[a-z][a-z0-9_+-]{0,31}$",
             "description": "Canonical lowercase language name, e.g. python or javascript. URL-encode plus signs."
           },
-          "requirements": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "maxLength": 2000
-            },
-            "maxItems": 50
-          },
-          "examples": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Example"
-            },
-            "maxItems": 20
-          },
-          "constraints": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "maxLength": 2000
-            },
-            "maxItems": 50
-          },
-          "tests": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TestCase"
-            },
-            "minItems": 1,
-            "maxItems": 100
+          "functionName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "description": "signature.function in this language's naming convention."
           },
           "starter": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 50000
+            "maxLength": 50000,
+            "description": "Plain-text editor contents, indented with indentUnit."
           },
-          "functionName": {
+          "indentUnit": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 120
-          },
-          "indexBase": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 2147483647
+            "maxLength": 8,
+            "description": "Indentation for this language, e.g. four spaces for Python. Use as the editor indent unit."
           }
         },
         "required": [
@@ -1570,15 +1525,17 @@
           "shortDescription",
           "difficulty",
           "category",
+          "topics",
           "description",
-          "language",
-          "requirements",
-          "examples",
           "constraints",
+          "signature",
+          "compare",
+          "examples",
           "tests",
-          "starter",
+          "language",
           "functionName",
-          "indexBase"
+          "starter",
+          "indentUnit"
         ],
         "additionalProperties": false
       },
@@ -1608,17 +1565,53 @@
             "minLength": 1,
             "maxLength": 120
           },
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "maxItems": 9,
+            "description": "Additional topics besides category. Unknown topics are created."
+          },
           "description": {
             "type": "string",
             "minLength": 1,
             "maxLength": 50000
           },
-          "languages": {
+          "constraints": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "maxItems": 50
+          },
+          "signature": {
+            "$ref": "#/components/schemas/Signature"
+          },
+          "compare": {
+            "$ref": "#/components/schemas/Compare"
+          },
+          "tests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemTestInput"
+            },
+            "minItems": 1,
+            "maxItems": 100
+          },
+          "starters": {
             "type": "object",
             "additionalProperties": {
-              "$ref": "#/components/schemas/LanguageData"
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000
             },
-            "maxProperties": 32
+            "maxProperties": 32,
+            "description": "Optional per-language starter overrides keyed by language. Merged by key on update."
           }
         },
         "required": [
@@ -1627,7 +1620,9 @@
           "shortDescription",
           "difficulty",
           "category",
-          "description"
+          "description",
+          "signature",
+          "tests"
         ],
         "additionalProperties": false
       },
@@ -1815,57 +1810,6 @@
         ],
         "additionalProperties": false
       },
-      "CreateProblemInput": {
-        "type": "object",
-        "properties": {
-          "slug": {
-            "type": "string",
-            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
-            "maxLength": 120
-          },
-          "title": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 200
-          },
-          "shortDescription": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 200
-          },
-          "difficulty": {
-            "$ref": "#/components/schemas/Difficulty"
-          },
-          "category": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 120
-          },
-          "description": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 50000
-          },
-          "languages": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/LanguageData"
-            },
-            "maxProperties": 32,
-            "minProperties": 1
-          }
-        },
-        "required": [
-          "slug",
-          "title",
-          "shortDescription",
-          "difficulty",
-          "category",
-          "description",
-          "languages"
-        ],
-        "additionalProperties": false
-      },
       "Difficulty": {
         "type": "string",
         "enum": [
@@ -1903,9 +1847,120 @@
           "newPassword": {
             "type": "string",
             "format": "password",
-            "description": "12\u201372 UTF-8 bytes"
+            "description": "12–72 UTF-8 bytes"
           }
         }
+      },
+      "TypeName": {
+        "type": "string",
+        "pattern": "^(int|long|double|bool|string|char|ListNode|TreeNode)(\\[\\]){0,3}$",
+        "description": "Language-agnostic type every runner implements. ListNode is encoded as an array of values; TreeNode as a level-order array with nulls."
+      },
+      "Signature": {
+        "type": "object",
+        "properties": {
+          "function": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+            "description": "Canonical camelCase name; languages apply their own naming convention."
+          },
+          "params": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$"
+                },
+                "type": {
+                  "$ref": "#/components/schemas/TypeName"
+                }
+              },
+              "required": [
+                "name",
+                "type"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "returns": {
+            "$ref": "#/components/schemas/TypeName"
+          }
+        },
+        "required": [
+          "function",
+          "params",
+          "returns"
+        ],
+        "additionalProperties": false
+      },
+      "Compare": {
+        "type": "string",
+        "enum": [
+          "exact",
+          "unordered"
+        ],
+        "description": "How a returned value is checked. unordered compares array returns as multisets."
+      },
+      "TestKind": {
+        "type": "string",
+        "enum": [
+          "example",
+          "public",
+          "hidden"
+        ],
+        "description": "Examples are shown in the statement; hidden tests are never returned."
+      },
+      "ProblemTest": {
+        "type": "object",
+        "properties": {
+          "args": {
+            "type": "array",
+            "items": {},
+            "description": "Positional arguments as JSON values matching signature.params."
+          },
+          "expected": {
+            "description": "JSON value matching signature.returns."
+          },
+          "explanation": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "args",
+          "expected"
+        ],
+        "additionalProperties": false
+      },
+      "ProblemTestInput": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/TestKind"
+          },
+          "args": {
+            "type": "array",
+            "items": {},
+            "description": "Positional arguments as JSON values matching signature.params."
+          },
+          "expected": {
+            "description": "JSON value matching signature.returns."
+          },
+          "explanation": {
+            "type": "string",
+            "maxLength": 2000,
+            "description": "Only for examples."
+          }
+        },
+        "required": [
+          "kind",
+          "args",
+          "expected"
+        ],
+        "additionalProperties": false
       }
     }
   }

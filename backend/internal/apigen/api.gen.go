@@ -26,6 +26,12 @@ const (
 	SessionCookieScopes = "sessionCookie.Scopes"
 )
 
+// Defines values for Compare.
+const (
+	Exact     Compare = "exact"
+	Unordered Compare = "unordered"
+)
+
 // Defines values for Difficulty.
 const (
 	Easy   Difficulty = "easy"
@@ -60,6 +66,13 @@ const (
 	StateInputStatusNotStarted StateInputStatus = "not_started"
 )
 
+// Defines values for TestKind.
+const (
+	TestKindExample TestKind = "example"
+	TestKindHidden  TestKind = "hidden"
+	TestKindPublic  TestKind = "public"
+)
+
 // Defines values for UserRole.
 const (
 	UserRoleAdmin UserRole = "admin"
@@ -71,16 +84,8 @@ type CodeInput struct {
 	Code string `json:"code"`
 }
 
-// CreateProblemInput defines model for CreateProblemInput.
-type CreateProblemInput struct {
-	Category         string                  `json:"category"`
-	Description      string                  `json:"description"`
-	Difficulty       Difficulty              `json:"difficulty"`
-	Languages        map[string]LanguageData `json:"languages"`
-	ShortDescription string                  `json:"shortDescription"`
-	Slug             string                  `json:"slug"`
-	Title            string                  `json:"title"`
-}
+// Compare How a returned value is checked. unordered compares array returns as multisets.
+type Compare string
 
 // Difficulty defines model for Difficulty.
 type Difficulty string
@@ -145,17 +150,6 @@ type Health struct {
 // HealthStatus defines model for Health.Status.
 type HealthStatus string
 
-// LanguageData defines model for LanguageData.
-type LanguageData struct {
-	Constraints  *[]string  `json:"constraints,omitempty"`
-	Examples     *[]Example `json:"examples,omitempty"`
-	FunctionName string     `json:"functionName"`
-	IndexBase    int        `json:"indexBase"`
-	Requirements *[]string  `json:"requirements,omitempty"`
-	Starter      string     `json:"starter"`
-	Tests        []TestCase `json:"tests"`
-}
-
 // LoginInput defines model for LoginInput.
 type LoginInput struct {
 	Email    string `json:"email"`
@@ -170,33 +164,58 @@ type PasswordInput struct {
 
 // ProblemDetail defines model for ProblemDetail.
 type ProblemDetail struct {
-	Category     string     `json:"category"`
-	Constraints  []string   `json:"constraints"`
-	Description  string     `json:"description"`
-	Difficulty   Difficulty `json:"difficulty"`
-	Examples     []Example  `json:"examples"`
-	FunctionName string     `json:"functionName"`
-	IndexBase    int        `json:"indexBase"`
+	Category string `json:"category"`
+
+	// Compare How a returned value is checked. unordered compares array returns as multisets.
+	Compare     Compare       `json:"compare"`
+	Constraints []string      `json:"constraints"`
+	Description string        `json:"description"`
+	Difficulty  Difficulty    `json:"difficulty"`
+	Examples    []ProblemTest `json:"examples"`
+
+	// FunctionName signature.function in this language's naming convention.
+	FunctionName string `json:"functionName"`
+
+	// IndentUnit Indentation for this language, e.g. four spaces for Python. Use as the editor indent unit.
+	IndentUnit string `json:"indentUnit"`
 
 	// Language Canonical lowercase language name, e.g. python or javascript. URL-encode plus signs.
-	Language         string     `json:"language"`
-	Requirements     []string   `json:"requirements"`
-	ShortDescription string     `json:"shortDescription"`
-	Slug             string     `json:"slug"`
-	Starter          string     `json:"starter"`
-	Tests            []TestCase `json:"tests"`
-	Title            string     `json:"title"`
+	Language         string    `json:"language"`
+	ShortDescription string    `json:"shortDescription"`
+	Signature        Signature `json:"signature"`
+	Slug             string    `json:"slug"`
+
+	// Starter Plain-text editor contents, indented with indentUnit.
+	Starter string `json:"starter"`
+
+	// Tests Examples followed by public tests. Hidden tests are omitted.
+	Tests []ProblemTest `json:"tests"`
+	Title string        `json:"title"`
+
+	// Topics All topic names, primary (category) first.
+	Topics []string `json:"topics"`
 }
 
 // ProblemInput defines model for ProblemInput.
 type ProblemInput struct {
-	Category         string                   `json:"category"`
-	Description      string                   `json:"description"`
-	Difficulty       Difficulty               `json:"difficulty"`
-	Languages        *map[string]LanguageData `json:"languages,omitempty"`
-	ShortDescription string                   `json:"shortDescription"`
-	Slug             string                   `json:"slug"`
-	Title            string                   `json:"title"`
+	Category string `json:"category"`
+
+	// Compare How a returned value is checked. unordered compares array returns as multisets.
+	Compare          *Compare   `json:"compare,omitempty"`
+	Constraints      *[]string  `json:"constraints,omitempty"`
+	Description      string     `json:"description"`
+	Difficulty       Difficulty `json:"difficulty"`
+	ShortDescription string     `json:"shortDescription"`
+	Signature        Signature  `json:"signature"`
+	Slug             string     `json:"slug"`
+
+	// Starters Optional per-language starter overrides keyed by language. Merged by key on update.
+	Starters *map[string]string `json:"starters,omitempty"`
+	Tests    []ProblemTestInput `json:"tests"`
+	Title    string             `json:"title"`
+
+	// Topics Additional topics besides category. Unknown topics are created.
+	Topics *[]string `json:"topics,omitempty"`
 }
 
 // ProblemState defines model for ProblemState.
@@ -219,6 +238,31 @@ type ProblemSummary struct {
 	Title            string     `json:"title"`
 }
 
+// ProblemTest defines model for ProblemTest.
+type ProblemTest struct {
+	// Args Positional arguments as JSON values matching signature.params.
+	Args []interface{} `json:"args"`
+
+	// Expected JSON value matching signature.returns.
+	Expected    interface{} `json:"expected"`
+	Explanation *string     `json:"explanation,omitempty"`
+}
+
+// ProblemTestInput defines model for ProblemTestInput.
+type ProblemTestInput struct {
+	// Args Positional arguments as JSON values matching signature.params.
+	Args []interface{} `json:"args"`
+
+	// Expected JSON value matching signature.returns.
+	Expected interface{} `json:"expected"`
+
+	// Explanation Only for examples.
+	Explanation *string `json:"explanation,omitempty"`
+
+	// Kind Examples are shown in the statement; hidden tests are never returned.
+	Kind TestKind `json:"kind"`
+}
+
 // RegisterInput defines model for RegisterInput.
 type RegisterInput struct {
 	DisplayName string `json:"displayName"`
@@ -231,6 +275,21 @@ type ResetPasswordInput struct {
 	// NewPassword 12–72 UTF-8 bytes
 	NewPassword string `json:"newPassword"`
 	Token       string `json:"token"`
+}
+
+// Signature defines model for Signature.
+type Signature struct {
+	// Function Canonical camelCase name; languages apply their own naming convention.
+	Function string `json:"function"`
+	Params   []struct {
+		Name string `json:"name"`
+
+		// Type Language-agnostic type every runner implements. ListNode is encoded as an array of values; TreeNode as a level-order array with nulls.
+		Type TypeName `json:"type"`
+	} `json:"params"`
+
+	// Returns Language-agnostic type every runner implements. ListNode is encoded as an array of values; TreeNode as a level-order array with nulls.
+	Returns TypeName `json:"returns"`
 }
 
 // StateInput defines model for StateInput.
@@ -247,6 +306,12 @@ type TestCase struct {
 	Expected interface{}   `json:"expected"`
 	Input    []interface{} `json:"input"`
 }
+
+// TestKind Examples are shown in the statement; hidden tests are never returned.
+type TestKind string
+
+// TypeName Language-agnostic type every runner implements. ListNode is encoded as an array of values; TreeNode as a level-order array with nulls.
+type TypeName = string
 
 // User defines model for User.
 type User struct {
@@ -324,7 +389,7 @@ type SaveDraftJSONRequestBody = CodeInput
 type SaveProblemStateJSONRequestBody = StateInput
 
 // CreateProblemJSONRequestBody defines body for CreateProblem for application/json ContentType.
-type CreateProblemJSONRequestBody = CreateProblemInput
+type CreateProblemJSONRequestBody = ProblemInput
 
 // GenerateProblemJSONRequestBody defines body for GenerateProblem for application/json ContentType.
 type GenerateProblemJSONRequestBody = GenerateInput
@@ -1325,54 +1390,67 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 // Base64 encoded, gzipped, json marshaled Swagger object
 var swaggerSpec = []string{
 
-	"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",
+	"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",
+	"I3kDgY8B/d4DegNZNzf/HwAA//++8gCDMWYAAA==",
 }
 
 // GetSwagger returns the content of the embedded swagger specification file
