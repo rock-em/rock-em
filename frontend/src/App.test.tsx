@@ -11,9 +11,11 @@ const catalog = [
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 const detailFor = (slug: string, language: string) => ({
   ...(catalog.find(problem => problem.slug === slug) ?? catalog[0]), language,
-  description: 'The statement supplied by the API.', requirements: ['Follow the language contract.'],
-  examples: [{ input: 'value = 1', output: '1' }], constraints: ['value is an integer'],
-  tests: [{ input: [1], expected: 1 }], functionName: 'solve', indexBase: 0,
+  topics: [(catalog.find(problem => problem.slug === slug) ?? catalog[0]).category],
+  description: 'The statement supplied by the API.', constraints: ['value is an integer'],
+  signature: { function: 'solve', params: [{ name: 'value', type: 'int' }], returns: 'int' }, compare: 'exact',
+  examples: [{ args: [1], expected: 1 }], tests: [{ args: [1], expected: 1 }],
+  functionName: 'solve', indentUnit: language === 'javascript' ? '  ' : '    ',
   starter: language === 'javascript' ? 'function solve(value) {}' : 'def solve(value):\n    pass',
 })
 function handler(request: RequestInfo | URL) {

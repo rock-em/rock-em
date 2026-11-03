@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react";
 import Account from "./Account";
 import { navigateTo, usePathname } from "./navigation";
 import { useProblemCatalog, useProblemDetail } from "./useProblemCatalog";
+import { toPracticeFields } from "./problemCatalog";
 import ProblemLanguageSelect from "./ProblemLanguageSelect";
 import ChromeSculpture from "./ChromeSculpture";
 import { generateProblem, type GeneratedProblem, type Level } from "./generateProblem";
@@ -20,14 +21,13 @@ type Problem = {
   topic: string;
   difficulty: Difficulty;
   language: string;
-  requirements: string[];
-  indexBase: number;
   description: string;
   examples: { input: string; output: string; explanation?: string }[];
   constraints: string[];
   functionName: string;
   starter: string;
   tests: TestCase[];
+  compare?: "exact" | "unordered";
   referenceSolution?: string;
   generated?: boolean;
 };
@@ -68,7 +68,7 @@ function runTests(problem: Problem, code: string): Promise<TestResult[]> {
       resolve([{ passed: false, input: [], expected: "Completed within 3 seconds", error: "Execution timed out. Check for an infinite loop." }]);
     }, 3000);
 
-    const payload = JSON.stringify({ code, functionName: problem.functionName, tests: problem.tests, token });
+    const payload = JSON.stringify({ code, functionName: problem.functionName, tests: problem.tests, unordered: problem.compare === "unordered", token });
     const safePayload = payload.replace(/</g, "\\u003c");
     iframe.srcdoc = `<!doctype html><html><body><script>
       const payload = ${safePayload};
@@ -80,7 +80,8 @@ function runTests(problem: Problem, code: string): Promise<TestResult[]> {
           const input = JSON.parse(JSON.stringify(test.input));
           try {
             const actual = solution(...input);
-            const passed = JSON.stringify(actual) === JSON.stringify(test.expected);
+            const key = (value) => payload.unordered && Array.isArray(value) ? JSON.stringify(value.map(item => JSON.stringify(item)).sort()) : JSON.stringify(value);
+            const passed = key(actual) === key(test.expected);
             results.push({ passed, input: test.input, expected: test.expected, actual });
           } catch (error) {
             results.push({ passed: false, input: test.input, expected: test.expected, error: String(error) });
@@ -99,7 +100,7 @@ const MIN_VERIFIED_TESTS = 3;
 // Generated test cases can contain mistakes, so keep only the ones the
 // generated reference solution actually passes.
 async function verifyGeneratedProblem(generated: GeneratedProblem, id: string): Promise<Problem> {
-  const candidate: Problem = { ...generated, id, language: "javascript", requirements: [], indexBase: 0, generated: true };
+  const candidate: Problem = { ...generated, id, language: "javascript", generated: true };
   const results = await runTests(candidate, generated.referenceSolution);
   const tests = candidate.tests.filter((_, index) => results[index]?.passed);
   if (tests.length < MIN_VERIFIED_TESTS) {
@@ -138,7 +139,7 @@ function Practice() {
   const [languagePreferences, setLanguagePreferences] = useState<Record<string, string>>({});
   const detail = useProblemDetail(generatedProblem ? null : selectedId, selectedId ? languagePreferences[selectedId] : undefined);
   const selected: Problem | undefined = generatedProblem ?? (detail.data ? {
-    ...detail.data, id: detail.data.slug, topic: detail.data.category,
+    ...detail.data, ...toPracticeFields(detail.data), id: detail.data.slug, topic: detail.data.category,
     difficulty: difficultyLabels[detail.data.difficulty],
   } : undefined);
   const draftKey = selected ? `${selected.id}:${selected.language}` : '';
@@ -245,7 +246,6 @@ if (submit && passed) {
                 {example.explanation && <div><b>Explanation:</b> {example.explanation}</div>}
               </div>
             ))}
-            {selected.requirements.length > 0 && <><h2>Requirements</h2><ul className="constraints">{selected.requirements.map(requirement => <li key={requirement}>{requirement}</li>)}</ul></>}
             <h2>Constraints</h2>
             <ul className="constraints">{selected.constraints.map((constraint) => <li key={constraint}>{constraint}</li>)}</ul>
             {selected.referenceSolution && (

@@ -124,7 +124,7 @@ export interface paths {
         put?: never;
         /**
          * CreateProblem
-         * @description Requires a nonempty languages map of complete language data. Returns Location header. Requires admin role.
+         * @description Requires a signature and at least one test whose values match it. Returns Location header. Requires admin role.
          */
         post: operations["CreateProblem"];
         delete?: never;
@@ -142,12 +142,12 @@ export interface paths {
         };
         /**
          * GetProblem
-         * @description Defaults to python. Missing language returns 404 with code language_not_available and current languages; never silently falls back.
+         * @description Defaults to python. A missing or disabled language returns 404 with code language_not_available and current languages; never silently falls back.
          */
         get: operations["GetProblem"];
         /**
          * UpdateProblem
-         * @description Replaces common metadata; merges supplied languages by key. Omitted languages are preserved. Requires admin role.
+         * @description Replaces metadata, topics, signature and tests. Supplied starter overrides merge by key; omitted overrides are preserved. Requires admin role.
          */
         put: operations["UpdateProblem"];
         post?: never;
@@ -170,7 +170,7 @@ export interface paths {
         };
         /**
          * ListProblemLanguages
-         * @description Sorted keys of the languages map stored on this problem. Empty map returns []. Missing/archived problem returns 404.
+         * @description Sorted enabled languages that can run this problem. A problem without a signature returns []. Missing/archived problem returns 404.
          */
         get: operations["ListProblemLanguages"];
         put?: never;
@@ -193,7 +193,7 @@ export interface paths {
         post?: never;
         /**
          * DeleteProblemLanguage
-         * @description Requires admin role.
+         * @description Removes this language's starter override so the generated starter is served again. 404 when there is no override. Requires admin role.
          */
         delete: operations["DeleteProblemLanguage"];
         options?: never;
@@ -466,15 +466,6 @@ export interface components {
             input: unknown[];
             expected: unknown;
         };
-        LanguageData: {
-            requirements?: string[];
-            examples?: components["schemas"]["Example"][];
-            constraints?: string[];
-            tests: components["schemas"]["TestCase"][];
-            starter: string;
-            functionName: string;
-            indexBase: number;
-        };
         ProblemSummary: {
             slug: string;
             title: string;
@@ -488,16 +479,23 @@ export interface components {
             shortDescription: string;
             difficulty: components["schemas"]["Difficulty"];
             category: string;
+            /** @description All topic names, primary (category) first. */
+            topics: string[];
             description: string;
+            constraints: string[];
+            signature: components["schemas"]["Signature"];
+            compare: components["schemas"]["Compare"];
+            examples: components["schemas"]["ProblemTest"][];
+            /** @description Examples followed by public tests. Hidden tests are omitted. */
+            tests: components["schemas"]["ProblemTest"][];
             /** @description Canonical lowercase language name, e.g. python or javascript. URL-encode plus signs. */
             language: string;
-            requirements: string[];
-            examples: components["schemas"]["Example"][];
-            constraints: string[];
-            tests: components["schemas"]["TestCase"][];
-            starter: string;
+            /** @description signature.function in this language's naming convention. */
             functionName: string;
-            indexBase: number;
+            /** @description Plain-text editor contents, indented with indentUnit. */
+            starter: string;
+            /** @description Indentation for this language, e.g. four spaces for Python. Use as the editor indent unit. */
+            indentUnit: string;
         };
         ProblemInput: {
             slug: string;
@@ -505,9 +503,16 @@ export interface components {
             shortDescription: string;
             difficulty: components["schemas"]["Difficulty"];
             category: string;
+            /** @description Additional topics besides category. Unknown topics are created. */
+            topics?: string[];
             description: string;
-            languages?: {
-                [key: string]: components["schemas"]["LanguageData"];
+            constraints?: string[];
+            signature: components["schemas"]["Signature"];
+            compare?: components["schemas"]["Compare"];
+            tests: components["schemas"]["ProblemTestInput"][];
+            /** @description Optional per-language starter overrides keyed by language. Merged by key on update. */
+            starters?: {
+                [key: string]: string;
             };
         };
         ProblemState: {
@@ -554,17 +559,6 @@ export interface components {
             /** @enum {string} */
             status: "ok" | "unhealthy";
         };
-        CreateProblemInput: {
-            slug: string;
-            title: string;
-            shortDescription: string;
-            difficulty: components["schemas"]["Difficulty"];
-            category: string;
-            description: string;
-            languages: {
-                [key: string]: components["schemas"]["LanguageData"];
-            };
-        };
         /** @enum {string} */
         Difficulty: "easy" | "medium" | "hard";
         ForgotPasswordInput: {
@@ -578,6 +572,43 @@ export interface components {
              * @description 12–72 UTF-8 bytes
              */
             newPassword: string;
+        };
+        /** @description Language-agnostic type every runner implements. ListNode is encoded as an array of values; TreeNode as a level-order array with nulls. */
+        TypeName: string;
+        Signature: {
+            /** @description Canonical camelCase name; languages apply their own naming convention. */
+            function: string;
+            params: {
+                name: string;
+                type: components["schemas"]["TypeName"];
+            }[];
+            returns: components["schemas"]["TypeName"];
+        };
+        /**
+         * @description How a returned value is checked. unordered compares array returns as multisets.
+         * @enum {string}
+         */
+        Compare: "exact" | "unordered";
+        /**
+         * @description Examples are shown in the statement; hidden tests are never returned.
+         * @enum {string}
+         */
+        TestKind: "example" | "public" | "hidden";
+        ProblemTest: {
+            /** @description Positional arguments as JSON values matching signature.params. */
+            args: unknown[];
+            /** @description JSON value matching signature.returns. */
+            expected: unknown;
+            explanation?: string;
+        };
+        ProblemTestInput: {
+            kind: components["schemas"]["TestKind"];
+            /** @description Positional arguments as JSON values matching signature.params. */
+            args: unknown[];
+            /** @description JSON value matching signature.returns. */
+            expected: unknown;
+            /** @description Only for examples. */
+            explanation?: string;
         };
     };
     responses: never;
@@ -824,7 +855,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateProblemInput"];
+                "application/json": components["schemas"]["ProblemInput"];
             };
         };
         responses: {

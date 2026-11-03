@@ -12,16 +12,20 @@ import (
 	"time"
 )
 
-func TestLanguageMapAndSummary(t *testing.T) {
+func TestContractAndSummary(t *testing.T) {
 	db := testutil.NewTestDB(t)
 	h := NewHandler(db)
-	slug := fmt.Sprintf("language-map-%d", time.Now().UnixNano())
-	data := `{"python":{"requirements":["Zero-based indices"],"examples":[],"constraints":["len(nums) >= 2"],"tests":[{"input":[[2,7],9],"expected":[0,1]}],"starter":"def pair(nums, target): pass","functionName":"pair","indexBase":0},"julia":{"requirements":["One-based indices"],"examples":[],"constraints":["length(nums) >= 2"],"tests":[{"input":[[2,7],9],"expected":[1,2]}],"starter":"function pair!(nums, target) end","functionName":"pair!","indexBase":1}}`
-	_, err := db.Exec(t.Context(), `INSERT INTO problems(slug,title,short_description,description,difficulty,topic,languages) VALUES($1,'Index Pair','Find a pair','Full statement','easy','Arrays',$2)`, slug, data)
+	slug := fmt.Sprintf("contract-%d", time.Now().UnixNano())
+	var id int64
+	err := db.QueryRow(t.Context(), `INSERT INTO problems(slug,title,short_description,description,difficulty,topic,signature) VALUES($1,'Index Pair','Find a pair','Full statement','easy','Arrays','{"function":"indexPair","params":[{"name":"nums","type":"int[]"},{"name":"target","type":"int"}],"returns":"int[]"}') RETURNING id`, slug).Scan(&id)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _, _ = db.Exec(context.Background(), `DELETE FROM problems WHERE slug=$1`, slug) })
+	_, err = db.Exec(t.Context(), `INSERT INTO problem_tests(problem_id,ordinal,kind,args,expected,explanation) VALUES($1,0,'public','[[1,2],3]','[0,1]',NULL),($1,1,'example','[[2,7],9]','[0,1]','2 + 7 = 9'),($1,2,'hidden','[[4,4],8]','[0,1]',NULL)`, id)
+	if err != nil {
+		t.Fatal(err)
+	}
 	call := func(query string, languages bool) *httptest.ResponseRecorder {
 		r := httptest.NewRequest("GET", "/api/problems/"+slug+query, nil)
 		r.SetPathValue("slug", slug)
@@ -38,13 +42,10 @@ func TestLanguageMapAndSummary(t *testing.T) {
 	if err := json.Unmarshal(w.Body.Bytes(), &names); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(names, []string{"julia", "python"}) {
-		t.Fatalf("not exactly map keys: %s", w.Body.String())
+	if !reflect.DeepEqual(names, []string{"javascript", "python"}) {
+		t.Fatalf("not every enabled language: %s", w.Body.String())
 	}
-	for _, tc := range []struct {
-		q, lang, expected string
-		base              int
-	}{{"", "python", "[0,1]", 0}, {"?language=julia", "julia", "[1,2]", 1}} {
+	for _, tc := range []struct{ q, lang, name, indent string }{{"", "python", "index_pair", "    "}, {"?language=javascript", "javascript", "indexPair", "  "}} {
 		w := call(tc.q, false)
 		if w.Code != 200 {
 			t.Fatalf("%d %s", w.Code, w.Body.String())
@@ -53,44 +54,40 @@ func TestLanguageMapAndSummary(t *testing.T) {
 		if err := json.Unmarshal(w.Body.Bytes(), &p); err != nil {
 			t.Fatal(err)
 		}
-		if p.Language != tc.lang || *p.IndexBase != tc.base || string(p.Tests[0].Expected) != tc.expected {
-			t.Fatalf("wrong selected map value: %s", w.Body.String())
+		if p.Language != tc.lang || p.FunctionName != tc.name || p.IndentUnit != tc.indent || !strings.Contains(p.Starter, tc.name+"(") {
+			t.Fatalf("wrong language rendering: %s", w.Body.String())
+		}
+		if len(p.Examples) != 1 || p.Examples[0].Explanation != "2 + 7 = 9" || len(p.Tests) != 2 || string(p.Tests[0].Args[1]) != "9" {
+			t.Fatalf("examples must lead and hidden tests stay private: %s", w.Body.String())
 		}
 	}
 	list := httptest.NewRecorder()
-	h.List(list, httptest.NewRequest("GET", "/api/problems?q=Index+Pair", nil))
+	h.List(list, httptest.NewRequest("GET", "/api/problems?q=Index+Pair&category=arrays", nil))
 	var summaries []map[string]any
+	if err := json.Unmarshal(list.Body.Bytes(), &summaries); err != nil {
+		t.Fatal(err)
+	}
+	// The raw insert above has no topic links, so topic filters must not match it.
+	if len(summaries) != 0 {
+		t.Fatalf("unlinked topic matched: %s", list.Body.String())
+	}
+	list = httptest.NewRecorder()
+	h.List(list, httptest.NewRequest("GET", "/api/problems?q=Index+Pair", nil))
 	if err := json.Unmarshal(list.Body.Bytes(), &summaries); err != nil {
 		t.Fatal(err)
 	}
 	if len(summaries) != 1 || len(summaries[0]) != 5 {
 		t.Fatalf("not a lean summary: %s", list.Body.String())
 	}
-	for _, key := range []string{"slug", "title", "shortDescription", "difficulty", "category"} {
-		if _, ok := summaries[0][key]; !ok {
-			t.Fatal(key)
-		}
-	}
-	for _, q := range []string{"?language=", "?language=Python", "?language=python&language=julia"} {
+	for _, q := range []string{"?language=", "?language=Python", "?language=python&language=javascript"} {
 		if call(q, false).Code != 400 {
 			t.Fatal("invalid selector accepted")
 		}
 	}
-	if w := call("?language=ruby", false); w.Code != 404 || !strings.Contains(w.Body.String(), `"languages":["julia","python"]`) {
+	if w := call("?language=ruby", false); w.Code != 404 || !strings.Contains(w.Body.String(), `"languages":["javascript","python"]`) {
 		t.Fatalf("missing alternatives: %s", w.Body.String())
 	}
-	r := httptest.NewRequest("DELETE", "/", nil)
-	r.SetPathValue("slug", slug)
-	r.SetPathValue("language", "python")
-	w = httptest.NewRecorder()
-	h.DeleteLanguage(w, r)
-	if w.Code != 204 || call("", false).Code != 404 {
-		t.Fatal("removed language still supported")
-	}
-	if got := strings.TrimSpace(call("/languages", true).Body.String()); got != `["julia"]` {
-		t.Fatal(got)
-	}
-	_, err = db.Exec(t.Context(), `UPDATE problems SET languages='{}' WHERE slug=$1`, slug)
+	_, err = db.Exec(t.Context(), `UPDATE problems SET signature=NULL WHERE slug=$1`, slug)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -105,40 +102,64 @@ func TestLanguageMapAndSummary(t *testing.T) {
 		t.Fatal("archived problem exposed")
 	}
 }
-func TestSeedLanguages(t *testing.T) {
+func TestSeedContracts(t *testing.T) {
 	db := testutil.NewTestDB(t)
 	h := NewHandler(db)
 	for _, slug := range []string{"two-sum", "valid-parentheses", "binary-search", "merge-two-sorted-lists", "maximum-subarray", "number-of-islands"} {
 		for _, language := range []string{"python", "javascript"} {
 			p, _, err := h.getDetail(t.Context(), slug, language)
 			if err != nil {
-				t.Fatal(err)
+				t.Fatal(slug, err)
 			}
-			if len(p.Tests) < 3 || p.IndexBase == nil || *p.IndexBase != 0 {
-				t.Fatal("missing test contract")
+			if len(p.Tests) < 3 || len(p.Examples) != 2 || len(p.Topics) != 1 || len(p.Constraints) == 0 {
+				t.Fatal(slug, "incomplete backfill")
+			}
+			for _, test := range p.Tests {
+				if !p.Signature.accepts(test) {
+					t.Fatal(slug, "seeded test does not match its signature")
+				}
 			}
 			prefix := "function "
 			if language == "python" {
 				prefix = "def "
 			}
-			if !strings.Contains(p.Starter, prefix) {
-				t.Fatal("wrong starter language")
-			}
-			for _, s := range p.Constraints {
-				for _, r := range s {
-					if r > 127 {
-						t.Fatal("non-ASCII new constraint")
-					}
-				}
+			if !strings.Contains(p.Starter, prefix+p.FunctionName+"(") {
+				t.Fatal(slug, "wrong starter language")
 			}
 		}
 	}
 }
-func TestIncompleteLanguageRejected(t *testing.T) {
-	zero := 0
-	for _, v := range []Variant{{IndexBase: &zero}, {IndexBase: &zero, Starter: "def f(): pass", FunctionName: "f"}, {IndexBase: &zero, Starter: "x", FunctionName: "f", Tests: []TestCase{{Input: []json.RawMessage{}}}}} {
-		if v.valid() {
-			t.Fatal("incomplete language accepted")
+func TestStarters(t *testing.T) {
+	s := Signature{Function: "mergeTwoLists", Params: []Param{{"list1", "ListNode"}, {"grid", "char[][]"}}, Returns: "ListNode[]"}
+	py := languages["python"].starter(s, "    ")
+	if !strings.Contains(py, "def merge_two_lists(list1: ListNode | None, grid: list[list[str]]) -> list[ListNode | None]:\n    # Write") || !strings.HasPrefix(py, "# ListNode") {
+		t.Fatal(py)
+	}
+	js := languages["javascript"].starter(s, "  ")
+	if !strings.Contains(js, " * @param {string[][]} grid\n * @return {(ListNode | null)[]}\n */\nfunction mergeTwoLists(list1, grid) {\n  // Write") {
+		t.Fatal(js)
+	}
+}
+func TestSignatureRejectsMismatchedTests(t *testing.T) {
+	s := Signature{Function: "f", Params: []Param{{"n", "int"}, {"c", "char"}, {"tree", "TreeNode"}}, Returns: "double"}
+	if !s.valid() || !s.accepts(Test{Args: raw(`3`, `"x"`, `[1,null,2]`), Expected: json.RawMessage(`1.5`)}) {
+		t.Fatal("valid test rejected")
+	}
+	for _, args := range [][]json.RawMessage{raw(`3`, `"x"`), raw(`3.5`, `"x"`, `[]`), raw(`3`, `"xy"`, `[]`), raw(`3`, `"x"`, `[1,"2"]`), raw(`2147483648`, `"x"`, `[]`)} {
+		if s.accepts(Test{Args: args, Expected: json.RawMessage(`1`)}) {
+			t.Fatalf("accepted %s", args)
 		}
 	}
+	for _, bad := range []Signature{{Function: "f", Returns: "Map"}, {Function: "1f", Returns: "int"}, {Function: "f", Params: []Param{{"a", "int"}, {"a", "int"}}, Returns: "int"}} {
+		if bad.valid() {
+			t.Fatalf("accepted %+v", bad)
+		}
+	}
+}
+func raw(values ...string) []json.RawMessage {
+	result := make([]json.RawMessage, len(values))
+	for i, v := range values {
+		result[i] = json.RawMessage(v)
+	}
+	return result
 }
