@@ -62,6 +62,17 @@ The site to scrape is taken from each URL's host, and requests go to its `/graph
 
 The `<!-- code: ID -->` markers in the editorial show where each entry in `code_blocks` belongs. `official` is `null` if the problem has no editorial, and `{"available": false}` if it is premium-only.
 
+## Importing into the backend
+
+`backend/cmd/import` loads scraper output into the problems table. Run it from `backend/` with `DATABASE_URL` set:
+
+```bash
+go run ./cmd/import ../scripts/scraper/sample.json
+go run ./cmd/import -dry-run top150.json   # just report what would be imported
+```
+
+Each problem gets its signature from the `python3` snippet and its example tests from `example_testcases`, paired with the `Output:` lines in the description. Problems that can't be checked with plain input/output tests are skipped with a reason: in-place edits, custom judges, design classes and unsupported types. Slugs that already exist are left untouched, so rerunning an import is safe.
+
 ## Tests
 
 ```bash
