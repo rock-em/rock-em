@@ -1,31 +1,31 @@
-UI/UX Design Principles
+# UI/UX design principles
 
 The platform will maintain a visually simple interface while supporting complex functionality. 
 The main design challenge is not reducing the number of features, but controlling when, where, and how users encounter that complexity.
 
-1. Content-First Design
+## Content-First Design
 The current task should dominate the page. On a problem page, prioritize the problem statement and code editor.
 Features such as recommendations, statistics, discussions, and progress should be secondary.
 
-2. Progressive Disclosure
+## Progressive Disclosure
 Do not display every available feature at once. Keep advanced or optional information accessible through expandable sections.
 For example, the default problem page can show the problem and editor while keeping Hints, Explanation, Previous Attempts, Complexity Analysis, and Related Problems collapsed until requested.
 Assistance should also progress in depth:
 Small Hint → Specific Hint → Concept Explanation → Solution Explanation
 
-3. Clear and Consistent Hierarchy
+## Clear and Consistent Hierarchy
 Problem pages should follow the same general structure.
 Use descriptive labels instead of ambiguous icons. Previous Attempts is more immediately understandable than an unlabeled history icon.
 Implementation rule: Once users learn how one problem page works, they should already know how every other problem page works.
 
-5. Contextual and User-Controlled Assistance
+## Contextual and User-Controlled Assistance
 Help should be available where the user needs it without interrupting independent problem solving. Hints belong near the problem, code analysis belongs near the editor, and performance feedback belongs near submission results.
 An incorrect submission could offer:
 Tests failed: 3/8
 [View Failed Tests] [Get a Hint] [Analyze My Code]
 This gives beginners access to substantial support while allowing experienced users to ignore it completely.
 
-6. Minimal Visual Noise
+## Minimal Visual Noise
 Use the smallest set of interface elements necessary to communicate information and actions. Favor standard HTML-style elements such as headings, paragraphs, links, buttons, code blocks, tables, forms, and simple borders.
 Avoid adding cards, animations, gradients, badges, pop-ups, sidebars, or icons unless they improve usability. A simple interface also makes important states—such as errors, successful submissions, or warnings—easier to notice.
 Implementation rule: Before adding a new visual component, make sure it is the simplest option possible.

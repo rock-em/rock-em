@@ -1,5 +1,4 @@
 
-/* Chrome Sculpture */
 
 .chrome-wrap {
   position: relative;
@@ -26,8 +25,6 @@
   height: 100%;
 }
 
-/* Topic text in front of sculpture */
-
 .chrome-topic {
   position: absolute;
   top: 50%;
@@ -51,8 +48,6 @@
   user-select: none;
   white-space: nowrap;
 }
-
-/* Mobile */
 
 @media (max-width: 650px) {
   .chrome-stage {

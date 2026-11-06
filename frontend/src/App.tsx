@@ -10,11 +10,8 @@ import { generateProblem, type GeneratedProblem, type Level } from "./generatePr
 import TopicLearningPath from "./TopicLearningPath";
 import AdaptivePractice from "./AdaptivePractice";
 import { recordPracticeAttempt } from "./practiceProgress";
-import "./index.css";
 
-// CodeMirror is only needed on problem pages, so keep it out of the initial bundle.
 const CodeEditor = lazy(() => import("./CodeEditor"));
-
 
 type Difficulty = "Easy" | "Medium" | "Hard";
 type TestCase = { input: unknown[]; expected: unknown };
@@ -43,7 +40,6 @@ function format(value: unknown): string {
   try { return JSON.stringify(value); } catch { return String(value); }
 }
 
-// A sandboxed iframe isolates evaluated code from the application's page.
 // This is a lightweight demo runner, not a production-grade secure judge.
 function runTests(problem: Problem, code: string): Promise<TestResult[]> {
   return new Promise((resolve) => {
@@ -101,8 +97,6 @@ function runTests(problem: Problem, code: string): Promise<TestResult[]> {
 
 const MIN_VERIFIED_TESTS = 3;
 
-// Generated test cases can contain mistakes, so keep only the ones the
-// generated reference solution actually passes.
 async function verifyGeneratedProblem(generated: GeneratedProblem, id: string): Promise<Problem> {
   const candidate: Problem = { ...generated, id, language: "javascript", generated: true };
   const results = await runTests(candidate, generated.referenceSolution);
@@ -196,7 +190,6 @@ function Practice() {
       const passed = testResults.length === selected.tests.length &&
   testResults.every((test) => test.passed);
 
-//Track performance when the user clicks Submit
 if (submit && testResults.length > 0) {
   recordPracticeAttempt(selected.id, passed);
 }
@@ -378,8 +371,6 @@ if (submit && passed) {
     </main>;
   }
 
-  // Account pages keep this component mounted so drafts and generated problems
-  // survive navigation, but do not run an invisible sculpture in the background.
   if (['/sign-in', '/sign-up', '/forgot-password', '/reset-password'].includes(path)) return null;
   if (path !== '/') {
     return <main className="page utility-page"><h1>{problemMatch ? 'Problem unavailable' : 'Page not found'}</h1>
@@ -399,7 +390,6 @@ if (submit && passed) {
         <div className="topic-meta">
           {solvedCount} / {totalTopicProblems} solved <span> · </span> {topicIndex + 1} of {topics.length}
         </div>
-
 
         <input aria-label={`Search ${currentTopic} problems`} className="search" type="text" placeholder={`Search ${currentTopic.toLowerCase()}...`} value={search} onChange={(event) => setSearch(event.target.value)} />
         <div className="problem-list" key={`${currentTopic}-${search}`}>

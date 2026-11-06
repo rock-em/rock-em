@@ -27,7 +27,6 @@ export default function AdaptivePractice({
 
   const [now, setNow] = useState(0);
 
-  // Load updated progress after submissions
   useEffect(() => {
     const refresh = (): void => {
       setProgress(loadProgress());
@@ -50,7 +49,6 @@ export default function AdaptivePractice({
     };
   }, []);
 
-  // Update the current time for scheduled reviews
   useEffect(() => {
     const updateTime = (): void => {
       setNow(Date.now());
@@ -69,7 +67,6 @@ export default function AdaptivePractice({
     };
   }, []);
 
-  // Calculate progress statistics
   const stats = useMemo(() => {
     const entries = problems
       .map((problem) => progress[String(problem.id)])
@@ -105,13 +102,11 @@ export default function AdaptivePractice({
     };
   }, [problems, progress]);
 
-  // Generate personalized recommendations
   const recommendations = useMemo<RecommendedProblem[]>(() => {
     return problems
       .map((problem): RecommendedProblem => {
         const record = progress[String(problem.id)];
 
-        // New problems
         if (!record) {
           return {
             ...problem,
@@ -120,12 +115,10 @@ export default function AdaptivePractice({
           };
         }
 
-        // Check whether a problem is due for review
         const due = record.nextReview
           ? new Date(record.nextReview).getTime() <= now
           : true;
 
-        // Failed problems receive highest priority
         if (due && record.streak === 0) {
           return {
             ...problem,
@@ -134,7 +127,6 @@ export default function AdaptivePractice({
           };
         }
 
-        // Previously solved problems ready for review
         if (due) {
           return {
             ...problem,
@@ -143,7 +135,6 @@ export default function AdaptivePractice({
           };
         }
 
-        // Problems currently on track
         return {
           ...problem,
           priority: 3,
@@ -177,7 +168,6 @@ export default function AdaptivePractice({
         </span>
       </div>
 
-      {/* Statistics */}
       <div className="adaptive-stats">
         <div className="adaptive-stat">
           <span>Problems Attempted</span>
@@ -195,7 +185,6 @@ export default function AdaptivePractice({
         </div>
       </div>
 
-      {/* Mastery Progress Bar */}
       <div className="adaptive-progress-heading">
         <span>Overall Mastery</span>
         <span>{masteryPercent}%</span>
@@ -216,7 +205,6 @@ export default function AdaptivePractice({
         />
       </div>
 
-      {/* Recommended Problems */}
       <div className="adaptive-recommendations">
         <h3>Recommended Practice</h3>
 
