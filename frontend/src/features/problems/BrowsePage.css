@@ -1,0 +1,143 @@
+.browse-page { margin-top: 20px; }
+.browse-page .problem-browser { border: 0; margin: 0; padding: 0; }
+
+.problem-browser {
+  min-height: 400px;
+}
+
+.topic-carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 16px 0 0;
+}
+
+.arrow {
+  flex: 0 0 auto;
+  border: none;
+  background: none;
+  font-size: 27px;
+  cursor: pointer;
+  color: #555;
+  padding: 12px;
+  transition: transform 0.2s, color 0.2s;
+}
+
+.arrow:hover {
+  color: #111;
+  transform: scale(1.15);
+}
+
+.arrow:focus-visible {
+  outline: 2px solid var(--color-link);
+}
+
+.topic-meta {
+  text-align: center;
+  color: var(--color-subtle);
+  font-size: 13px;
+  margin: 10px 0 28px;
+}
+
+.search {
+  width: 100%;
+  padding: 9px 10px;
+  margin-bottom: 24px;
+  border: none;
+  border-bottom: 1px solid #aaa;
+  font: inherit;
+  outline: none;
+}
+
+.search:focus {
+  border-bottom-color: var(--color-text);
+}
+
+.problem-list {
+  animation: problems-enter 0.35s ease;
+}
+
+.problem-row {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 5px;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text);
+  text-decoration: none;
+  text-align: left;
+  transition: padding-left 0.2s, background 0.2s;
+}
+
+.problem-row:hover {
+  padding-left: 10px;
+  background: #fafafa;
+}
+
+.problem-row:focus-visible {
+  outline: 2px solid var(--color-link);
+  outline-offset: 2px;
+}
+
+.problem-left {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.problem-number {
+  width: 25px;
+  color: var(--color-subtle);
+  font-size: 13px;
+}
+
+.problem-name {
+  color: var(--color-link);
+}
+
+.problem-row:hover .problem-name {
+  text-decoration: underline;
+}
+
+.difficulty {
+  color: var(--color-subtle);
+  font-size: 13px;
+}
+
+.no-results {
+  text-align: center;
+  color: var(--color-subtle);
+  margin-top: 40px;
+}
+
+@keyframes problems-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 650px) {
+  .topic-carousel {
+    gap: 0;
+  }
+
+  .arrow {
+    padding: 5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .problem-list {
+    animation: none;
+  }
+}

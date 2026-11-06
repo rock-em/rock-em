@@ -1,0 +1,49 @@
+.utility-page > .generator { margin: 0; padding: 0; border: 0; }
+
+.generator-form {
+  display: grid;
+  gap: 16px;
+  max-width: 520px;
+}
+
+.generator-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.generator-form input,
+.generator-form select {
+  padding: 8px 0;
+  border: none;
+  border-bottom: 1px solid #aaa;
+  background: transparent;
+  outline: none;
+}
+
+.generator-form input:focus,
+.generator-form select:focus {
+  border-bottom-color: var(--color-text);
+}
+
+.generator-form button {
+  justify-self: start;
+}
+
+.generator-form button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.optional {
+  color: var(--color-subtle);
+}
+
+.generator-status {
+  color: #555;
+  font-size: 14px;
+}
+
+.generator-error {
+  color: #b95b5b;
+}

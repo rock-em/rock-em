@@ -1,0 +1,280 @@
+.workspace-page {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+
+.workspace-header {
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.back-link {
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: var(--color-link);
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+.workspace-counter {
+  color: var(--color-subtle);
+  font-size: 13px;
+}
+
+.workspace-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 24px;
+  align-items: start;
+  margin-top: 26px;
+}
+
+.workspace-panel {
+  min-width: 0;
+  margin: 0;
+  padding: 26px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
+.workspace-eyebrow {
+  margin-bottom: 8px;
+  color: var(--color-subtle);
+  font-size: 13px;
+}
+
+.description-panel h1 {
+  margin-bottom: 12px;
+}
+
+.description-panel h2 {
+  margin-top: 32px;
+  font-size: 20px;
+}
+
+.problem-difficulty,
+.solved-label {
+  display: inline-block;
+  margin-right: 14px;
+  color: var(--color-subtle);
+  font-size: 13px;
+}
+
+.solved-label {
+  color: #267047;
+}
+
+.problem-description {
+  margin-top: 24px;
+}
+
+.example {
+  padding: 14px 16px;
+  margin: 12px 0;
+  background: #f7f7f7;
+  border-left: 2px solid #ccc;
+  overflow-wrap: anywhere;
+}
+
+.example > div {
+  margin-top: 6px;
+}
+
+.example code,
+.test-case code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.constraints {
+  padding-left: 20px;
+}
+
+.constraints li {
+  margin-bottom: 7px;
+}
+
+.editor-panel {
+  padding: 0;
+  overflow: hidden;
+}
+
+.editor-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.reset-button {
+  background: transparent;
+  border: none;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.reset-button:hover {
+  color: #111;
+  text-decoration: underline;
+}
+
+.code-editor .cm-editor {
+  font-size: 14px;
+  tab-size: 2;
+}
+
+.code-editor .cm-content,
+.code-editor .cm-gutter {
+  min-height: 420px;
+}
+
+.code-editor .cm-content {
+  padding: 20px 0;
+}
+
+.code-editor .cm-line {
+  padding: 0 20px 0 12px;
+}
+
+.code-loading {
+  margin: 0;
+  padding: 20px;
+  background: #fcfcfc;
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.code-editor.code-loading {
+  min-height: 420px;
+}
+
+.editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.editor-heading label { margin-right: 8px; font-size: 13px; color: var(--color-muted); }
+.editor-heading select { margin-top: 6px; padding: 4px 8px; font: inherit; font-size: 13px; border: 1px solid #ccc; border-radius: 3px; background: #fff; color: var(--color-text); }
+
+.test-message {
+  padding: 0 20px;
+  margin: 14px 0;
+  font-size: 14px;
+}
+
+.test-results {
+  padding: 0 20px 16px;
+}
+
+.test-results h2 {
+  display: flex;
+  justify-content: space-between;
+  font-size: 18px;
+}
+
+.test-results h2 span {
+  font-family: "Atkinson Hyperlegible", Arial, sans-serif;
+  color: var(--color-subtle);
+  font-size: 13px;
+}
+
+.test-case {
+  padding: 12px 14px;
+  margin-top: 10px;
+  background: #f8f8f8;
+  border-left: 3px solid #bbb;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+.test-case > div {
+  margin-top: 5px;
+}
+
+.test-pass {
+  border-left-color: #4b8b63;
+}
+
+.test-fail {
+  border-left-color: #b95b5b;
+}
+
+.runner-note {
+  margin: 0;
+  padding: 0 20px 20px;
+  color: #888;
+  font-size: 12px;
+}
+
+.reference-solution {
+  margin-top: 24px;
+}
+
+.reference-solution summary {
+  cursor: pointer;
+  color: var(--color-link);
+}
+
+.reference-solution .code-block {
+  margin-top: 10px;
+}
+
+.reference-solution .cm-editor {
+  font-size: 13px;
+}
+
+.reference-solution .cm-content {
+  padding: 14px 0;
+}
+
+.reference-solution .cm-line {
+  padding: 0 14px;
+}
+
+@media (max-width: 850px) {
+  .workspace-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .workspace-page {
+    padding: 0 12px 30px;
+  }
+
+  .workspace-panel {
+    padding: 18px;
+  }
+
+  .editor-panel {
+    padding: 0;
+  }
+
+  .workspace-counter {
+    display: none;
+  }
+
+  .code-editor .cm-content,
+  .code-editor .cm-gutter,
+  .code-editor.code-loading {
+    min-height: 320px;
+  }
+}

@@ -3,6 +3,7 @@ import { navigate } from "../../lib/router";
 import { usePractice } from "../practice/context";
 import { generateProblem, type Level } from "./api";
 import { toVerifiedProblem } from "./verify";
+import "./GeneratePage.css";
 
 export function GeneratePage() {
   const { addGenerated, setTopic } = usePractice();

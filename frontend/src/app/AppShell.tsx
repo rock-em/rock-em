@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { AccountMenu } from "../features/auth/AccountMenu";
 import { Link } from "../lib/Link";
 import { SiteNavigation } from "./SiteNavigation";
+import "./AppShell.css";
 
 export function AppShell({ children }: { children: ReactNode }) {
   return (

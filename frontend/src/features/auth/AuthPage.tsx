@@ -35,7 +35,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
     return (
       <AuthLayout>
         <h1>You’re signed in</h1>
-        <p className="account-muted">Continue practicing as {user.displayName}.</p>
+        <p className="muted">Continue practicing as {user.displayName}.</p>
         <Link href="/">Browse problems →</Link>
       </AuthLayout>
     );
@@ -44,7 +44,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
   return (
     <AuthLayout>
       <h1>{signingUp ? "A little practice, every day." : "Welcome back."}</h1>
-      <p className="account-muted">{signingUp ? "Create your rock em account." : "Sign in to your rock em account."}</p>
+      <p className="muted">{signingUp ? "Create your rock em account." : "Sign in to your rock em account."}</p>
       <form onSubmit={(event) => void submit(event)} className="auth-form">
         {signingUp && (
           <label>

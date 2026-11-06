@@ -7,7 +7,7 @@ export function ProgressPage() {
   return (
     <main className="page utility-page">
       <h1>Practice review</h1>
-      <p className="account-muted">See your progress and choose what to revisit next.</p>
+      <p className="muted">See your progress and choose what to revisit next.</p>
       <div className="summary">
         <span>
           <strong>Problems</strong> · {problems.length}
