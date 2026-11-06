@@ -4,12 +4,15 @@ export type TestResult = { passed: boolean; input: unknown[]; expected: unknown;
 
 const TIMEOUT_MS = 3000;
 
+export function compareKey(value: unknown, unordered: boolean): string {
+  if (unordered && Array.isArray(value)) return JSON.stringify(value.map((item) => JSON.stringify(item)).sort());
+  return JSON.stringify(value);
+}
+
 function sandboxSource(payload: string) {
   return `<!doctype html><html><body><script>
     const payload = ${payload};
-    const key = (value) => payload.unordered && Array.isArray(value)
-      ? JSON.stringify(value.map((item) => JSON.stringify(item)).sort())
-      : JSON.stringify(value);
+    const compareKey = ${compareKey};
     const results = [];
     try {
       const solution = new Function(payload.code + "\\nreturn " + payload.functionName + ";")();
@@ -18,7 +21,7 @@ function sandboxSource(payload: string) {
         const input = JSON.parse(JSON.stringify(test.input));
         try {
           const actual = solution(...input);
-          results.push({ passed: key(actual) === key(test.expected), input: test.input, expected: test.expected, actual });
+          results.push({ passed: compareKey(actual, payload.unordered) === compareKey(test.expected, payload.unordered), input: test.input, expected: test.expected, actual });
         } catch (error) {
           results.push({ passed: false, input: test.input, expected: test.expected, error: String(error) });
         }
@@ -31,7 +34,10 @@ function sandboxSource(payload: string) {
 }
 
 // A lightweight demo runner, not a production-grade secure judge.
-export function runTests(problem: Pick<Problem, "functionName" | "tests" | "compare">, code: string): Promise<TestResult[]> {
+export function runTests(
+  problem: Pick<Problem, "functionName" | "tests" | "compare">,
+  code: string,
+): Promise<TestResult[]> {
   return new Promise((resolve) => {
     const iframe = document.createElement("iframe");
     iframe.style.display = "none";
@@ -49,11 +55,24 @@ export function runTests(problem: Pick<Problem, "functionName" | "tests" | "comp
       if (event.source === iframe.contentWindow && event.data?.token === token) finish(event.data.results);
     };
     const timer = window.setTimeout(() => {
-      finish([{ passed: false, input: [], expected: "Completed within 3 seconds", error: "Execution timed out. Check for an infinite loop." }]);
+      finish([
+        {
+          passed: false,
+          input: [],
+          expected: "Completed within 3 seconds",
+          error: "Execution timed out. Check for an infinite loop.",
+        },
+      ]);
     }, TIMEOUT_MS);
     window.addEventListener("message", receive);
 
-    const payload = JSON.stringify({ code, functionName: problem.functionName, tests: problem.tests, unordered: problem.compare === "unordered", token });
+    const payload = JSON.stringify({
+      code,
+      functionName: problem.functionName,
+      tests: problem.tests,
+      unordered: problem.compare === "unordered",
+      token,
+    });
     iframe.srcdoc = sandboxSource(payload.replace(/</g, "\\u003c"));
   });
 }
