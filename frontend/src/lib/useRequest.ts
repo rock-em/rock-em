@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type Settled<T> = { id: string; data?: T; error?: Error };
 
@@ -25,11 +25,7 @@ export function useRequest<T>(key: string | null, load: (signal: AbortSignal) =>
     return () => controller.abort();
   }, [id]);
 
+  const retry = useCallback(() => setAttempt((count) => count + 1), []);
   const current = settled?.id === id ? settled : null;
-  return {
-    data: current?.data,
-    error: current?.error ?? null,
-    loading: id !== null && current === null,
-    retry: () => setAttempt((count) => count + 1),
-  };
+  return { data: current?.data, error: current?.error ?? null, loading: id !== null && current === null, retry };
 }

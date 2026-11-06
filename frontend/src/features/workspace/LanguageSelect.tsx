@@ -7,7 +7,7 @@ type Props = {
   loading?: boolean;
 };
 
-export default function ProblemLanguageSelect({ languages, value, onChange, loading = false }: Props) {
+export function LanguageSelect({ languages, value, onChange, loading = false }: Props) {
   const id = useId();
   const options = languages ?? [];
   const selected = options.some(option => option === value) ? value! : "";
