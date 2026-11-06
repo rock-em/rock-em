@@ -1,13 +1,14 @@
 import { navigate } from "../../lib/router";
 import { usePractice } from "../practice/context";
 import { TopicLearningPath } from "./TopicLearningPath";
+import "./LearnPage.css";
 
 export function LearnPage() {
   const { problems, topics, topic, setTopic, solved } = usePractice();
   return (
     <main className="page utility-page">
       <h1>Learning paths</h1>
-      <p className="account-muted">Build the concepts behind each topic, one step at a time.</p>
+      <p className="muted">Build the concepts behind each topic, one step at a time.</p>
       <label className="topic-picker">
         Topic
         <select value={topic} onChange={(event) => setTopic(event.target.value)}>

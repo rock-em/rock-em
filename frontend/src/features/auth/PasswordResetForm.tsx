@@ -45,7 +45,7 @@ export function PasswordResetForm({ resetting, onReset }: Props) {
     return (
       <>
         <h1>{resetting ? "Password updated." : "Check your inbox."}</h1>
-        <p className="account-muted" role="status">
+        <p className="muted" role="status">
           {resetting
             ? "Your password has been changed and all sessions have been signed out. Sign in with your new password."
             : "If an account exists for that email, you’ll receive a reset link shortly. The link expires in 30 minutes. Check your spam folder, too."}
@@ -64,7 +64,7 @@ export function PasswordResetForm({ resetting, onReset }: Props) {
         </p>
       ) : (
         <>
-          <p className="account-muted">
+          <p className="muted">
             {resetting ? "Choose a password you haven’t used before." : "Enter your account email and we’ll send you a reset link."}
           </p>
           <form className="auth-form" onSubmit={(event) => void submit(event)}>

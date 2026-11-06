@@ -1,0 +1,162 @@
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("../assets/fonts/AtkinsonHyperlegible-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("../assets/fonts/AtkinsonHyperlegible-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("../assets/fonts/AtkinsonHyperlegible-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("../assets/fonts/AtkinsonHyperlegible-BoldItalic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+:root {
+  --color-text: #222;
+  --color-muted: #666;
+  --color-subtle: #777;
+  --color-link: #0645ad;
+  --color-border: #ddd;
+  --font-serif: Georgia, serif;
+  --font-mono: Consolas, "Courier New", monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+  color: var(--color-text);
+  font-family: "Atkinson Hyperlegible", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+button,
+textarea,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.page {
+  width: min(900px, 92%);
+  margin: 60px auto;
+}
+
+h1 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: normal;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  margin-top: 24px;
+}
+
+section {
+  margin-top: 50px;
+  padding-top: 8px;
+  border-top: 1px solid #ccc;
+}
+
+h2 {
+  font-family: var(--font-serif);
+  font-size: 21px;
+  font-weight: normal;
+}
+
+.run-button,
+.submit-button {
+  padding: 9px 17px;
+  border-radius: 3px;
+  border: 1px solid #aaa;
+}
+
+.run-button {
+  background: #fff;
+  color: #333;
+}
+
+.submit-button {
+  background: var(--color-text);
+  color: #fff;
+  border-color: var(--color-text);
+}
+
+.run-button:hover {
+  background: #f1f1f1;
+}
+
+.submit-button:hover {
+  background: #444;
+}
+
+.run-button:disabled,
+.submit-button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.muted {
+  color: var(--color-muted);
+}
+
+.utility-page > p {
+  color: var(--color-muted);
+}
+
+.utility-page a {
+  color: var(--color-link);
+  text-underline-offset: 4px;
+}
+
+.about-page {
+  max-width: 620px;
+}
+
+@media (max-width: 650px) {
+  .page {
+    margin: 32px auto;
+  }
+}

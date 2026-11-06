@@ -5,6 +5,7 @@ import { fromDetail } from "../problems/model";
 import { LanguageSelect } from "./LanguageSelect";
 import { ProblemStatement } from "./ProblemStatement";
 import { SolutionPanel } from "./SolutionPanel";
+import "./workspace.css";
 
 export function WorkspacePage({ slug }: { slug: string }) {
   const { generated, languages, setLanguage, problems, solved } = usePractice();

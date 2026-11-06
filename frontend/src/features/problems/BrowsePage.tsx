@@ -3,6 +3,7 @@ import { navigate } from "../../lib/router";
 import { usePractice } from "../practice/context";
 import { ChromeSculpture } from "./ChromeSculpture";
 import { difficultyLabel } from "./model";
+import "./BrowsePage.css";
 
 export function BrowsePage() {
   const { problems, topics, topic, setTopic, solved } = usePractice();

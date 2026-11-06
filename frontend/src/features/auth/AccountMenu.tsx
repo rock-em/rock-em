@@ -4,6 +4,7 @@ import { navigate } from "../../lib/router";
 import { useDismiss } from "../../lib/useDismiss";
 import { signOut } from "./api";
 import { useSession } from "./session";
+import "./auth.css";
 
 export function AccountMenu() {
   const { user, checking, setUser } = useSession();
@@ -29,7 +30,7 @@ export function AccountMenu() {
   return (
     <nav aria-label="Account" className="account-nav">
       {checking ? (
-        <span className="account-muted" role="status">Loading account…</span>
+        <span className="muted" role="status">Loading account…</span>
       ) : user ? (
         <details className="profile" ref={profile}>
           <summary>
@@ -38,8 +39,8 @@ export function AccountMenu() {
           </summary>
           <div className="profile-panel">
             <strong>{user.displayName}</strong>
-            {user.role === "admin" && <span className="account-muted">Admin</span>}
-            <span className="account-muted">{user.email}</span>
+            {user.role === "admin" && <span className="muted">Admin</span>}
+            <span className="muted">{user.email}</span>
             <button disabled={busy} onClick={() => void endSession()}>
               {busy ? "Signing out…" : "Sign out"}
             </button>

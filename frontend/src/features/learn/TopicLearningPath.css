@@ -2,7 +2,7 @@
 .learning-path {
   margin: 0 0 28px;
   padding: 23px 25px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   background: #fff;
 }
@@ -36,7 +36,7 @@
 
 .learning-path-intro {
   margin: 12px 0 16px;
-  color: #666;
+  color: var(--color-muted);
   font-size: 14px;
 }
 
@@ -57,7 +57,7 @@
 
 .learning-path-stats {
   margin-top: 8px;
-  color: #777;
+  color: var(--color-subtle);
   font-size: 12px;
 }
 
@@ -68,7 +68,7 @@
   border: 0;
   border-top: 1px solid #eee;
   background: none;
-  color: #0645ad;
+  color: var(--color-link);
   text-align: left;
 }
 
@@ -107,7 +107,7 @@
 }
 
 .learning-path-concept small {
-  color: #777;
+  color: var(--color-subtle);
   font-size: 12px;
   line-height: 1.5;
 }
@@ -115,7 +115,7 @@
 .learning-path-next {
   margin-top: 12px;
   padding: 15px 0 0;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--color-border);
 }
 
 .learning-path-next > div {
@@ -138,7 +138,7 @@
   padding: 8px 12px;
   border: 1px solid #333;
   border-radius: 3px;
-  background: #222;
+  background: var(--color-text);
   color: white;
   font-size: 13px;
 }
@@ -149,7 +149,7 @@
 
 .learning-path-next button:focus-visible,
 .learning-path-toggle:focus-visible {
-  outline: 2px solid #0645ad;
+  outline: 2px solid var(--color-link);
   outline-offset: 2px;
 }
 
