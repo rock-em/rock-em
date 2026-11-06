@@ -22,7 +22,7 @@ describe('Password reset', () => {
   it.each([202, 503, 429])('handles reset requests with status %s', async (status) => {
     const fetch = vi.fn().mockResolvedValue(json({}, status));
     vi.stubGlobal('fetch', fetch);
-    render(<PasswordReset resetting={false} onReset={vi.fn()} signIn={vi.fn()} />);
+    render(<PasswordReset resetting={false} onReset={vi.fn()} />);
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'sam@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: 'Send reset link →' }));
     expect(fetch).toHaveBeenCalledWith('/api/auth/forgot-password', expect.objectContaining({ body: JSON.stringify({ email: 'sam@example.com' }) }));
@@ -35,7 +35,7 @@ describe('Password reset', () => {
     const fetch = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
     vi.stubGlobal('fetch', fetch);
     const onReset = vi.fn();
-    render(<PasswordReset resetting onReset={onReset} signIn={vi.fn()} />);
+    render(<PasswordReset resetting onReset={onReset} />);
     fireEvent.change(screen.getByLabelText('New password'), { target: { value: 'a-new-secure-password' } });
     fireEvent.change(screen.getByLabelText('Confirm new password'), { target: { value: 'different-password' } });
     fireEvent.click(screen.getByRole('button', { name: 'Update password →' }));
@@ -52,12 +52,12 @@ describe('Password reset', () => {
   it('rejects missing and expired links', async () => {
     const fetch = vi.fn().mockResolvedValue(json({}, 400));
     vi.stubGlobal('fetch', fetch);
-    const view = render(<PasswordReset resetting onReset={vi.fn()} signIn={vi.fn()} />);
+    const view = render(<PasswordReset resetting onReset={vi.fn()} />);
     expect(screen.getByRole('alert')).toHaveTextContent('missing or invalid');
     expect(screen.queryByRole('button', { name: 'Update password →' })).not.toBeInTheDocument();
     view.unmount();
     window.history.replaceState(null, '', `/reset-password#token=${token}`);
-    render(<PasswordReset resetting onReset={vi.fn()} signIn={vi.fn()} />);
+    render(<PasswordReset resetting onReset={vi.fn()} />);
     for (const name of ['New password', 'Confirm new password']) fireEvent.change(screen.getByLabelText(name), { target: { value: 'a-new-secure-password' } });
     fireEvent.click(screen.getByRole('button', { name: 'Update password →' }));
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('invalid or expired'));

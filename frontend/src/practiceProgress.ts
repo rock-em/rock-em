@@ -1,3 +1,4 @@
+import { isRecord, readJson, writeJson } from "./lib/storage";
 
 const STORAGE_KEY = "adaptive-practice-progress";
 
@@ -19,15 +20,7 @@ export interface PracticeProgress {
 export type ProgressRecord = Record<string, PracticeProgress>;
 
 export function loadProgress(): ProgressRecord {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-
-    return saved
-      ? (JSON.parse(saved) as ProgressRecord)
-      : {};
-  } catch {
-    return {};
-  }
+  return readJson(STORAGE_KEY, (value): value is ProgressRecord => isRecord(value), {});
 }
 
 export function recordPracticeAttempt(
@@ -67,10 +60,7 @@ export function recordPracticeAttempt(
     nextReview: nextReview.toISOString(),
   };
 
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(progress)
-  );
+  writeJson(STORAGE_KEY, progress);
 
   window.dispatchEvent(
     new Event("practice-progress-updated")
