@@ -18,7 +18,9 @@ export function CatalogGate({ children }: { children: ReactNode }) {
   return (
     <main className="page utility-page">
       <h1>{catalog.error ? "Couldn’t load problems" : "No problems yet"}</h1>
-      <p role={catalog.error ? "alert" : "status"}>{catalog.error || "There are no published problems to browse yet."}</p>
+      <p role={catalog.error ? "alert" : "status"}>
+        {catalog.error || "There are no published problems to browse yet."}
+      </p>
       <button className="run-button" onClick={catalog.retry}>
         Reload problems
       </button>

@@ -1,4 +1,8 @@
-.utility-page > .generator { margin: 0; padding: 0; border: 0; }
+.utility-page > .generator {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
 
 .generator-form {
   display: grid;

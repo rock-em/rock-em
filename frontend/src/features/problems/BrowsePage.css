@@ -1,5 +1,11 @@
-.browse-page { margin-top: 20px; }
-.browse-page .problem-browser { border: 0; margin: 0; padding: 0; }
+.browse-page {
+  margin-top: 20px;
+}
+.browse-page .problem-browser {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
 
 .problem-browser {
   min-height: 400px;
@@ -21,7 +27,9 @@
   cursor: pointer;
   color: #555;
   padding: 12px;
-  transition: transform 0.2s, color 0.2s;
+  transition:
+    transform 0.2s,
+    color 0.2s;
 }
 
 .arrow:hover {
@@ -70,7 +78,9 @@
   color: var(--color-text);
   text-decoration: none;
   text-align: left;
-  transition: padding-left 0.2s, background 0.2s;
+  transition:
+    padding-left 0.2s,
+    background 0.2s;
 }
 
 .problem-row:hover {

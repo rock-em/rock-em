@@ -171,8 +171,21 @@
   border-top: 1px solid var(--color-border);
 }
 
-.editor-heading label { margin-right: 8px; font-size: 13px; color: var(--color-muted); }
-.editor-heading select { margin-top: 6px; padding: 4px 8px; font: inherit; font-size: 13px; border: 1px solid #ccc; border-radius: 3px; background: #fff; color: var(--color-text); }
+.editor-heading label {
+  margin-right: 8px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+.editor-heading select {
+  margin-top: 6px;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: #fff;
+  color: var(--color-text);
+}
 
 .test-message {
   padding: 0 20px;

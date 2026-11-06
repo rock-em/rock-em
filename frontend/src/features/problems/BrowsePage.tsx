@@ -11,7 +11,9 @@ export function BrowsePage() {
   const topicIndex = topics.indexOf(topic);
   const inTopic = problems.filter((problem) => problem.topic === topic);
   const query = search.toLowerCase();
-  const matches = inTopic.filter((problem) => problem.title.toLowerCase().includes(query) || problem.difficulty.includes(query));
+  const matches = inTopic.filter(
+    (problem) => problem.title.toLowerCase().includes(query) || problem.difficulty.includes(query),
+  );
   const solvedCount = inTopic.filter((problem) => solved.includes(problem.id)).length;
 
   function step(offset: number) {
@@ -24,9 +26,13 @@ export function BrowsePage() {
       <h1 className="sr-only">Programming practice</h1>
       <section className="problem-browser">
         <div className="topic-carousel">
-          <button className="arrow" onClick={() => step(-1)} aria-label="Previous topic">←</button>
+          <button className="arrow" onClick={() => step(-1)} aria-label="Previous topic">
+            ←
+          </button>
           <ChromeSculpture key={topic} topic={topic} />
-          <button className="arrow" onClick={() => step(1)} aria-label="Next topic">→</button>
+          <button className="arrow" onClick={() => step(1)} aria-label="Next topic">
+            →
+          </button>
         </div>
         <div className="topic-meta">
           {solvedCount} / {inTopic.length} solved <span> · </span> {topicIndex + 1} of {topics.length}
@@ -42,7 +48,12 @@ export function BrowsePage() {
         <div className="problem-list" key={`${topic}-${search}`}>
           {matches.length ? (
             matches.map((problem, index) => (
-              <button type="button" className="problem-row" key={problem.id} onClick={() => navigate(`/problems/${problem.id}`)}>
+              <button
+                type="button"
+                className="problem-row"
+                key={problem.id}
+                onClick={() => navigate(`/problems/${problem.id}`)}
+              >
                 <span className="problem-left">
                   <span className="problem-number">{solved.includes(problem.id) ? "✓" : index + 1}</span>
                   <span className="problem-name">{problem.title}</span>

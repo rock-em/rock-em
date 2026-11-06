@@ -19,7 +19,9 @@ export function GeneratePage() {
     setGenerating(true);
     setError("");
     try {
-      const problem = await toVerifiedProblem(await generateProblem({ topic: topic.trim(), theme: theme.trim(), level }));
+      const problem = await toVerifiedProblem(
+        await generateProblem({ topic: topic.trim(), theme: theme.trim(), level }),
+      );
       addGenerated(problem);
       setTopic(problem.topic);
       navigate(`/problems/${problem.id}`);
@@ -38,11 +40,24 @@ export function GeneratePage() {
         <form className="generator-form" onSubmit={(event) => void submit(event)}>
           <label>
             Topic
-            <input type="text" required maxLength={120} placeholder="e.g. sliding window, tries, dynamic programming" value={topic} onChange={(event) => setTopicInput(event.target.value)} />
+            <input
+              type="text"
+              required
+              maxLength={120}
+              placeholder="e.g. sliding window, tries, dynamic programming"
+              value={topic}
+              onChange={(event) => setTopicInput(event.target.value)}
+            />
           </label>
           <label>
             Industry or theme <span className="optional">(optional)</span>
-            <input type="text" maxLength={200} placeholder="e.g. fintech payments, game dev, healthcare" value={theme} onChange={(event) => setTheme(event.target.value)} />
+            <input
+              type="text"
+              maxLength={200}
+              placeholder="e.g. fintech payments, game dev, healthcare"
+              value={theme}
+              onChange={(event) => setTheme(event.target.value)}
+            />
           </label>
           <label>
             Level

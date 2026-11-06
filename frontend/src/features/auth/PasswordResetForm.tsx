@@ -65,19 +65,38 @@ export function PasswordResetForm({ resetting, onReset }: Props) {
       ) : (
         <>
           <p className="muted">
-            {resetting ? "Choose a password you haven’t used before." : "Enter your account email and we’ll send you a reset link."}
+            {resetting
+              ? "Choose a password you haven’t used before."
+              : "Enter your account email and we’ll send you a reset link."}
           </p>
           <form className="auth-form" onSubmit={(event) => void submit(event)}>
             {resetting ? (
               <>
                 <label>
                   New password
-                  <input name="password" type="password" autoComplete="new-password" required minLength={12} maxLength={72} aria-describedby="reset-password-hint" />
+                  <input
+                    name="password"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    minLength={12}
+                    maxLength={72}
+                    aria-describedby="reset-password-hint"
+                  />
                 </label>
-                <span className="password-hint" id="reset-password-hint">Minimum 12 characters.</span>
+                <span className="password-hint" id="reset-password-hint">
+                  Minimum 12 characters.
+                </span>
                 <label>
                   Confirm new password
-                  <input name="confirm" type="password" autoComplete="new-password" required minLength={12} maxLength={72} />
+                  <input
+                    name="confirm"
+                    type="password"
+                    autoComplete="new-password"
+                    required
+                    minLength={12}
+                    maxLength={72}
+                  />
                 </label>
               </>
             ) : (

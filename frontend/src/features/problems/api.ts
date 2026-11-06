@@ -12,12 +12,18 @@ function failure(error: unknown, response: Response): never {
 }
 
 export async function getProblemLanguages(slug: string, signal?: AbortSignal): Promise<string[]> {
-  const { data, error, response } = await api.GET("/api/problems/{slug}/languages", { params: { path: { slug } }, signal });
+  const { data, error, response } = await api.GET("/api/problems/{slug}/languages", {
+    params: { path: { slug } },
+    signal,
+  });
   return data ?? failure(error, response);
 }
 
 export async function getProblemDetail(slug: string, language: string, signal?: AbortSignal): Promise<ProblemDetail> {
-  const { data, error, response } = await api.GET("/api/problems/{slug}", { params: { path: { slug }, query: { language } }, signal });
+  const { data, error, response } = await api.GET("/api/problems/{slug}", {
+    params: { path: { slug }, query: { language } },
+    signal,
+  });
   return data ?? failure(error, response);
 }
 

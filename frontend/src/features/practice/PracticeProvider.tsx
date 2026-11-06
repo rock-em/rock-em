@@ -29,7 +29,17 @@ export function PracticeProvider({ children }: { children: ReactNode }) {
       languages,
       setLanguage: (problemId, language) => setLanguages((previous) => ({ ...previous, [problemId]: language })),
     };
-  }, [catalog.data, catalog.loading, catalog.error, catalog.retry, generated, selectedTopic, drafts, solved, languages]);
+  }, [
+    catalog.data,
+    catalog.loading,
+    catalog.error,
+    catalog.retry,
+    generated,
+    selectedTopic,
+    drafts,
+    solved,
+    languages,
+  ]);
 
   return <PracticeContext value={value}>{children}</PracticeContext>;
 }

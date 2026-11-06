@@ -22,7 +22,11 @@ export function AuthPage({ mode }: { mode: Mode }) {
     setBusy(true);
     setError("");
     try {
-      setUser(signingUp ? await signUp({ ...credentials, displayName: String(data.get("name")).trim() }) : await signIn(credentials));
+      setUser(
+        signingUp
+          ? await signUp({ ...credentials, displayName: String(data.get("name")).trim() })
+          : await signIn(credentials),
+      );
       navigate("/");
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : "Unable to connect. Please try again.");
@@ -68,18 +72,31 @@ export function AuthPage({ mode }: { mode: Mode }) {
               required
               aria-describedby={signingUp ? "password-hint" : undefined}
             />
-            <button type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} onClick={() => setShowPassword(!showPassword)}>
+            <button
+              type="button"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              onClick={() => setShowPassword(!showPassword)}
+            >
               {showPassword ? "Hide" : "Show"}
             </button>
           </span>
         </label>
-        {signingUp && <span id="password-hint" className="password-hint">Minimum 12 characters.</span>}
+        {signingUp && (
+          <span id="password-hint" className="password-hint">
+            Minimum 12 characters.
+          </span>
+        )}
         {!signingUp && (
           <div className="forgot-password-link">
             <Link href="/forgot-password">Forgot password?</Link>
           </div>
         )}
-        {error && <p className="auth-error" role="alert">{error}</p>}
+        {error && (
+          <p className="auth-error" role="alert">
+            {error}
+          </p>
+        )}
         <button className="auth-submit" disabled={busy || checking}>
           {busy ? "Please wait…" : signingUp ? "Create account →" : "Sign in →"}
         </button>

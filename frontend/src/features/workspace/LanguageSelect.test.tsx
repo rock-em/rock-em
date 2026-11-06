@@ -21,5 +21,4 @@ describe("LanguageSelect", () => {
     expect(screen.getByLabelText("Language")).toHaveValue("");
     expect(screen.getByRole("status")).toHaveTextContent("No languages");
   });
-
 });
