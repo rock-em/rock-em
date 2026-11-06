@@ -35,7 +35,6 @@ export default function ChromeSculpture({ topic }: Props) {
     const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
     camera.position.set(0, 0, 8.2);
 
-    // Procedural studio reflections; no HDR image or Blender asset required.
     const pmrem = new THREE.PMREMGenerator(renderer);
     const room = new RoomEnvironment();
     const environment = pmrem.fromScene(room, 0.035);
@@ -112,7 +111,6 @@ export default function ChromeSculpture({ topic }: Props) {
         const ny = y / 1.55;
         const nz = z / 1.55;
 
-        // Continuous flowing deformation
         const seed = shapeSeed * 0.1;
 
         const flow =
@@ -122,34 +120,28 @@ export default function ChromeSculpture({ topic }: Props) {
           0.18 * Math.cos(5.0 * nx + 3.0 * nz + t * 0.55 + seed * 1.3) +
           0.06 * Math.sin(7.0 * (nx + ny) - t * 0.9 + seed * 0.4);
 
-        // Distance from cursor's projected position
         const dx = nx - mx * 0.85;
         const dy = ny + my * 0.85;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // Localized mouse interaction
         const influence = Math.exp(-distance * distance * 5.0);
 
-        // Surface ripples spread outward from cursor
         const ripple =
           Math.sin(distance * 11.0 - t * 6.0) *
           influence *
           energy *
           0.10;
 
-        // Push surface outward or inward near cursor
         const deformation =
           influence *
           energy *
           (0.32 + 0.12 * Math.sin(t * 6.0));
 
-        // Combine fluid movement with cursor interaction
         const radius = Math.max(
           0.35,
           1 + flow + ripple + deformation
         );
 
-        // Stretch the liquid toward the moving cursor
         const stretchX = influence * energy * mx * 0.24;
         const stretchY = influence * energy * -my * 0.24;
 
@@ -170,9 +162,6 @@ export default function ChromeSculpture({ topic }: Props) {
           positions.getX(i) ** 2 + positions.getY(i) ** 2 + positions.getZ(i) ** 2);
       }
 
-      // Fit a sphere around every deformed vertex, leaving room on all sides
-      // even while dragging or on a narrow screen. Expand immediately to avoid
-      // clipping, and ease back slowly without a distracting camera snap.
       const halfVertical = THREE.MathUtils.degToRad(camera.fov / 2);
       const halfHorizontal = Math.atan(Math.tan(halfVertical) * camera.aspect);
       const radius = Math.max(2.65, Math.sqrt(maxRadiusSquared));

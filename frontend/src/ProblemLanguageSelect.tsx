@@ -7,7 +7,6 @@ type Props = {
   loading?: boolean;
 };
 
-// Controlled so the editor can preserve separate drafts by (slug, language). Options come exclusively from this problem.
 export default function ProblemLanguageSelect({ languages, value, onChange, loading = false }: Props) {
   const id = useId();
   const options = languages ?? [];

@@ -13,11 +13,9 @@ type Props = {
   onChange?: (value: string) => void;
   readOnly?: boolean;
   className?: string;
-  /** Indentation the server uses for this language's starter; overrides the grammar's default. */
   indentUnit?: string;
 };
 
-// Grammars are split into their own chunks so a problem only downloads the language it shows.
 const languageLoaders: Record<string, () => Promise<Extension>> = {
   javascript: () => import("@codemirror/lang-javascript").then(m => m.javascript()),
   typescript: () => import("@codemirror/lang-javascript").then(m => m.javascript({ typescript: true })),
@@ -55,8 +53,6 @@ const theme = EditorView.theme({
   "&.cm-focused": { outline: "2px solid #0645ad", outlineOffset: "-2px" },
 });
 
-// Uncontrolled after mount: the document is owned by CodeMirror and pushed to the parent through onChange.
-// Remount with a new `key` when switching drafts so undo history does not leak between them.
 export default function CodeEditor({ value, language, label, onChange, readOnly = false, className, indentUnit: serverIndent }: Props) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
@@ -74,7 +70,6 @@ export default function CodeEditor({ value, language, label, onChange, readOnly 
           drawSelection(),
           bracketMatching(),
           syntaxHighlighting(highlightStyle),
-          // indentUnit takes the first value provided, so the server's choice beats the grammar's, which beats CodeMirror's two spaces.
           serverIndent ? indentUnit.of(serverIndent) : [],
           languageSlot.of([]),
           keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap, indentWithTab]),
@@ -92,11 +87,9 @@ export default function CodeEditor({ value, language, label, onChange, readOnly 
       if (!cancelled) editor.dispatch({ effects: languageSlot.reconfigure(extension) });
     });
     return () => { cancelled = true; editor.destroy(); view.current = null; };
-    // The editor is configured once per mount; callers remount via `key` to change language or mode.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Pick up external replacements such as "Reset code" without disturbing normal typing.
   useEffect(() => {
     const editor = view.current;
     if (editor && editor.state.doc.toString() !== value) {

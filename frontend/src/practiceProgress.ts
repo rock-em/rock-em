@@ -18,7 +18,6 @@ export interface PracticeProgress {
 
 export type ProgressRecord = Record<string, PracticeProgress>;
 
-// Load saved progress
 export function loadProgress(): ProgressRecord {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -31,7 +30,6 @@ export function loadProgress(): ProgressRecord {
   }
 }
 
-// Record a submitted solution
 export function recordPracticeAttempt(
   problemId: string | number,
   passed: boolean
@@ -48,7 +46,6 @@ export function recordPracticeAttempt(
 
   const streak = passed ? previous.streak + 1 : 0;
 
-  // Spaced repetition intervals in days
   const intervals = [0, 1, 3, 7, 14, 30];
 
   const interval = passed

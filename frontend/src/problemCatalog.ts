@@ -27,8 +27,6 @@ export async function getProblemDetail(slug: string, language: string, signal?: 
 }
 const show = (value: unknown) => JSON.stringify(value);
 
-// Examples and tests are stored once as JSON values; render them the same way
-// for every language, named by the signature's parameters.
 export function toPracticeFields(detail: ProblemDetail) {
   return {
     examples: detail.examples.map(example => ({

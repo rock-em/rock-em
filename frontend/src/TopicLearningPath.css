@@ -1,4 +1,3 @@
-/* Learning Path */
 
 .learning-path {
   margin: 0 0 28px;
@@ -41,8 +40,6 @@
   font-size: 14px;
 }
 
-/* Progress Bar */
-
 .learning-path-progress {
   height: 5px;
   overflow: hidden;
@@ -64,8 +61,6 @@
   font-size: 12px;
 }
 
-/* Toggle */
-
 .learning-path-toggle {
   width: 100%;
   margin-top: 22px;
@@ -80,8 +75,6 @@
 .learning-path-toggle:hover {
   text-decoration: underline;
 }
-
-/* Concepts */
 
 .learning-path-concepts {
   display: grid;
@@ -118,8 +111,6 @@
   font-size: 12px;
   line-height: 1.5;
 }
-
-/* Next Problem */
 
 .learning-path-next {
   margin-top: 12px;
@@ -162,8 +153,6 @@
   outline-offset: 2px;
 }
 
-/* Mobile */
-
 @media (max-width: 650px) {
   .learning-path {
     padding: 18px;
@@ -177,8 +166,6 @@
     flex-wrap: wrap;
   }
 }
-
-/* Accessibility */
 
 @media (prefers-reduced-motion: reduce) {
   .learning-path-progress > span {

@@ -139,10 +139,6 @@ if needed. Problems whose tests disagree are skipped and listed in a migration n
 `function_name` columns. The category is the primary entry in `problem_topics`.
 Rolling `000009` back restores empty columns, not the per-language content.
 
-The frontend runs JavaScript in a sandboxed iframe and renders examples from
-`args` with the signature's parameter names. Preserve editor drafts by
-`(slug, language)`.
-
 ### Password recovery
 
 `POST /api/auth/forgot-password` accepts `{ "email": "..." }` without a session.
@@ -153,5 +149,23 @@ If email delivery is not configured, it returns 503. Requests are rate limited.
 without a session. Tokens expire after 30 minutes and can be used once. A successful
 204 response means the password was changed and all existing sessions were revoked;
 users must log in again. Invalid/expired tokens and invalid passwords return 400.
-Passwords must contain 12–72 UTF-8 bytes. See
-`frontend/docs/authentication.md` for SMTP setup and delivery behavior.
+Passwords must contain 12–72 UTF-8 bytes.
+
+Reset links point to `/reset-password#token=…`. Tokens are 32 random bytes, stored
+only as SHA-256 hashes, and consumed in the same transaction as the password update.
+A new link replaces the previous one, and changing a password while signed in
+invalidates outstanding links.
+
+### Email delivery
+
+Reset emails go out over SMTP with STARTTLS. Configure the API environment with:
+
+- `SMTP_ADDR`: provider host and port, normally `hostname:587`.
+- `SMTP_USERNAME` and `SMTP_PASSWORD`: provider-issued credentials.
+- `SMTP_FROM`: a verified sender, such as `rock em <accounts@your-domain.example>`.
+- `PUBLIC_ORIGIN`: the site's HTTPS origin, used to build reset links.
+
+Leaving `SMTP_ADDR` unset makes forgot-password return 503. Requests are rate
+limited per IP, with a one-minute cooldown per account. Delivery runs in a bounded
+in-memory queue, so a restart can drop pending emails; users can request another
+link. Delivery errors are logged without addresses or tokens.

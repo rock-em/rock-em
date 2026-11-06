@@ -87,7 +87,7 @@ export default function TopicLearningPath({ topic, problems, completedIds, onOpe
     try {
       localStorage.setItem(storageKey, JSON.stringify(progress));
     } catch {
-      // In private browsing, storage may be unavailable. The feature still works in-session.
+      // Storage is unavailable in private browsing; progress still works for the session.
     }
   }, [progress]);
 
