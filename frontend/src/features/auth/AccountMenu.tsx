@@ -30,11 +30,15 @@ export function AccountMenu() {
   return (
     <nav aria-label="Account" className="account-nav">
       {checking ? (
-        <span className="muted" role="status">Loading account…</span>
+        <span className="muted" role="status">
+          Loading account…
+        </span>
       ) : user ? (
         <details className="profile" ref={profile}>
           <summary>
-            <span className="avatar" aria-hidden="true">{user.displayName.trim().charAt(0).toUpperCase() || "?"}</span>
+            <span className="avatar" aria-hidden="true">
+              {user.displayName.trim().charAt(0).toUpperCase() || "?"}
+            </span>
             <span className="profile-name">{user.displayName}</span>
           </summary>
           <div className="profile-panel">
@@ -44,13 +48,19 @@ export function AccountMenu() {
             <button disabled={busy} onClick={() => void endSession()}>
               {busy ? "Signing out…" : "Sign out"}
             </button>
-            {error && <p role="alert" className="auth-error">{error}</p>}
+            {error && (
+              <p role="alert" className="auth-error">
+                {error}
+              </p>
+            )}
           </div>
         </details>
       ) : (
         <>
           <Link href="/sign-in">Sign in</Link>
-          <Link className="account-button" href="/sign-up">Sign up</Link>
+          <Link className="account-button" href="/sign-up">
+            Sign up
+          </Link>
         </>
       )}
     </nav>

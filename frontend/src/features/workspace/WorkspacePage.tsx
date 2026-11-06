@@ -24,7 +24,9 @@ export function WorkspacePage({ slug }: { slug: string }) {
         ) : (
           <>
             <p role="alert">{detail.error || "No language variants are available for this problem."}</p>
-            {detail.languages.length > 0 && <LanguageSelect languages={detail.languages} value={null} onChange={chooseLanguage} />}
+            {detail.languages.length > 0 && (
+              <LanguageSelect languages={detail.languages} value={null} onChange={chooseLanguage} />
+            )}
             <button className="run-button" onClick={detail.retry}>
               Try again
             </button>
@@ -46,7 +48,11 @@ export function WorkspacePage({ slug }: { slug: string }) {
       </header>
       <div className="workspace-grid">
         <ProblemStatement problem={problem} solved={solved.includes(problem.id)} />
-        <SolutionPanel problem={problem} languages={generatedProblem ? ["javascript"] : detail.languages} onLanguageChange={chooseLanguage} />
+        <SolutionPanel
+          problem={problem}
+          languages={generatedProblem ? ["javascript"] : detail.languages}
+          onLanguageChange={chooseLanguage}
+        />
       </div>
     </main>
   );

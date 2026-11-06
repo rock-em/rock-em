@@ -41,7 +41,14 @@ export function ProblemStatement({ problem, solved }: { problem: Problem; solved
       {problem.referenceSolution && (
         <details className="reference-solution">
           <summary>Reference solution</summary>
-          <LazyCodeEditor key={problem.language} className="code-block" label="Reference solution" language={problem.language} value={problem.referenceSolution} readOnly />
+          <LazyCodeEditor
+            key={problem.language}
+            className="code-block"
+            label="Reference solution"
+            language={problem.language}
+            value={problem.referenceSolution}
+            readOnly
+          />
         </details>
       )}
     </section>

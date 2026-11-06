@@ -58,7 +58,14 @@ export function AdaptivePractice({ problems, onSelectProblem }: Props) {
         <span>Overall Mastery</span>
         <span>{stats.masteryPercent}%</span>
       </div>
-      <div className="adaptive-progress-bar" role="progressbar" aria-label="Overall mastery" aria-valuenow={stats.masteryPercent} aria-valuemin={0} aria-valuemax={100}>
+      <div
+        className="adaptive-progress-bar"
+        role="progressbar"
+        aria-label="Overall mastery"
+        aria-valuenow={stats.masteryPercent}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
         <div style={{ width: `${stats.masteryPercent}%` }} />
       </div>
 
@@ -69,7 +76,12 @@ export function AdaptivePractice({ problems, onSelectProblem }: Props) {
           <p>No problems available yet.</p>
         ) : (
           recommendations.map((problem) => (
-            <button type="button" className="adaptive-problem" key={problem.id} onClick={() => onSelectProblem(problem.id)}>
+            <button
+              type="button"
+              className="adaptive-problem"
+              key={problem.id}
+              onClick={() => onSelectProblem(problem.id)}
+            >
               <span className="adaptive-problem-info">
                 <span className="adaptive-problem-title">{problem.title}</span>
                 <span className="adaptive-problem-difficulty">{difficultyLabel[problem.difficulty]}</span>

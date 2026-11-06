@@ -17,7 +17,8 @@ function readCheckedConcepts(): Record<string, string[]> {
   const stored = readJson(STORAGE_KEY, isRecord, {});
   return Object.fromEntries(
     Object.entries(stored).filter(
-      (entry): entry is [string, string[]] => Array.isArray(entry[1]) && entry[1].every((item) => typeof item === "string"),
+      (entry): entry is [string, string[]] =>
+        Array.isArray(entry[1]) && entry[1].every((item) => typeof item === "string"),
     ),
   );
 }
@@ -41,7 +42,10 @@ export function TopicLearningPath({ topic, problems, solvedIds, onOpenProblem }:
   function toggleConcept(title: string) {
     setCheckedByTopic((previous) => {
       const values = previous[topic] ?? [];
-      return { ...previous, [topic]: values.includes(title) ? values.filter((value) => value !== title) : [...values, title] };
+      return {
+        ...previous,
+        [topic]: values.includes(title) ? values.filter((value) => value !== title) : [...values, title],
+      };
     });
   }
 
@@ -56,7 +60,14 @@ export function TopicLearningPath({ topic, problems, solvedIds, onOpenProblem }:
       </div>
 
       <p className="learning-path-intro">{guide.intro}</p>
-      <div className="learning-path-progress" role="progressbar" aria-label={`${topic} learning progress`} aria-valuenow={mastery} aria-valuemin={0} aria-valuemax={100}>
+      <div
+        className="learning-path-progress"
+        role="progressbar"
+        aria-label={`${topic} learning progress`}
+        aria-valuenow={mastery}
+        aria-valuemin={0}
+        aria-valuemax={100}
+      >
         <span style={{ width: `${mastery}%` }} />
       </div>
       <div className="learning-path-stats">
@@ -68,7 +79,12 @@ export function TopicLearningPath({ topic, problems, solvedIds, onOpenProblem }:
         </span>
       </div>
 
-      <button type="button" className="learning-path-toggle" aria-expanded={expanded} onClick={() => setExpanded(!expanded)}>
+      <button
+        type="button"
+        className="learning-path-toggle"
+        aria-expanded={expanded}
+        onClick={() => setExpanded(!expanded)}
+      >
         {expanded ? "Hide learning checklist" : "Explore learning checklist"}
         <span aria-hidden="true">{expanded ? "−" : "+"}</span>
       </button>
@@ -77,7 +93,11 @@ export function TopicLearningPath({ topic, problems, solvedIds, onOpenProblem }:
         <div className="learning-path-concepts">
           {guide.concepts.map((concept) => (
             <label className="learning-path-concept" key={concept.title}>
-              <input type="checkbox" checked={checked.includes(concept.title)} onChange={() => toggleConcept(concept.title)} />
+              <input
+                type="checkbox"
+                checked={checked.includes(concept.title)}
+                onChange={() => toggleConcept(concept.title)}
+              />
               <span>
                 <strong>{concept.title}</strong>
                 <small>{concept.detail}</small>
@@ -90,7 +110,13 @@ export function TopicLearningPath({ topic, problems, solvedIds, onOpenProblem }:
       <div className="learning-path-next">
         <div>
           <small>{next ? "RECOMMENDED NEXT" : problems.length ? "ALL DONE" : "GET STARTED"}</small>
-          <strong>{next ? next.title : problems.length ? "You've solved every problem here!" : "Generate your first problem below"}</strong>
+          <strong>
+            {next
+              ? next.title
+              : problems.length
+                ? "You've solved every problem here!"
+                : "Generate your first problem below"}
+          </strong>
           {next && (
             <span>
               {difficultyLabel[next.difficulty]} · {topic}

@@ -19,11 +19,23 @@ export function Routes() {
 
   switch (path) {
     case "/":
-      return <CatalogGate><BrowsePage /></CatalogGate>;
+      return (
+        <CatalogGate>
+          <BrowsePage />
+        </CatalogGate>
+      );
     case "/learn":
-      return <CatalogGate><LearnPage /></CatalogGate>;
+      return (
+        <CatalogGate>
+          <LearnPage />
+        </CatalogGate>
+      );
     case "/progress":
-      return <CatalogGate><ProgressPage /></CatalogGate>;
+      return (
+        <CatalogGate>
+          <ProgressPage />
+        </CatalogGate>
+      );
     case "/generate":
       return <GeneratePage />;
     case "/about":

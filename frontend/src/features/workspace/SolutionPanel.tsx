@@ -16,7 +16,8 @@ type Props = {
 type Run = { key: string; results: TestResult[] | null; message: string };
 
 function outcome(submitted: boolean, passed: boolean) {
-  if (submitted) return passed ? "All sample tests passed. Marked as solved for this session." : "Not quite yet. Review the failed tests and try again.";
+  if (submitted && passed) return "All sample tests passed. Marked as solved for this session.";
+  if (submitted) return "Not quite yet. Review the failed tests and try again.";
   return passed ? "All sample tests passed! Ready to submit." : "Some tests failed. Check the results below.";
 }
 

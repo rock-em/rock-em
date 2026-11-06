@@ -19,6 +19,12 @@ export function navigate(path: string) {
   window.scrollTo(0, 0);
 }
 
-export function isPlainClick(event: { button: number; metaKey: boolean; ctrlKey: boolean; shiftKey: boolean; altKey: boolean }) {
+export function isPlainClick(event: {
+  button: number;
+  metaKey: boolean;
+  ctrlKey: boolean;
+  shiftKey: boolean;
+  altKey: boolean;
+}) {
   return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 }

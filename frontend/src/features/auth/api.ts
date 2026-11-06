@@ -23,7 +23,10 @@ async function send(pending: Promise<Result>, unavailable: string): Promise<Resu
 function toUser({ data, error, response }: Result, messages: Record<number, string>): User {
   if (response.status === 404 || !isJson(response)) throw new ApiError(UNAVAILABLE, response.status);
   if (!response.ok) {
-    const message = response.status === 400 ? errorMessage(error) ?? "Please check your account details." : messages[response.status];
+    const message =
+      response.status === 400
+        ? (errorMessage(error) ?? "Please check your account details.")
+        : messages[response.status];
     throw new ApiError(message ?? FAILED, response.status, error);
   }
   const user = data as Partial<User> | undefined;
@@ -61,14 +64,20 @@ function resetFailure(response: Response, invalid?: string): never {
 }
 
 export async function requestPasswordReset(email: string): Promise<void> {
-  const { response } = await send(api.POST("/api/auth/forgot-password", { body: { email }, credentials: "include" }), RESET_UNAVAILABLE);
+  const { response } = await send(
+    api.POST("/api/auth/forgot-password", { body: { email }, credentials: "include" }),
+    RESET_UNAVAILABLE,
+  );
   if (!response.ok) resetFailure(response);
   // Do not treat an SPA fallback or unexpected response as a successful reset.
   if (response.status !== 202 || !isJson(response)) throw new ApiError(RESET_UNAVAILABLE, response.status);
 }
 
 export async function resetPassword(token: string, newPassword: string): Promise<void> {
-  const { response } = await send(api.POST("/api/auth/reset-password", { body: { token, newPassword }, credentials: "include" }), RESET_UNAVAILABLE);
+  const { response } = await send(
+    api.POST("/api/auth/reset-password", { body: { token, newPassword }, credentials: "include" }),
+    RESET_UNAVAILABLE,
+  );
   if (!response.ok) resetFailure(response, "This reset link is invalid or expired. Request a new link.");
   if (response.status !== 204) throw new ApiError(RESET_UNAVAILABLE, response.status);
 }

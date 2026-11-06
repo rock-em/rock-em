@@ -27,7 +27,12 @@ function classify(problem: ProblemListItem, history: AttemptHistory, now: number
   return { ...problem, priority: 3, reason: "On track" };
 }
 
-export function recommend(problems: ProblemListItem[], history: AttemptHistory, now: number, limit = 5): Recommendation[] {
+export function recommend(
+  problems: ProblemListItem[],
+  history: AttemptHistory,
+  now: number,
+  limit = 5,
+): Recommendation[] {
   return problems
     .map((problem) => classify(problem, history, now))
     .sort((a, b) => a.priority - b.priority)

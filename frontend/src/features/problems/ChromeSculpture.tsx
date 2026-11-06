@@ -7,10 +7,7 @@ import "./ChromeSculpture.css";
 type Props = { topic: string };
 
 export function ChromeSculpture({ topic }: Props) {
-  const shapeSeed = Array.from(topic).reduce(
-  (sum, char) => sum + char.charCodeAt(0),
-  0
-);
+  const shapeSeed = Array.from(topic).reduce((sum, char) => sum + char.charCodeAt(0), 0);
   const mountRef = useRef<HTMLDivElement>(null);
   const pointer = useRef({ x: 0, y: 0, active: false, dragging: false });
 
@@ -54,7 +51,7 @@ export function ChromeSculpture({ topic }: Props) {
       metalness: 1,
       roughness: 0.12,
       clearcoat: 1,
-      clearcoatRoughness: 0.10,
+      clearcoatRoughness: 0.1,
       envMapIntensity: 2.4,
     });
     const mesh = new THREE.Mesh(geometry, material);
@@ -91,16 +88,13 @@ export function ChromeSculpture({ topic }: Props) {
       const t = elapsed;
       const pointerEase = 1 - Math.exp(-10 * dt);
       const energyEase = 1 - Math.exp(-5.5 * dt);
-      
+
       const targetX = pointer.current.active ? pointer.current.x : 0;
       const targetY = pointer.current.active ? pointer.current.y : 0;
       mx += (targetX - mx) * pointerEase;
       my += (targetY - my) * pointerEase;
-      energy += (
-        (pointer.current.dragging ? 1.8 : pointer.current.active ? 1.0 : 0)
-        - energy
-      ) * energyEase;
-      
+      energy += ((pointer.current.dragging ? 1.8 : pointer.current.active ? 1.0 : 0) - energy) * energyEase;
+
       let maxRadiusSquared = 0;
       for (let i = 0; i < positions.count; i++) {
         const x = base[i * 3];
@@ -114,8 +108,7 @@ export function ChromeSculpture({ topic }: Props) {
         const seed = shapeSeed * 0.1;
 
         const flow =
-          0.30 * Math.sin(3.2 * nx + 2.8 * ny + t * 0.8 + seed) *
-            Math.cos(2.6 * nz - t * 0.5) +
+          0.3 * Math.sin(3.2 * nx + 2.8 * ny + t * 0.8 + seed) * Math.cos(2.6 * nz - t * 0.5) +
           0.22 * Math.sin(4.5 * ny - 3.0 * nz - t * 0.65 + seed * 0.7) +
           0.18 * Math.cos(5.0 * nx + 3.0 * nz + t * 0.55 + seed * 1.3) +
           0.06 * Math.sin(7.0 * (nx + ny) - t * 0.9 + seed * 0.4);
@@ -126,53 +119,43 @@ export function ChromeSculpture({ topic }: Props) {
 
         const influence = Math.exp(-distance * distance * 5.0);
 
-        const ripple =
-          Math.sin(distance * 11.0 - t * 6.0) *
-          influence *
-          energy *
-          0.10;
+        const ripple = Math.sin(distance * 11.0 - t * 6.0) * influence * energy * 0.1;
 
-        const deformation =
-          influence *
-          energy *
-          (0.32 + 0.12 * Math.sin(t * 6.0));
+        const deformation = influence * energy * (0.32 + 0.12 * Math.sin(t * 6.0));
 
-        const radius = Math.max(
-          0.35,
-          1 + flow + ripple + deformation
-        );
+        const radius = Math.max(0.35, 1 + flow + ripple + deformation);
 
         const stretchX = influence * energy * mx * 0.24;
         const stretchY = influence * energy * -my * 0.24;
 
         positions.setXYZ(
           i,
-          x * radius +
-            stretchX +
-            0.15 * Math.sin(2.8 * ny + t * 0.5),
+          x * radius + stretchX + 0.15 * Math.sin(2.8 * ny + t * 0.5),
 
-          y * radius +
-            stretchY +
-            0.14 * Math.cos(3.0 * nz - t * 0.4),
+          y * radius + stretchY + 0.14 * Math.cos(3.0 * nz - t * 0.4),
 
-          z * radius +
-            0.16 * Math.sin(3.2 * nx + t * 0.45)
+          z * radius + 0.16 * Math.sin(3.2 * nx + t * 0.45),
         );
-        maxRadiusSquared = Math.max(maxRadiusSquared,
-          positions.getX(i) ** 2 + positions.getY(i) ** 2 + positions.getZ(i) ** 2);
+        maxRadiusSquared = Math.max(
+          maxRadiusSquared,
+          positions.getX(i) ** 2 + positions.getY(i) ** 2 + positions.getZ(i) ** 2,
+        );
       }
 
       const halfVertical = THREE.MathUtils.degToRad(camera.fov / 2);
       const halfHorizontal = Math.atan(Math.tan(halfVertical) * camera.aspect);
       const radius = Math.max(2.65, Math.sqrt(maxRadiusSquared));
-      const distance = radius * 1.12 / Math.sin(Math.min(halfVertical, halfHorizontal));
-      camera.position.z = Math.max(distance, camera.position.z + (distance - camera.position.z) * (1 - Math.exp(-2 * dt)));
+      const distance = (radius * 1.12) / Math.sin(Math.min(halfVertical, halfHorizontal));
+      camera.position.z = Math.max(
+        distance,
+        camera.position.z + (distance - camera.position.z) * (1 - Math.exp(-2 * dt)),
+      );
       geometry.boundingSphere!.radius = radius;
       positions.needsUpdate = true;
       geometry.computeVertexNormals();
       mesh.rotation.y = t * 0.13 + mx * 0.38;
       mesh.rotation.x = 0.22 + my * 0.32 + Math.sin(t * 0.22) * 0.12;
-      mesh.rotation.z = Math.sin(t * 0.17) * 0.10;
+      mesh.rotation.z = Math.sin(t * 0.17) * 0.1;
       renderer.render(scene, camera);
     }
     animate();
@@ -199,7 +182,9 @@ export function ChromeSculpture({ topic }: Props) {
         className="chrome-stage"
         role="img"
         aria-label={`Interactive floating chrome sculpture for ${topic}`}
-        onPointerEnter={() => { pointer.current.active = true; }}
+        onPointerEnter={() => {
+          pointer.current.active = true;
+        }}
         onPointerMove={(event) => {
           const bounds = event.currentTarget.getBoundingClientRect();
           pointer.current.x = THREE.MathUtils.clamp(((event.clientX - bounds.left) / bounds.width) * 2 - 1, -1, 1);
@@ -209,12 +194,23 @@ export function ChromeSculpture({ topic }: Props) {
           pointer.current.dragging = true;
           event.currentTarget.setPointerCapture(event.pointerId);
         }}
-        onPointerUp={() => { pointer.current.dragging = false; }}
-        onLostPointerCapture={() => { pointer.current.dragging = false; }}
-        onPointerCancel={() => { pointer.current.dragging = false; }}
-        onPointerLeave={() => { pointer.current.active = false; pointer.current.dragging = false; }}
+        onPointerUp={() => {
+          pointer.current.dragging = false;
+        }}
+        onLostPointerCapture={() => {
+          pointer.current.dragging = false;
+        }}
+        onPointerCancel={() => {
+          pointer.current.dragging = false;
+        }}
+        onPointerLeave={() => {
+          pointer.current.active = false;
+          pointer.current.dragging = false;
+        }}
       />
-      <div className="chrome-topic" aria-live="polite">{topic}</div>
+      <div className="chrome-topic" aria-live="polite">
+        {topic}
+      </div>
     </div>
   );
 }

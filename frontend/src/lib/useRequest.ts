@@ -18,8 +18,9 @@ export function useRequest<T>(key: string | null, load: (signal: AbortSignal) =>
       (data) => {
         if (!controller.signal.aborted) setSettled({ id, data });
       },
-      (error: unknown) => {
-        if (!controller.signal.aborted) setSettled({ id, error: error instanceof Error ? error : new Error(String(error)) });
+      (reason: unknown) => {
+        const error = reason instanceof Error ? reason : new Error(String(reason));
+        if (!controller.signal.aborted) setSettled({ id, error });
       },
     );
     return () => controller.abort();
