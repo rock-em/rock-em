@@ -17,7 +17,7 @@ func TestContractAndSummary(t *testing.T) {
 	h := NewHandler(db)
 	slug := fmt.Sprintf("contract-%d", time.Now().UnixNano())
 	var id int64
-	err := db.QueryRow(t.Context(), `INSERT INTO problems(slug,title,short_description,description,difficulty,topic,signature) VALUES($1,'Index Pair','Find a pair','Full statement','easy','Arrays','{"function":"indexPair","params":[{"name":"nums","type":"int[]"},{"name":"target","type":"int"}],"returns":"int[]"}') RETURNING id`, slug).Scan(&id)
+	err := db.QueryRow(t.Context(), `INSERT INTO problems(slug,title,short_description,description,difficulty,signature) VALUES($1,'Index Pair','Find a pair','Full statement','easy','{"function":"indexPair","params":[{"name":"nums","type":"int[]"},{"name":"target","type":"int"}],"returns":"int[]"}') RETURNING id`, slug).Scan(&id)
 	if err != nil {
 		t.Fatal(err)
 	}

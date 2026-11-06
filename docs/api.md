@@ -2,7 +2,7 @@
 
 See [the OpenAPI contract](../api/openapi.json) and [generation guide](../api/README.md)
 for every route, parameter, input, response and stub. Apply migrations `000001`
-through `000007` before deploying this branch's binary.
+through `000008` before deploying this branch's binary.
 
 ## Problem data
 
@@ -127,9 +127,15 @@ variant (the leading tests become examples) and writes signatures for the unchan
 starter catalog. Other problems keep their tests but have no signature, so they offer
 no languages until an admin PUTs one.
 
-The old `languages` map and legacy columns are not written any more but are kept, so
-rolling back `000007` loses nothing authored before it. `topic` mirrors the primary
-topic. Drop the old columns in a later migration once this is deployed.
+`000008` fills the gaps `000007` left. Catalog rows that predate the seed migrations
+(for example a hand-made `two-sum`, which `000003` skipped) get the catalog's
+signature, tests, constraints and topic. Other unsigned problems with tests get a
+signature inferred from their test arguments, named after their authored starter;
+linked lists and trees come out as arrays, so check those and PUT a better signature
+if needed. Problems whose tests disagree are skipped and listed in a migration notice.
+
+The old `languages` map and legacy columns are kept but no longer read or written;
+the category is the primary entry in `problem_topics`. A later migration drops them.
 
 The frontend runs JavaScript in a sandboxed iframe and renders examples from
 `args` with the signature's parameter names. Preserve editor drafts by
