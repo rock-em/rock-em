@@ -1,17 +1,19 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import ProblemLanguageSelect from "./ProblemLanguageSelect";
-import { CatalogError, getProblemCatalog, chooseProblemLanguage, getProblemDetail, getProblemLanguages } from "./problemCatalog";
+import { ApiError } from "../../api/client";
+import ProblemLanguageSelect from "../../ProblemLanguageSelect";
+import { getProblemCatalog, getProblemDetail, getProblemLanguages } from "./api";
+import { chooseLanguage } from "./model";
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 const languages = ["python", "julia"];
 
 describe("problem language discovery", () => {
   it("uses an available preference or advertised default without guessing", () => {
-    expect(chooseProblemLanguage(languages, "julia")).toBe("julia");
-    expect(chooseProblemLanguage(languages, "ruby")).toBe("python");
-    expect(chooseProblemLanguage(["julia"], "ruby")).toBeNull();
-    expect(chooseProblemLanguage([], "python")).toBeNull();
+    expect(chooseLanguage(languages, "julia")).toBe("julia");
+    expect(chooseLanguage(languages, "ruby")).toBe("python");
+    expect(chooseLanguage(["julia"], "ruby")).toBeNull();
+    expect(chooseLanguage([], "python")).toBeNull();
   });
 
   it("renders only the problem's available languages and preserves controlled selection", () => {
@@ -47,9 +49,9 @@ describe("problem language discovery", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(JSON.stringify({ error: "Unavailable", code: "language_not_available", languages }), { status: 404 })));
     try { await getProblemDetail("two-sum", "ruby"); expect.fail("expected rejection"); }
     catch (error) {
-      expect(error).toBeInstanceOf(CatalogError);
-      expect((error as CatalogError).code).toBe("language_not_available");
-      expect((error as CatalogError).languages).toEqual(languages);
+      expect(error).toBeInstanceOf(ApiError);
+      expect((error as ApiError).code).toBe("language_not_available");
+      expect((error as ApiError).languages).toEqual(languages);
     }
   });
 });

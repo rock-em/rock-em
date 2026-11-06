@@ -1,10 +1,10 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, expect, it, vi } from 'vitest';
-import { useProblemDetail } from './useProblemCatalog';
-import { getProblemDetail, getProblemLanguages, type ProblemDetail } from './problemCatalog';
+import { useProblemDetail } from './hooks';
+import { getProblemDetail, getProblemLanguages, type ProblemDetail } from './api';
 
-vi.mock('./problemCatalog', async original => ({
-  ...await original<typeof import('./problemCatalog')>(),
+vi.mock('./api', async original => ({
+  ...await original<typeof import('./api')>(),
   getProblemLanguages: vi.fn(), getProblemDetail: vi.fn(),
 }));
 afterEach(() => vi.resetAllMocks());

@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import PasswordReset from './PasswordReset';
 import Account from './Account';
+import { sentRequest } from './test/http';
 
 const token = 'a'.repeat(64);
 const json = (body: unknown, status: number) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -25,7 +26,8 @@ describe('Password reset', () => {
     render(<PasswordReset resetting={false} onReset={vi.fn()} />);
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'sam@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: 'Send reset link →' }));
-    expect(fetch).toHaveBeenCalledWith('/api/auth/forgot-password', expect.objectContaining({ body: JSON.stringify({ email: 'sam@example.com' }) }));
+    await waitFor(() => expect(fetch).toHaveBeenCalled());
+    expect(await sentRequest(fetch)).toMatchObject({ path: '/api/auth/forgot-password', body: { email: 'sam@example.com' } });
     if (status === 202) expect(await screen.findByRole('status')).toHaveTextContent('If an account exists');
     else expect(await screen.findByRole('alert')).toHaveTextContent(status === 503 ? 'unavailable' : 'Too many attempts');
   });
@@ -46,7 +48,7 @@ describe('Password reset', () => {
     expect(await screen.findByRole('status')).toHaveTextContent('all sessions have been signed out');
     expect(onReset).toHaveBeenCalledOnce();
     expect(window.location.hash).toBe('');
-    expect(fetch).toHaveBeenCalledWith('/api/auth/reset-password', expect.objectContaining({ body: JSON.stringify({ token, newPassword: 'a-new-secure-password' }) }));
+    expect(await sentRequest(fetch)).toMatchObject({ path: '/api/auth/reset-password', body: { token, newPassword: 'a-new-secure-password' } });
   });
 
   it('rejects missing and expired links', async () => {

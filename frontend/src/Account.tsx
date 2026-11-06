@@ -2,42 +2,16 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from './lib/Link';
 import { navigate as goTo } from './lib/router';
 import { useDismiss } from './lib/useDismiss';
+import { getSession, signIn, signOut as endSession, signUp, type User } from './features/auth/api';
 import type { FormEvent, ReactNode } from 'react';
 import PasswordReset from './PasswordReset';
 import SiteNavigation from './SiteNavigation';
 
-type User = { displayName: string; email: string; role: "user" | "admin" };
 type Page = 'sign-in' | 'sign-up' | 'forgot-password' | 'reset-password' | null;
 const currentPage = (): Page => {
   const path = window.location.pathname.replace(/\/$/, '').slice(1);
   return path === 'sign-in' || path === 'sign-up' || path === 'forgot-password' || path === 'reset-password' ? path : null;
 };
-
-async function accountRequest(path: string, body?: unknown): Promise<User | null> {
-  const response = await fetch(`/api/auth/${({ session: "me", "sign-in": "login", "sign-up": "register", "sign-out": "logout" })[path as "session" | "sign-in" | "sign-up" | "sign-out"]}`, {
-    method: body === undefined ? 'GET' : 'POST',
-    credentials: 'include',
-    headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  if (path === 'session' && response.status === 401) return null;
-  if (path === 'sign-out' && response.ok) return null;
-  if (response.status === 404 || !response.headers.get('content-type')?.includes('application/json')) {
-    throw new Error('Account access is not available yet. Please try again later.');
-  }
-  if (!response.ok) {
-    if (response.status === 401) throw new Error('The email or password is incorrect. Please try again.');
-    if (response.status === 409) throw new Error('An account with this email already exists. Try signing in.');
-    if (response.status === 400) {
-      const data = await response.json();
-      throw new Error(typeof data.error === 'string' ? data.error : 'Please check your account details.');
-    }
-    throw new Error('Unable to complete your request. Please try again.');
-  }
-  const data = await response.json();
-  if (typeof data?.displayName !== 'string' || typeof data?.email !== 'string') throw new Error('Unable to load your account. Please try again.');
-  return data;
-}
 
 export default function Account({ children }: { children: ReactNode }) {
   const [page, setPage] = useState<Page>(currentPage);
@@ -50,7 +24,7 @@ export default function Account({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    accountRequest('session').then((next) => { if (active) setUser(next); }).catch(() => {}).finally(() => { if (active) setChecking(false); });
+    getSession().then((next) => { if (active) setUser(next); }).catch(() => {}).finally(() => { if (active) setChecking(false); });
     const onPop = () => { setPage(currentPage()); setError(''); setShowPassword(false); };
     window.addEventListener('popstate', onPop);
     return () => { active = false; window.removeEventListener('popstate', onPop); };
@@ -74,10 +48,8 @@ export default function Account({ children }: { children: ReactNode }) {
     const data = new FormData(event.currentTarget);
     setBusy(true); setError('');
     try {
-      const next = await accountRequest(page!, {
-        email: String(data.get('email')).trim(), password: data.get('password'),
-        ...(page === 'sign-up' ? { displayName: String(data.get('name')).trim() } : {}),
-      });
+      const credentials = { email: String(data.get('email')).trim(), password: String(data.get('password')) };
+      const next = page === 'sign-up' ? await signUp({ ...credentials, displayName: String(data.get('name')).trim() }) : await signIn(credentials);
       setUser(next); navigate(null);
     } catch (failure) { setError(failure instanceof Error ? failure.message : 'Unable to connect. Please try again.'); }
     finally { setBusy(false); }
@@ -85,7 +57,7 @@ export default function Account({ children }: { children: ReactNode }) {
 
   async function signOut() {
     setBusy(true); setError('');
-    try { await accountRequest('sign-out', {}); setUser(null); navigate(null); }
+    try { await endSession(); setUser(null); navigate(null); }
     catch { setError('Unable to sign out. Please try again.'); }
     finally { setBusy(false); }
   }
