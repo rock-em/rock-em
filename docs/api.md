@@ -2,7 +2,8 @@
 
 See [the OpenAPI contract](../api/openapi.json) and [generation guide](../api/README.md)
 for every route, parameter, input, response and stub. Apply migrations `000001`
-through `000008` before deploying this branch's binary.
+through `000008` before deploying this branch's binary, and `000009` only after it is
+live (older binaries still read the dropped `topic` column).
 
 ## Problem data
 
@@ -134,8 +135,9 @@ signature inferred from their test arguments, named after their authored starter
 linked lists and trees come out as arrays, so check those and PUT a better signature
 if needed. Problems whose tests disagree are skipped and listed in a migration notice.
 
-The old `languages` map and legacy columns are kept but no longer read or written;
-the category is the primary entry in `problem_topics`. A later migration drops them.
+`000009` drops the old `languages` map and the `topic`, `examples`, `starter` and
+`function_name` columns. The category is the primary entry in `problem_topics`.
+Rolling `000009` back restores empty columns, not the per-language content.
 
 The frontend runs JavaScript in a sandboxed iframe and renders examples from
 `args` with the signature's parameter names. Preserve editor drafts by
