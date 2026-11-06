@@ -1,8 +1,8 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import PasswordReset from './PasswordReset';
-import Account from './Account';
-import { sentRequest } from './test/http';
+import { App } from '../../app/App';
+import { jsonResponse, routedFetch, sentRequest } from '../../test/http';
+import { PasswordResetForm } from './PasswordResetForm';
 
 const token = 'a'.repeat(64);
 const json = (body: unknown, status: number) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -13,8 +13,8 @@ describe('Password reset', () => {
   it('opens from the sign-in page', async () => {
     window.history.replaceState(null, '', '/sign-in');
     vi.spyOn(window, 'scrollTo').mockImplementation(() => {});
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(json({}, 401)));
-    render(<Account>Practice</Account>);
+    vi.stubGlobal('fetch', routedFetch({ '/api/auth/me': () => jsonResponse({}, 401), '/api/problems': () => jsonResponse([]) }));
+    render(<App />);
     fireEvent.click(await screen.findByRole('link', { name: 'Forgot password?' }));
     expect(window.location.pathname).toBe('/forgot-password');
     expect(screen.getByRole('button', { name: 'Send reset link →' })).toBeVisible();
@@ -23,7 +23,7 @@ describe('Password reset', () => {
   it.each([202, 503, 429])('handles reset requests with status %s', async (status) => {
     const fetch = vi.fn().mockResolvedValue(json({}, status));
     vi.stubGlobal('fetch', fetch);
-    render(<PasswordReset resetting={false} onReset={vi.fn()} />);
+    render(<PasswordResetForm resetting={false} onReset={vi.fn()} />);
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'sam@example.com' } });
     fireEvent.click(screen.getByRole('button', { name: 'Send reset link →' }));
     await waitFor(() => expect(fetch).toHaveBeenCalled());
@@ -37,7 +37,7 @@ describe('Password reset', () => {
     const fetch = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
     vi.stubGlobal('fetch', fetch);
     const onReset = vi.fn();
-    render(<PasswordReset resetting onReset={onReset} />);
+    render(<PasswordResetForm resetting onReset={onReset} />);
     fireEvent.change(screen.getByLabelText('New password'), { target: { value: 'a-new-secure-password' } });
     fireEvent.change(screen.getByLabelText('Confirm new password'), { target: { value: 'different-password' } });
     fireEvent.click(screen.getByRole('button', { name: 'Update password →' }));
@@ -54,12 +54,12 @@ describe('Password reset', () => {
   it('rejects missing and expired links', async () => {
     const fetch = vi.fn().mockResolvedValue(json({}, 400));
     vi.stubGlobal('fetch', fetch);
-    const view = render(<PasswordReset resetting onReset={vi.fn()} />);
+    const view = render(<PasswordResetForm resetting onReset={vi.fn()} />);
     expect(screen.getByRole('alert')).toHaveTextContent('missing or invalid');
     expect(screen.queryByRole('button', { name: 'Update password →' })).not.toBeInTheDocument();
     view.unmount();
     window.history.replaceState(null, '', `/reset-password#token=${token}`);
-    render(<PasswordReset resetting onReset={vi.fn()} />);
+    render(<PasswordResetForm resetting onReset={vi.fn()} />);
     for (const name of ['New password', 'Confirm new password']) fireEvent.change(screen.getByLabelText(name), { target: { value: 'a-new-secure-password' } });
     fireEvent.click(screen.getByRole('button', { name: 'Update password →' }));
     await waitFor(() => expect(screen.getByRole('alert')).toHaveTextContent('invalid or expired'));

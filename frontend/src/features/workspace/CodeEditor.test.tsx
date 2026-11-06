@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import CodeEditor from './CodeEditor'
+import { CodeEditor } from './CodeEditor'
 
 describe('CodeEditor', () => {
   it('renders the document under an accessible label and follows external replacements', async () => {

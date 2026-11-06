@@ -4,11 +4,12 @@ import { getProblemCatalog, getProblemDetail, getProblemLanguages } from "./api"
 import { chooseLanguage } from "./model";
 
 const UNREACHABLE = "Unable to reach the problem service.";
+const NO_PROBLEMS: never[] = [];
 
 export function useProblemCatalog() {
   const request = useRequest("catalog", getProblemCatalog);
   return {
-    data: request.data ?? [],
+    data: request.data ?? NO_PROBLEMS,
     loading: request.loading,
     error: request.error ? request.error.message || UNREACHABLE : "",
     retry: request.retry,

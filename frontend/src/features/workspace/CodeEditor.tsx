@@ -6,7 +6,7 @@ import { Compartment, EditorState, type Extension } from "@codemirror/state";
 import { drawSelection, EditorView, highlightActiveLine, highlightActiveLineGutter, keymap, lineNumbers } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
 
-type Props = {
+export type CodeEditorProps = {
   value: string;
   language: string;
   label: string;
@@ -53,7 +53,7 @@ const theme = EditorView.theme({
   "&.cm-focused": { outline: "2px solid #0645ad", outlineOffset: "-2px" },
 });
 
-export default function CodeEditor({ value, language, label, onChange, readOnly = false, className, indentUnit: serverIndent }: Props) {
+export function CodeEditor({ value, language, label, onChange, readOnly = false, className, indentUnit: serverIndent }: CodeEditorProps) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
   const onChangeRef = useRef(onChange);

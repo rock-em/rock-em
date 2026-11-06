@@ -1,10 +1,10 @@
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import App from './App'
+import { App } from './App'
 
-vi.mock('./ChromeSculpture', () => ({ default: ({ topic }: { topic: string }) => <div aria-label={`Sculpture for ${topic}`}>{topic}</div> }))
-vi.mock('./CodeEditor', () => ({
-  default: ({ label, value, onChange, readOnly }: { label: string; value: string; onChange?: (value: string) => void; readOnly?: boolean }) =>
+vi.mock('../features/problems/ChromeSculpture', () => ({ ChromeSculpture: ({ topic }: { topic: string }) => <div aria-label={`Sculpture for ${topic}`}>{topic}</div> }))
+vi.mock('../features/workspace/CodeEditor', () => ({
+  CodeEditor: ({ label, value, onChange, readOnly }: { label: string; value: string; onChange?: (value: string) => void; readOnly?: boolean }) =>
     <textarea aria-label={label} value={value} readOnly={readOnly} onChange={event => onChange?.(event.target.value)} />,
 }))
 const catalog = [

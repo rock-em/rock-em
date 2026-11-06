@@ -6,7 +6,7 @@ import "./ChromeSculpture.css";
 
 type Props = { topic: string };
 
-export default function ChromeSculpture({ topic }: Props) {
+export function ChromeSculpture({ topic }: Props) {
   const shapeSeed = Array.from(topic).reduce(
   (sum, char) => sum + char.charCodeAt(0),
   0
