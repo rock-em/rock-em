@@ -35,7 +35,7 @@ func TestImportAddsProblemOnce(t *testing.T) {
 
 	var title, topic string
 	var tests int
-	err = db.QueryRow(t.Context(), `SELECT p.title, p.topic, (SELECT count(*) FROM problem_tests WHERE problem_id=p.id) FROM problems p WHERE slug='test-import-sum'`).Scan(&title, &topic, &tests)
+	err = db.QueryRow(t.Context(), `SELECT p.title, (SELECT t.name FROM problem_topics pt JOIN topics t ON t.id=pt.topic_id WHERE pt.problem_id=p.id AND pt.is_primary), (SELECT count(*) FROM problem_tests WHERE problem_id=p.id) FROM problems p WHERE slug='test-import-sum'`).Scan(&title, &topic, &tests)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -62,7 +62,7 @@ func (h *Handler) List(w http.ResponseWriter, r *http.Request) {
 		httpapi.Error(w, 400, "invalid pagination or filters")
 		return
 	}
-	rows, err := h.db.Query(r.Context(), `SELECT slug,title,short_description,difficulty,topic FROM problems p WHERE deleted_at IS NULL AND ($1='' OR difficulty=$1) AND ($2='' OR EXISTS(SELECT 1 FROM problem_topics pt JOIN topics t ON t.id=pt.topic_id WHERE pt.problem_id=p.id AND (t.name=$2 OR t.slug=$2))) AND ($3='' OR title ILIKE '%'||$3||'%' OR short_description ILIKE '%'||$3||'%') ORDER BY id LIMIT $4 OFFSET $5`, difficulty, category, q.Get("q"), limit, offset)
+	rows, err := h.db.Query(r.Context(), `SELECT slug,title,short_description,difficulty,coalesce((SELECT t.name FROM problem_topics pt JOIN topics t ON t.id=pt.topic_id WHERE pt.problem_id=p.id AND pt.is_primary),'') FROM problems p WHERE deleted_at IS NULL AND ($1='' OR difficulty=$1) AND ($2='' OR EXISTS(SELECT 1 FROM problem_topics pt JOIN topics t ON t.id=pt.topic_id WHERE pt.problem_id=p.id AND (t.name=$2 OR t.slug=$2))) AND ($3='' OR title ILIKE '%'||$3||'%' OR short_description ILIKE '%'||$3||'%') ORDER BY id LIMIT $4 OFFSET $5`, difficulty, category, q.Get("q"), limit, offset)
 	if err != nil {
 		fail(w, err)
 		return
@@ -143,8 +143,7 @@ func saveContract(ctx context.Context, tx pgx.Tx, id int64, in *Input) error {
 		}
 	}
 	in.Category = in.Topics[0]
-	_, err := tx.Exec(ctx, `UPDATE problems SET topic=$2 WHERE id=$1`, id, in.Category)
-	return err
+	return nil
 }
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) { h.write(w, r, true) }
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) { h.write(w, r, false) }
@@ -174,11 +173,10 @@ func (h *Handler) write(w http.ResponseWriter, r *http.Request, create bool) {
 	}
 	defer tx.Rollback(r.Context())
 	var id int64
-	// topic mirrors the primary topic so the pre-contract columns stay consistent.
 	if create {
-		err = tx.QueryRow(r.Context(), `INSERT INTO problems(slug,title,short_description,description,difficulty,topic,constraints,signature,compare,created_by) VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8::jsonb,$9,$10) RETURNING id`, in.Slug, in.Title, in.ShortDescription, in.Description, in.Difficulty, in.Category, string(constraints), string(signature), in.Compare, auth.Current(r).ID).Scan(&id)
+		err = tx.QueryRow(r.Context(), `INSERT INTO problems(slug,title,short_description,description,difficulty,constraints,signature,compare,created_by) VALUES($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8,$9) RETURNING id`, in.Slug, in.Title, in.ShortDescription, in.Description, in.Difficulty, string(constraints), string(signature), in.Compare, auth.Current(r).ID).Scan(&id)
 	} else {
-		err = tx.QueryRow(r.Context(), `UPDATE problems SET slug=$1,title=$2,short_description=$3,description=$4,difficulty=$5,topic=$6,constraints=$7::jsonb,signature=$8::jsonb,compare=$9,updated_at=now() WHERE slug=$10 AND deleted_at IS NULL RETURNING id`, in.Slug, in.Title, in.ShortDescription, in.Description, in.Difficulty, in.Category, string(constraints), string(signature), in.Compare, r.PathValue("slug")).Scan(&id)
+		err = tx.QueryRow(r.Context(), `UPDATE problems SET slug=$1,title=$2,short_description=$3,description=$4,difficulty=$5,constraints=$6::jsonb,signature=$7::jsonb,compare=$8,updated_at=now() WHERE slug=$9 AND deleted_at IS NULL RETURNING id`, in.Slug, in.Title, in.ShortDescription, in.Description, in.Difficulty, string(constraints), string(signature), in.Compare, r.PathValue("slug")).Scan(&id)
 	}
 	if err != nil {
 		fail(w, err)

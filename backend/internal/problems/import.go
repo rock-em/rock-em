@@ -39,7 +39,7 @@ func Import(ctx context.Context, db *pgxpool.Pool, in Input) (bool, error) {
 	}
 	defer tx.Rollback(ctx)
 	var id int64
-	err = tx.QueryRow(ctx, `INSERT INTO problems(slug,title,short_description,description,difficulty,topic,constraints,signature,compare) VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8::jsonb,$9) ON CONFLICT (slug) DO NOTHING RETURNING id`, in.Slug, in.Title, in.ShortDescription, in.Description, in.Difficulty, in.Category, string(constraints), string(signature), in.Compare).Scan(&id)
+	err = tx.QueryRow(ctx, `INSERT INTO problems(slug,title,short_description,description,difficulty,constraints,signature,compare) VALUES($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8) ON CONFLICT (slug) DO NOTHING RETURNING id`, in.Slug, in.Title, in.ShortDescription, in.Description, in.Difficulty, string(constraints), string(signature), in.Compare).Scan(&id)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return false, nil
 	}

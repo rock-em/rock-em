@@ -69,7 +69,7 @@ func (h *Handler) getDetail(ctx context.Context, slug, language string) (Problem
 	p := ProblemDetail{Examples: []Test{}, Tests: []Test{}}
 	var id int64
 	var signature []byte
-	err := h.db.QueryRow(ctx, `SELECT p.id,p.slug,p.title,p.short_description,p.difficulty,p.topic,p.description,p.constraints,p.signature,p.compare,
+	err := h.db.QueryRow(ctx, `SELECT p.id,p.slug,p.title,p.short_description,p.difficulty,coalesce((SELECT t.name FROM problem_topics pt JOIN topics t ON t.id=pt.topic_id WHERE pt.problem_id=p.id AND pt.is_primary),''),p.description,p.constraints,p.signature,p.compare,
 		ARRAY(SELECT t.name FROM problem_topics pt JOIN topics t ON t.id=pt.topic_id WHERE pt.problem_id=p.id ORDER BY pt.is_primary DESC,t.sort_order,t.name)
 		FROM problems p WHERE p.slug=$1 AND p.deleted_at IS NULL`, slug).Scan(&id, &p.Slug, &p.Title, &p.ShortDescription, &p.Difficulty, &p.Category, &p.Description, &p.Constraints, &signature, &p.Compare, &p.Topics)
 	if err != nil {
