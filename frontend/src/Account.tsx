@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from './lib/Link';
+import { navigate as goTo } from './lib/router';
+import { useDismiss } from './lib/useDismiss';
 import type { FormEvent, ReactNode } from 'react';
 import PasswordReset from './PasswordReset';
 import SiteNavigation from './SiteNavigation';
-import { navigateTo } from './navigation';
 
 type User = { displayName: string; email: string; role: "user" | "admin" };
 type Page = 'sign-in' | 'sign-up' | 'forgot-password' | 'reset-password' | null;
@@ -50,33 +52,20 @@ export default function Account({ children }: { children: ReactNode }) {
     let active = true;
     accountRequest('session').then((next) => { if (active) setUser(next); }).catch(() => {}).finally(() => { if (active) setChecking(false); });
     const onPop = () => { setPage(currentPage()); setError(''); setShowPassword(false); };
-    const dismiss = (event: PointerEvent) => {
-      if (profile.current && !profile.current.contains(event.target as Node)) profile.current.open = false;
-    };
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && profile.current?.open) {
-        profile.current.open = false;
-        profile.current.querySelector('summary')?.focus();
-      }
-    };
     window.addEventListener('popstate', onPop);
-    document.addEventListener('pointerdown', dismiss);
-    document.addEventListener('keydown', escape);
-    return () => { active = false; window.removeEventListener('popstate', onPop); document.removeEventListener('pointerdown', dismiss); document.removeEventListener('keydown', escape); };
+    return () => { active = false; window.removeEventListener('popstate', onPop); };
   }, []);
+  useDismiss(profile);
 
   function navigate(next: Page) {
-    navigateTo(next ? `/${next}` : '/');
+    goTo(next ? `/${next}` : '/');
     setPage(next);
     setError('');
     setShowPassword(false);
   }
 
   function link(next: Page, label: string, className?: string) {
-    return <a className={className} href={next ? `/${next}` : '/'} onClick={(event) => {
-      if (event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-      event.preventDefault(); navigate(next);
-    }}>{label}</a>;
+    return <Link className={className} href={next ? `/${next}` : '/'}>{label}</Link>;
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -118,7 +107,7 @@ export default function Account({ children }: { children: ReactNode }) {
     </header>
     {page ? <main className="auth-page" key={page}>
       {link(null, '← Back to problems', 'auth-back')}
-      {page === 'forgot-password' || page === 'reset-password' ? <PasswordReset resetting={page === 'reset-password'} onReset={() => setUser(null)} signIn={() => navigate('sign-in')} /> : user ? <><h1>You’re signed in</h1><p className="account-muted">Continue practicing as {user.displayName}.</p>{link(null, 'Browse problems →')}</> : <>
+      {page === 'forgot-password' || page === 'reset-password' ? <PasswordReset resetting={page === 'reset-password'} onReset={() => setUser(null)} /> : user ? <><h1>You’re signed in</h1><p className="account-muted">Continue practicing as {user.displayName}.</p>{link(null, 'Browse problems →')}</> : <>
         <h1>{page === 'sign-up' ? 'A little practice, every day.' : 'Welcome back.'}</h1>
         <p className="account-muted">{page === 'sign-up' ? 'Create your rock em account.' : 'Sign in to your rock em account.'}</p>
         <form onSubmit={(event) => void submit(event)} className="auth-form">

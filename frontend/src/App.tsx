@@ -1,7 +1,7 @@
-import { PageLink } from './PageLink';
 import { lazy, Suspense, useState, type FormEvent } from "react";
 import Account from "./Account";
-import { navigateTo, usePathname } from "./navigation";
+import { Link } from "./lib/Link";
+import { navigate, usePathname } from "./lib/router";
 import { useProblemCatalog, useProblemDetail } from "./useProblemCatalog";
 import { toPracticeFields } from "./problemCatalog";
 import ProblemLanguageSelect from "./ProblemLanguageSelect";
@@ -154,8 +154,8 @@ function Practice() {
 
   function nextTopic() { setTopicIndex((prev) => (prev + 1) % topics.length); setSearch(""); }
   function previousTopic() { setTopicIndex((prev) => (prev + topics.length - 1) % topics.length); setSearch(""); }
-  function openProblem(id: string) { setResults(null); setMessage(""); navigateTo(`/problems/${id}`); }
-  function goBack() { setResults(null); setMessage(""); navigateTo("/"); }
+  function openProblem(id: string) { setResults(null); setMessage(""); navigate(`/problems/${id}`); }
+  function goBack() { setResults(null); setMessage(""); navigate("/"); }
 
   async function createProblem(event: FormEvent) {
     event.preventDefault();
@@ -209,7 +209,7 @@ if (submit && passed) {
 
   if (problemMatch && !selected) {
     return <main className="page utility-page">
-      <PageLink href="/">← Back to problems</PageLink>
+      <Link href="/">← Back to problems</Link>
       <h1>{detail.loading ? 'Loading problem…' : 'Problem unavailable'}</h1>
       {detail.loading ? <p role="status">Loading languages and problem details.</p> : <>
         <p role="alert">{detail.error || 'No language variants are available for this problem.'}</p>
@@ -301,7 +301,7 @@ if (submit && passed) {
       {catalog.loading ? <p role="status">Fetching the problem catalog.</p> : <>
         <p role={catalog.error ? 'alert' : 'status'}>{catalog.error || 'There are no published problems to browse yet.'}</p>
         <button className="run-button" onClick={catalog.retry}>Reload problems</button>
-        <p><PageLink href="/generate">Generate a problem →</PageLink></p>
+        <p><Link href="/generate">Generate a problem →</Link></p>
       </>}
     </main>;
   }
@@ -367,7 +367,7 @@ if (submit && passed) {
       <h1>About rock em</h1>
       <p>A place to practice programming that is nice on the eyes :D</p>
       <p>rock em is an open source program for practicing programming problems. Browse by topic, follow a learning path, or generate something new to work on.</p>
-      <PageLink href="/">Browse problems →</PageLink>
+      <Link href="/">Browse problems →</Link>
     </main>;
   }
 
@@ -375,7 +375,7 @@ if (submit && passed) {
   if (path !== '/') {
     return <main className="page utility-page"><h1>{problemMatch ? 'Problem unavailable' : 'Page not found'}</h1>
       <p>{problemMatch ? 'This problem may have been generated in a previous session.' : 'That page does not exist.'}</p>
-      <PageLink href="/">Back to problems</PageLink>
+      <Link href="/">Back to problems</Link>
     </main>;
   }
 

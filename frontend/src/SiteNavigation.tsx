@@ -1,6 +1,7 @@
-import { PageLink } from './PageLink';
-import { useEffect, useRef } from 'react';
-import { usePathname } from './navigation';
+import { useRef } from "react";
+import { Link } from "./lib/Link";
+import { usePathname } from "./lib/router";
+import { useDismiss } from "./lib/useDismiss";
 
 const pages = [
   ['/', 'Problems'],
@@ -13,25 +14,12 @@ const pages = [
 export default function SiteNavigation() {
   const path = usePathname();
   const menu = useRef<HTMLDetailsElement>(null);
-  useEffect(() => {
-    const dismiss = (event: PointerEvent) => {
-      if (menu.current && !menu.current.contains(event.target as Node)) menu.current.open = false;
-    };
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && menu.current?.open) {
-        menu.current.open = false;
-        menu.current.querySelector('summary')?.focus();
-      }
-    };
-    document.addEventListener('pointerdown', dismiss);
-    document.addEventListener('keydown', escape);
-    return () => { document.removeEventListener('pointerdown', dismiss); document.removeEventListener('keydown', escape); };
-  }, []);
+  useDismiss(menu);
   return <nav aria-label="Site" className="site-navigation">
     <details ref={menu} className="explore-menu">
       <summary>Explore</summary>
       <div className="explore-links">
-        {pages.map(([href, label]) => <PageLink key={href} href={href} aria-current={path === href ? 'page' : undefined} onClick={() => { if (menu.current) menu.current.open = false; }}>{label}</PageLink>)}
+        {pages.map(([href, label]) => <Link key={href} href={href} aria-current={path === href ? 'page' : undefined} onClick={() => { if (menu.current) menu.current.open = false; }}>{label}</Link>)}
       </div>
     </details>
   </nav>;

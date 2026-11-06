@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { isRecord, readJson, writeJson } from "./lib/storage";
 import "./TopicLearningPath.css";
 
 type TopicProblem = {
@@ -65,31 +66,18 @@ const guides: Record<string, Guide> = {
 const storageKey = "rock-em:topic-concepts:v1";
 
 function readProgress(): Record<string, string[]> {
-  try {
-    const raw = localStorage.getItem(storageKey);
-    if (!raw) return {};
-    const value: unknown = JSON.parse(raw);
-    if (!value || typeof value !== "object" || Array.isArray(value)) return {};
-    return Object.fromEntries(
-      Object.entries(value).filter((entry): entry is [string, string[]] =>
-        Array.isArray(entry[1]) && entry[1].every((item) => typeof item === "string")),
-    );
-  } catch {
-    return {};
-  }
+  const stored = readJson(storageKey, isRecord, {});
+  return Object.fromEntries(
+    Object.entries(stored).filter((entry): entry is [string, string[]] =>
+      Array.isArray(entry[1]) && entry[1].every((item) => typeof item === "string")),
+  );
 }
 
 export default function TopicLearningPath({ topic, problems, completedIds, onOpenProblem }: Props) {
   const [progress, setProgress] = useState<Record<string, string[]>>(readProgress);
   const [expanded, setExpanded] = useState(false);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(storageKey, JSON.stringify(progress));
-    } catch {
-      // Storage is unavailable in private browsing; progress still works for the session.
-    }
-  }, [progress]);
+  useEffect(() => writeJson(storageKey, progress), [progress]);
 
   const guide = guides[topic] ?? {
     intro: `Practice ${topic} with a focused learning checklist and coding exercises.`,
