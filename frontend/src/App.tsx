@@ -2,11 +2,11 @@ import { lazy, Suspense, useState, type FormEvent } from "react";
 import Account from "./Account";
 import { Link } from "./lib/Link";
 import { navigate, usePathname } from "./lib/router";
-import { useProblemCatalog, useProblemDetail } from "./useProblemCatalog";
-import { toPracticeFields } from "./problemCatalog";
+import { useProblemCatalog, useProblemDetail } from "./features/problems/hooks";
+import { difficultyLabel, toPracticeFields } from "./features/problems/model";
 import ProblemLanguageSelect from "./ProblemLanguageSelect";
 import ChromeSculpture from "./ChromeSculpture";
-import { generateProblem, type GeneratedProblem, type Level } from "./generateProblem";
+import { generateProblem, type GeneratedProblem, type Level } from "./features/generate/api";
 import TopicLearningPath from "./TopicLearningPath";
 import AdaptivePractice from "./AdaptivePractice";
 import { recordPracticeAttempt } from "./practiceProgress";
@@ -98,7 +98,7 @@ function runTests(problem: Problem, code: string): Promise<TestResult[]> {
 const MIN_VERIFIED_TESTS = 3;
 
 async function verifyGeneratedProblem(generated: GeneratedProblem, id: string): Promise<Problem> {
-  const candidate: Problem = { ...generated, id, language: "javascript", generated: true };
+  const candidate: Problem = { ...generated, difficulty: difficultyLabel[generated.difficulty] as Difficulty, id, language: "javascript", generated: true };
   const results = await runTests(candidate, generated.referenceSolution);
   const tests = candidate.tests.filter((_, index) => results[index]?.passed);
   if (tests.length < MIN_VERIFIED_TESTS) {
@@ -111,10 +111,9 @@ function Practice() {
   const path = usePathname();
   const [generated, setGenerated] = useState<Problem[]>([]);
   const catalog = useProblemCatalog();
-  const difficultyLabels = { easy: "Easy", medium: "Medium", hard: "Hard" } as const;
   const problems = [...catalog.data.map(problem => ({
     id: problem.slug, title: problem.title, topic: problem.category,
-    difficulty: difficultyLabels[problem.difficulty],
+    difficulty: difficultyLabel[problem.difficulty] as Difficulty,
   })), ...generated];
   const topics = [...new Set(problems.map((problem) => problem.topic))];
   const [topicIndex, setTopicIndex] = useState(0);
@@ -138,7 +137,7 @@ function Practice() {
   const detail = useProblemDetail(generatedProblem ? null : selectedId, selectedId ? languagePreferences[selectedId] : undefined);
   const selected: Problem | undefined = generatedProblem ?? (detail.data ? {
     ...detail.data, ...toPracticeFields(detail.data), id: detail.data.slug, topic: detail.data.category,
-    difficulty: difficultyLabels[detail.data.difficulty],
+    difficulty: difficultyLabel[detail.data.difficulty] as Difficulty,
   } : undefined);
   const draftKey = selected ? `${selected.id}:${selected.language}` : '';
   const [resultKey, setResultKey] = useState('');

@@ -1,6 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Account from './Account';
+import { sentRequest } from './test/http';
 
 const user = { displayName: 'Sam Rivers', role: 'admin', email: 'sam@example.com' };
 const response = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
@@ -32,7 +33,7 @@ describe('Account', () => {
     await waitFor(() => expect(window.location.pathname).toBe('/'));
     fireEvent.click(screen.getByText(user.displayName, { selector: '.profile-name' }));
     expect(screen.getByText(user.email)).toBeVisible();
-    expect(fetch).toHaveBeenNthCalledWith(2, '/api/auth/login', expect.objectContaining({ credentials: 'include', body: JSON.stringify({ email: user.email, password: 'test-password' }) }));
+    expect(await sentRequest(fetch, 1)).toMatchObject({ method: 'POST', path: '/api/auth/login', credentials: 'include', body: { email: user.email, password: 'test-password' } });
     fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
     expect(await screen.findByRole('link', { name: 'Sign in' })).toBeVisible();
   });
@@ -59,7 +60,8 @@ describe('Account', () => {
     fireEvent.change(screen.getByLabelText('Email'), { target: { value: user.email } });
     fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'a-secure-password' } });
     fireEvent.click(screen.getByRole('button', { name: 'Create account →' }));
-    expect(fetch).toHaveBeenNthCalledWith(2, '/api/auth/register', expect.objectContaining({ body: JSON.stringify({ email: user.email, password: 'a-secure-password', displayName: user.displayName }) }));
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    expect(await sentRequest(fetch, 1)).toMatchObject({ path: '/api/auth/register', body: { email: user.email, password: 'a-secure-password', displayName: user.displayName } });
     if (status === 201) {
       await waitFor(() => expect(window.location.pathname).toBe('/'));
       fireEvent.click(screen.getByText(user.displayName, { selector: '.profile-name' }));

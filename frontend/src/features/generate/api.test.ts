@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { generateProblem } from './generateProblem'
+import { sentRequest } from '../../test/http'
+import { generateProblem } from './api'
 
 function mockFetch(status: number, body: unknown) {
   const fetchMock = vi.fn().mockResolvedValue(
@@ -20,11 +21,10 @@ describe('generateProblem', () => {
     const problem = await generateProblem({ topic: 'sliding window', theme: 'logistics', level: 'beginner' })
 
     expect(problem.title).toBe('Late Shipment Window')
-    expect(fetchMock).toHaveBeenCalledWith('/api/problems/generate', expect.objectContaining({ method: 'POST' }))
-    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
-      topic: 'sliding window',
-      theme: 'logistics',
-      level: 'beginner',
+    expect(await sentRequest(fetchMock)).toMatchObject({
+      method: 'POST',
+      path: '/api/problems/generate',
+      body: { topic: 'sliding window', theme: 'logistics', level: 'beginner' },
     })
   })
 

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { Link } from './lib/Link';
+import { requestPasswordReset, resetPassword } from './features/auth/api';
 
 type Props = { resetting: boolean; onReset: () => void };
 
@@ -23,20 +24,8 @@ export default function PasswordReset({ resetting, onReset }: Props) {
     }
     setBusy(true);
     try {
-      const response = await fetch(`/api/auth/${resetting ? 'reset-password' : 'forgot-password'}`, {
-        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(resetting ? { token, newPassword: password } : { email: String(values.get('email')).trim() }),
-      });
-      if (!response.ok) {
-        if (response.status === 429) throw new Error('Too many attempts. Please wait a minute and try again.');
-        if (response.status === 503 || response.status === 404) throw new Error('Password reset is currently unavailable. Please try again later.');
-        if (response.status === 400 && resetting) throw new Error('This reset link is invalid or expired. Request a new link.');
-        throw new Error('Unable to complete your request. Please try again.');
-      }
-      // Do not treat an SPA fallback or unexpected response as a successful reset.
-      if (resetting ? response.status !== 204 : response.status !== 202 || !response.headers.get('content-type')?.includes('application/json')) {
-        throw new Error('Password reset is currently unavailable. Please try again later.');
-      }
+      if (resetting) await resetPassword(token, password);
+      else await requestPasswordReset(String(values.get('email')).trim());
       setDone(true);
       if (resetting) {
         window.history.replaceState(null, '', '/reset-password');
