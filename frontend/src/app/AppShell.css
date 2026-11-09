@@ -23,7 +23,8 @@
 
 .site-header-start {
   display: flex;
-  align-items: center;
+  /* Sit the small nav text on the logo's baseline rather than its center. */
+  align-items: baseline;
   gap: 30px;
   min-width: 0;
 }
