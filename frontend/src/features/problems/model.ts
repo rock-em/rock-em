@@ -1,4 +1,5 @@
 import type { components } from "../../api/schema";
+import type { Output } from "../workspace/runner";
 import type { ProblemDetail, ProblemSummary } from "./api";
 
 export type Difficulty = components["schemas"]["Difficulty"];
@@ -22,6 +23,7 @@ export type Problem = ProblemListItem & {
   starter: string;
   tests: TestCase[];
   compare?: Compare;
+  output?: Output;
   indentUnit?: string;
   referenceSolution?: string;
   generated?: boolean;
@@ -42,6 +44,12 @@ export function fromSummary(summary: ProblemSummary): ProblemListItem {
 
 const show = (value: unknown) => JSON.stringify(value);
 
+function outputOf(signature: ProblemDetail["signature"]): Output | undefined {
+  const index = signature.params.findIndex((param) => param.name === signature.output);
+  if (index < 0) return undefined;
+  return { index, prefix: signature.returns !== "void" };
+}
+
 export function fromDetail(detail: ProblemDetail): Problem {
   return {
     ...fromSummary(detail),
@@ -51,6 +59,7 @@ export function fromDetail(detail: ProblemDetail): Problem {
     functionName: detail.functionName,
     starter: detail.starter,
     compare: detail.compare,
+    output: outputOf(detail.signature),
     indentUnit: detail.indentUnit,
     examples: detail.examples.map((example) => ({
       input: detail.signature.params.map((param, index) => `${param.name} = ${show(example.args[index])}`).join(", "),

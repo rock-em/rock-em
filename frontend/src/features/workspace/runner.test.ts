@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { allPassed, compareKey, formatValue } from "./runner";
+import { allPassed, checkedValue, compareKey, formatValue } from "./runner";
 
 describe("compareKey", () => {
   it("compares exactly by default", () => {
@@ -10,6 +10,20 @@ describe("compareKey", () => {
   it("ignores array order when the problem compares unordered", () => {
     expect(compareKey([[1, 2], [3]], true)).toBe(compareKey([[3], [1, 2]], true));
     expect(compareKey([[1, 2]], true)).not.toBe(compareKey([[2, 1]], true));
+  });
+});
+
+describe("checkedValue", () => {
+  it("uses the return value unless the problem changes an argument", () => {
+    expect(checkedValue(3, [[1, 2]])).toBe(3);
+  });
+
+  it("checks the changed argument for void solutions", () => {
+    expect(checkedValue(undefined, [[1, 2, 3], 3], { index: 0, prefix: false })).toEqual([1, 2, 3]);
+  });
+
+  it("checks the first k items when the solution returns k", () => {
+    expect(checkedValue(2, [[2, 2, 3, 3], 3], { index: 0, prefix: true })).toEqual([2, 2]);
   });
 });
 

@@ -9,10 +9,21 @@ export function compareKey(value: unknown, unordered: boolean): string {
   return JSON.stringify(value);
 }
 
+export type Output = { index: number; prefix: boolean };
+
+// In-place problems are checked on the changed argument, or its first k items
+// when the solution returns k.
+export function checkedValue(returned: unknown, input: unknown[], output?: Output): unknown {
+  if (!output) return returned;
+  const changed = input[output.index];
+  return output.prefix && Array.isArray(changed) ? changed.slice(0, Number(returned)) : changed;
+}
+
 function sandboxSource(payload: string) {
   return `<!doctype html><html><body><script>
     const payload = ${payload};
     const compareKey = ${compareKey};
+    const checkedValue = ${checkedValue};
     const results = [];
     try {
       const solution = new Function(payload.code + "\\nreturn " + payload.functionName + ";")();
@@ -20,7 +31,7 @@ function sandboxSource(payload: string) {
       for (const test of payload.tests) {
         const input = JSON.parse(JSON.stringify(test.input));
         try {
-          const actual = solution(...input);
+          const actual = checkedValue(solution(...input), input, payload.output);
           results.push({ passed: compareKey(actual, payload.unordered) === compareKey(test.expected, payload.unordered), input: test.input, expected: test.expected, actual });
         } catch (error) {
           results.push({ passed: false, input: test.input, expected: test.expected, error: String(error) });
@@ -35,7 +46,7 @@ function sandboxSource(payload: string) {
 
 // A lightweight demo runner, not a production-grade secure judge.
 export function runTests(
-  problem: Pick<Problem, "functionName" | "tests" | "compare">,
+  problem: Pick<Problem, "functionName" | "tests" | "compare" | "output">,
   code: string,
 ): Promise<TestResult[]> {
   return new Promise((resolve) => {
@@ -71,6 +82,7 @@ export function runTests(
       functionName: problem.functionName,
       tests: problem.tests,
       unordered: problem.compare === "unordered",
+      output: problem.output,
       token,
     });
     iframe.srcdoc = sandboxSource(payload.replace(/</g, "\\u003c"));

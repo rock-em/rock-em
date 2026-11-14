@@ -582,7 +582,10 @@ export interface components {
                 name: string;
                 type: components["schemas"]["TypeName"];
             }[];
-            returns: components["schemas"]["TypeName"];
+            /** @description A TypeName, or void when the solution only changes output. */
+            returns: string;
+            /** @description Parameter changed in place and checked after the call. With a void return the whole parameter is the answer; with an int return k, its first k items are. Required for void returns. */
+            output?: string;
         };
         /**
          * @description How a returned value is checked. unordered compares array returns as multisets.

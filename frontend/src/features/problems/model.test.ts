@@ -46,5 +46,41 @@ describe("fromDetail", () => {
       examples: [{ input: "nums = [2,7], target = 9", output: "[0,1]", explanation: "2 + 7 = 9" }],
       tests: [{ input: [[3, 3], 6], expected: [0, 1] }],
     });
+    expect(fromDetail(detail).output).toBeUndefined();
+  });
+
+  it("points the runner at the argument an in-place problem changes", () => {
+    const detail = {
+      slug: "remove-element",
+      title: "Remove Element",
+      shortDescription: "Remove val in place.",
+      difficulty: "easy",
+      category: "Array",
+      topics: ["Array"],
+      description: "Remove every val from nums.",
+      constraints: [],
+      signature: {
+        function: "removeElement",
+        params: [
+          { name: "nums", type: "int[]" },
+          { name: "val", type: "int" },
+        ],
+        returns: "int",
+        output: "nums",
+      },
+      compare: "unordered",
+      examples: [],
+      tests: [{ args: [[3, 2, 2, 3], 3], expected: [2, 2] }],
+      language: "javascript",
+      functionName: "removeElement",
+      starter: "function removeElement(nums, val) {}",
+      indentUnit: "  ",
+    } as ProblemDetail;
+
+    expect(fromDetail(detail).output).toEqual({ index: 0, prefix: true });
+    expect(fromDetail({ ...detail, signature: { ...detail.signature, returns: "void" } }).output).toEqual({
+      index: 0,
+      prefix: false,
+    });
   });
 });
