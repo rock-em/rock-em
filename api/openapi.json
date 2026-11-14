@@ -1886,7 +1886,14 @@
             }
           },
           "returns": {
-            "$ref": "#/components/schemas/TypeName"
+            "type": "string",
+            "pattern": "^(void|(int|long|double|bool|string|char|ListNode|TreeNode)(\\[\\]){0,3})$",
+            "description": "A TypeName, or void when the solution only changes output."
+          },
+          "output": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$",
+            "description": "Parameter changed in place and checked after the call. With a void return the whole parameter is the answer; with an int return k, its first k items are. Required for void returns."
           }
         },
         "required": [

@@ -36,6 +36,13 @@ values) and `TreeNode` (a level-order array with `null`s), plus up to three `[]`
 suffixes. Every test's values must match the signature. All problems are 0-indexed.
 `compare: "unordered"` checks array returns as multisets.
 
+For problems that change an argument in place, `signature.output` names that
+argument and tests' `expected` is what it should hold afterwards. With
+`"returns": "void"` the whole argument is checked; with `"returns": "int"` the
+solution returns k and only the first k items are checked (the usual "remove
+elements and return the new length" judge). `void` is only allowed as a return
+type, and only together with `output`.
+
 The `languages` table is the runtime registry (key, name, version, indent unit,
 enabled). Keys match editor language ids (CodeMirror `lang-*`).
 `GET /api/problems/two-sum/languages` lists enabled languages that can serve the

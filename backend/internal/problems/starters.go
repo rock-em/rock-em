@@ -17,11 +17,12 @@ type language struct {
 var languages = map[string]language{
 	"python": {
 		name:  snakeCase,
-		types: map[string]string{"int": "int", "long": "int", "double": "float", "bool": "bool", "string": "str", "char": "str", "ListNode": "ListNode | None", "TreeNode": "TreeNode | None"},
+		types: map[string]string{"int": "int", "long": "int", "double": "float", "bool": "bool", "string": "str", "char": "str", "ListNode": "ListNode | None", "TreeNode": "TreeNode | None", "void": "None"},
 		array: func(t string) string { return "list[" + t + "]" },
 		render: func(s Signature, name func(string) string, types func(string) string, indent string) string {
 			var b strings.Builder
 			nodeComments(&b, s, "# ", "None")
+			outputComment(&b, s, "# ", name)
 			params := make([]string, len(s.Params))
 			for i, p := range s.Params {
 				params[i] = name(p.Name) + ": " + types(p.Type)
@@ -33,7 +34,7 @@ var languages = map[string]language{
 	},
 	"javascript": {
 		name:  func(s string) string { return s },
-		types: map[string]string{"int": "number", "long": "number", "double": "number", "bool": "boolean", "string": "string", "char": "string", "ListNode": "ListNode | null", "TreeNode": "TreeNode | null"},
+		types: map[string]string{"int": "number", "long": "number", "double": "number", "bool": "boolean", "string": "string", "char": "string", "ListNode": "ListNode | null", "TreeNode": "TreeNode | null", "void": "void"},
 		array: func(t string) string {
 			if strings.Contains(t, " ") {
 				return "(" + t + ")[]"
@@ -43,6 +44,7 @@ var languages = map[string]language{
 		render: func(s Signature, name func(string) string, types func(string) string, indent string) string {
 			var b strings.Builder
 			nodeComments(&b, s, "// ", "null")
+			outputComment(&b, s, "// ", name)
 			b.WriteString("/**\n")
 			params := make([]string, len(s.Params))
 			for i, p := range s.Params {
@@ -89,6 +91,17 @@ func nodeComments(b *strings.Builder, s Signature, comment, empty string) {
 	}
 	if uses("ListNode") || uses("TreeNode") {
 		b.WriteString("\n")
+	}
+}
+
+func outputComment(b *strings.Builder, s Signature, comment string, name func(string) string) {
+	switch {
+	case s.Output == "":
+		return
+	case s.Returns == "void":
+		b.WriteString(comment + "Modify " + name(s.Output) + " in place; nothing is returned.\n\n")
+	default:
+		b.WriteString(comment + "Return k and put the answer in the first k items of " + name(s.Output) + ".\n\n")
 	}
 }
 

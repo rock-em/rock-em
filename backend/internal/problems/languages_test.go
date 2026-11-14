@@ -156,6 +156,39 @@ func TestSignatureRejectsMismatchedTests(t *testing.T) {
 		}
 	}
 }
+func TestSignatureOutput(t *testing.T) {
+	nums := Param{"nums", "int[]"}
+	merge := Signature{Function: "merge", Params: []Param{nums, {"m", "int"}}, Returns: "void", Output: "nums"}
+	if !merge.valid() || !merge.accepts(Test{Args: raw(`[1,0]`, `1`), Expected: json.RawMessage(`[1,2]`)}) {
+		t.Fatal("void signature rejected")
+	}
+	if merge.accepts(Test{Args: raw(`[1,0]`, `1`), Expected: json.RawMessage(`3`)}) {
+		t.Fatal("void signature should check the changed argument's type")
+	}
+	remove := Signature{Function: "removeElement", Params: []Param{nums, {"val", "int"}}, Returns: "int", Output: "nums"}
+	if !remove.valid() || !remove.accepts(Test{Args: raw(`[3,2,2,3]`, `3`), Expected: json.RawMessage(`[2,2]`)}) {
+		t.Fatal("first k signature rejected")
+	}
+	for _, bad := range []Signature{
+		{Function: "f", Params: []Param{nums}, Returns: "void"},
+		{Function: "f", Params: []Param{nums}, Returns: "void", Output: "missing"},
+		{Function: "f", Params: []Param{nums}, Returns: "bool", Output: "nums"},
+		{Function: "f", Params: []Param{{"n", "int"}}, Returns: "int", Output: "n"},
+		{Function: "f", Params: []Param{{"v", "void"}}, Returns: "int"},
+	} {
+		if bad.valid() {
+			t.Fatalf("accepted %+v", bad)
+		}
+	}
+	py := languages["python"].starter(merge, "    ")
+	if !strings.Contains(py, "# Modify nums in place; nothing is returned.\n\ndef merge(nums: list[int], m: int) -> None:") {
+		t.Fatal(py)
+	}
+	js := languages["javascript"].starter(remove, "  ")
+	if !strings.HasPrefix(js, "// Return k and put the answer in the first k items of nums.\n") || !strings.Contains(js, "@return {number}") {
+		t.Fatal(js)
+	}
+}
 func raw(values ...string) []json.RawMessage {
 	result := make([]json.RawMessage, len(values))
 	for i, v := range values {

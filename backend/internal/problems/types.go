@@ -19,10 +19,13 @@ type Summary struct {
 }
 
 // Signature is the one language-agnostic contract; runners map its types to native ones.
+// Output names a parameter the solution changes in place. With a void return
+// the parameter's final value is checked; with an int return k, its first k items.
 type Signature struct {
 	Function string  `json:"function"`
 	Params   []Param `json:"params"`
 	Returns  string  `json:"returns"`
+	Output   string  `json:"output,omitempty"`
 }
 type Param struct {
 	Name string `json:"name"`
@@ -114,7 +117,7 @@ func (in *Input) valid() bool {
 	if in.Compare == "" {
 		in.Compare = "exact"
 	}
-	if in.Signature == nil || !in.Signature.valid() || (in.Compare != "exact" && in.Compare != "unordered") || (in.Compare == "unordered" && !strings.HasSuffix(in.Signature.Returns, "[]")) {
+	if in.Signature == nil || !in.Signature.valid() || (in.Compare != "exact" && in.Compare != "unordered") || (in.Compare == "unordered" && !strings.HasSuffix(in.Signature.checked(), "[]")) {
 		return false
 	}
 	if len(in.Tests) == 0 || len(in.Tests) > 100 {
@@ -143,7 +146,7 @@ func (in *Input) valid() bool {
 }
 
 func (s *Signature) valid() bool {
-	if !identPattern.MatchString(s.Function) || !typePattern.MatchString(s.Returns) || len(s.Params) > 10 {
+	if !identPattern.MatchString(s.Function) || (!typePattern.MatchString(s.Returns) && s.Returns != "void") || len(s.Params) > 10 {
 		return false
 	}
 	if s.Params == nil {
@@ -156,7 +159,21 @@ func (s *Signature) valid() bool {
 		}
 		names[p.Name] = true
 	}
-	return true
+	if s.Output == "" {
+		return s.Returns != "void"
+	}
+	output := s.checked()
+	return names[s.Output] && (s.Returns == "void" || (s.Returns == "int" && strings.HasSuffix(output, "[]")))
+}
+
+// checked is the type of the value tests compare against.
+func (s *Signature) checked() string {
+	for _, p := range s.Params {
+		if s.Output != "" && p.Name == s.Output {
+			return p.Type
+		}
+	}
+	return s.Returns
 }
 
 // accepts reports whether the test's JSON values have the signature's shapes.
@@ -169,7 +186,7 @@ func (s *Signature) accepts(t Test) bool {
 			return false
 		}
 	}
-	return valueMatches(s.Returns, t.Expected)
+	return valueMatches(s.checked(), t.Expected)
 }
 
 func valueMatches(typ string, raw json.RawMessage) bool {
