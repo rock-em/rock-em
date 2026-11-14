@@ -50,18 +50,61 @@ func TestConvertTwoSum(t *testing.T) {
 	}
 }
 
-func TestConvertSkipsUncheckableProblems(t *testing.T) {
+func TestConvertInPlaceProblems(t *testing.T) {
 	problems := sample(t)
-	cases := map[string]string{
-		"merge-sorted-array":                  "in place",
-		"remove-element":                      "custom judge",
-		"remove-duplicates-from-sorted-array": "custom judge",
+	cases := []struct {
+		slug, returns, output, compare, expected string
+	}{
+		{"merge-sorted-array", "void", "nums1", "exact", "[1,2,2,3,5,6]"},
+		{"remove-element", "int", "nums", "unordered", "[2,2]"},
+		{"remove-duplicates-from-sorted-array", "int", "nums", "exact", "[1,2]"},
+		{"remove-duplicates-from-sorted-array-ii", "int", "nums", "exact", "[1,1,2,2,3]"},
 	}
-	for slug, reason := range cases {
-		_, err := Convert(problems[slug])
-		if err == nil || !strings.Contains(err.Error(), reason) {
-			t.Errorf("%s: err = %v, want %q", slug, err, reason)
+	for _, c := range cases {
+		in, err := Convert(problems[c.slug])
+		if err != nil {
+			t.Errorf("%s: %v", c.slug, err)
+			continue
 		}
+		if in.Signature.Returns != c.returns || in.Signature.Output != c.output || in.Compare != c.compare || string(in.Tests[0].Expected) != c.expected {
+			t.Errorf("%s: returns=%s output=%s compare=%s expected=%s", c.slug, in.Signature.Returns, in.Signature.Output, in.Compare, in.Tests[0].Expected)
+		}
+	}
+}
+
+func TestConvertSkipsOtherCustomJudges(t *testing.T) {
+	p := sample(t)["remove-element"]
+	p.Description = strings.Replace(p.Description, "assert nums[i] == expectedNums[i];", "assert check(nums);", 1)
+	if _, err := Convert(p); err == nil || !strings.Contains(err.Error(), "custom judge") {
+		t.Fatalf("err = %v, want custom judge", err)
+	}
+}
+
+func TestFirstK(t *testing.T) {
+	cases := map[string]string{
+		"2, nums = [2,2,_,_]":         "[2,2]",
+		"5, nums = [0,1,4,0,3,_,_,_]": "[0,1,4,0,3]",
+		"0, nums = [_]":               "[]",
+	}
+	for output, want := range cases {
+		if got, err := firstK(output, "nums"); err != nil || got != want {
+			t.Errorf("firstK(%q) = %q, %v; want %q", output, got, err, want)
+		}
+	}
+	for _, output := range []string{"2, arr = [1,2]", "3, nums = [1,2]", "[1,2]"} {
+		if _, err := firstK(output, "nums"); err == nil {
+			t.Errorf("firstK(%q) should fail", output)
+		}
+	}
+}
+
+func TestSignatureFindsChangedArgument(t *testing.T) {
+	sig, err := signature("class Solution:\n    def rotate(self, nums: List[int], k: int) -> None:\n")
+	if err != nil || sig.Returns != "void" || sig.Output != "nums" {
+		t.Fatalf("signature = %+v, %v", sig, err)
+	}
+	if _, err := signature("class Solution:\n    def f(self, a: List[int], b: List[int]) -> None:\n"); err == nil {
+		t.Fatal("two list arguments without a docstring should be ambiguous")
 	}
 }
 

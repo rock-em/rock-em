@@ -71,7 +71,7 @@ go run ./cmd/import ../scripts/scraper/sample.json
 go run ./cmd/import -dry-run top150.json   # just report what would be imported
 ```
 
-Each problem gets its signature from the `python3` snippet and its example tests from `example_testcases`, paired with the `Output:` lines in the description. Problems that can't be checked with plain input/output tests are skipped with a reason: in-place edits, custom judges, design classes and unsupported types. Slugs that already exist are left untouched, so rerunning an import is safe.
+Each problem gets its signature from the `python3` snippet and its example tests from `example_testcases`, paired with the `Output:` lines in the description. In-place problems are imported too: a method that returns `None` is checked on the argument its docstring says to modify, and the common "return k, then check the first k items of nums" custom judge is checked on those k items. Anything else is skipped with a reason, like other custom judges, design classes and unsupported types. Slugs that already exist are left untouched, so rerunning an import is safe.
 
 ## Tests
 

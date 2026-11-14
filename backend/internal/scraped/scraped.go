@@ -32,11 +32,16 @@ var (
 	defPattern     = regexp.MustCompile(`def (\w+)\(self(?:, ([^)]*))?\) -> (.+):`)
 	examplePattern = regexp.MustCompile(`(?m)^Example \d+:\s*$`)
 	sectionPattern = regexp.MustCompile(`(?m)^(Constraints|Follow[- ]up):`)
+	inPlacePattern = regexp.MustCompile(`modify (\w+) in-place`)
+	judgePattern   = regexp.MustCompile(`assert (\w+)\[i\] == expected\w*\[i\]`)
+	sortedPattern  = regexp.MustCompile(`sort\(\w+, 0, k\)`)
+	prefixPattern  = regexp.MustCompile(`^(\d+), (\w+) = \[(.*)\]$`)
 )
 
-// Convert builds an API problem from a scraped one. Problems that can't be
-// checked with plain input/output tests (in-place edits, custom judges,
-// design classes) return an error explaining why.
+// Convert builds an API problem from a scraped one. In-place problems and the
+// usual "return k, then check the first k items" custom judge are supported.
+// Anything else that can't be checked with input/output tests (other custom
+// judges, design classes) returns an error explaining why.
 func Convert(p Problem) (problems.Input, error) {
 	var in problems.Input
 	if strings.TrimSpace(p.Description) == "" {
@@ -48,19 +53,25 @@ func Convert(p Problem) (problems.Input, error) {
 	if len(p.Topics) == 0 {
 		return in, errors.New("no topics")
 	}
-	if strings.Contains(p.Description, "Custom Judge:") {
-		return in, errors.New("uses a custom judge")
-	}
 	sig, err := signature(p.CodeSnippets["python3"])
 	if err != nil {
 		return in, err
+	}
+	prefix, sorted := "", false
+	if strings.Contains(p.Description, "Custom Judge:") {
+		m := judgePattern.FindStringSubmatch(p.Description)
+		if m == nil || sig.Returns != "int" {
+			return in, errors.New("uses a custom judge")
+		}
+		prefix, sorted = m[1], sortedPattern.MatchString(p.Description)
+		sig.Output = prefix
 	}
 	statement, examples, constraints, followUp := split(p.Description)
 	if len(examples) != len(p.ExampleTestcases) {
 		return in, fmt.Errorf("%d examples in the description but %d test cases", len(examples), len(p.ExampleTestcases))
 	}
 	for i, example := range examples {
-		test, err := exampleTest(p.ExampleTestcases[i], example)
+		test, err := exampleTest(p.ExampleTestcases[i], example, prefix)
 		if err != nil {
 			return in, fmt.Errorf("example %d: %w", i+1, err)
 		}
@@ -80,7 +91,7 @@ func Convert(p Problem) (problems.Input, error) {
 	in.Constraints = constraints
 	in.Signature = &sig
 	in.Compare = "exact"
-	if strings.HasSuffix(sig.Returns, "[]") && strings.Contains(strings.ToLower(statement), "in any order") {
+	if sorted || (strings.HasSuffix(sig.Returns, "[]") && strings.Contains(strings.ToLower(statement), "in any order")) {
 		in.Compare = "unordered"
 	}
 	if err := in.Check(); err != nil {
@@ -100,10 +111,10 @@ func signature(code string) (problems.Signature, error) {
 	if m == nil {
 		return sig, errors.New("no python3 solution method")
 	}
-	if m[3] == "None" {
-		return sig, errors.New("modifies its input in place")
+	returns, ok := "void", true
+	if m[3] != "None" {
+		returns, ok = pyType(m[3])
 	}
-	returns, ok := pyType(m[3])
 	if !ok {
 		return sig, fmt.Errorf("unsupported return type %s", m[3])
 	}
@@ -116,7 +127,30 @@ func signature(code string) (problems.Signature, error) {
 		}
 		sig.Params = append(sig.Params, problems.Param{Name: strings.TrimSpace(name), Type: t})
 	}
+	if returns == "void" {
+		if sig.Output = inPlaceParam(code, sig.Params); sig.Output == "" {
+			return sig, errors.New("returns nothing and it's unclear which argument changes")
+		}
+	}
 	return sig, nil
+}
+
+// inPlaceParam finds the argument a void method changes, from the starter's
+// docstring or, failing that, the only list argument.
+func inPlaceParam(code string, params []problems.Param) string {
+	if m := inPlacePattern.FindStringSubmatch(code); m != nil {
+		return m[1]
+	}
+	found := ""
+	for _, p := range params {
+		if strings.HasSuffix(p.Type, "[]") {
+			if found != "" {
+				return ""
+			}
+			found = p.Name
+		}
+	}
+	return found
 }
 
 func pyType(t string) (string, bool) {
@@ -231,8 +265,10 @@ func splitSections(text string) []string {
 }
 
 // exampleTest pairs one test case (a JSON value per line, in parameter order)
-// with the Output line from the matching example in the description.
-func exampleTest(testcase, example string) (problems.Test, error) {
+// with the Output line from the matching example in the description. For
+// custom judge problems the output looks like "2, nums = [2,2,_,_]" and only
+// the first k items are kept.
+func exampleTest(testcase, example, prefix string) (problems.Test, error) {
 	var test problems.Test
 	for _, line := range strings.Split(strings.TrimSpace(testcase), "\n") {
 		if !json.Valid([]byte(line)) {
@@ -245,6 +281,12 @@ func exampleTest(testcase, example string) (problems.Test, error) {
 		return test, errors.New("no output")
 	}
 	output := strings.TrimSpace(strings.SplitN(after, "\n", 2)[0])
+	if prefix != "" {
+		var err error
+		if output, err = firstK(output, prefix); err != nil {
+			return test, err
+		}
+	}
 	if !json.Valid([]byte(output)) {
 		return test, fmt.Errorf("output %q is not JSON", output)
 	}
@@ -253,6 +295,27 @@ func exampleTest(testcase, example string) (problems.Test, error) {
 		test.Explanation = shorten(strings.TrimSpace(strings.SplitN(after, "\n\n", 2)[0]), 2000)
 	}
 	return test, nil
+}
+
+func firstK(output, name string) (string, error) {
+	m := prefixPattern.FindStringSubmatch(output)
+	if m == nil || m[2] != name {
+		return "", fmt.Errorf("output %q is not in the form k, %s = [...]", output, name)
+	}
+	var k int
+	fmt.Sscan(m[1], &k)
+	items := strings.Split(m[3], ",")
+	for i, item := range items {
+		if strings.TrimSpace(item) == "_" {
+			items[i] = "null"
+		}
+	}
+	var values []json.RawMessage
+	if err := json.Unmarshal([]byte("["+strings.Join(items, ",")+"]"), &values); err != nil || k > len(values) {
+		return "", fmt.Errorf("output %q is not in the form k, %s = [...]", output, name)
+	}
+	b, err := json.Marshal(values[:k])
+	return string(b), err
 }
 
 func shorten(s string, limit int) string {
