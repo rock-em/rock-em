@@ -7,14 +7,14 @@ import "./LiquidMetalButton.css";
 const motionQuery = "(prefers-reduced-motion: reduce)";
 
 const metalUniforms = {
-  u_colorBack: [0, 0, 0, 0],
-  u_colorTint: [0.84, 0.88, 1, 1],
-  u_repetition: 2.25,
-  u_shiftRed: 0.02,
-  u_shiftBlue: 0.06,
-  u_contour: 0.55,
-  u_softness: 0.32,
-  u_distortion: 0.36,
+  u_colorBack: [0.75, 0.77, 0.8, 1],
+  u_colorTint: [1, 1, 1, 1],
+  u_repetition: 1.6,
+  u_shiftRed: 0.12,
+  u_shiftBlue: 0.2,
+  u_contour: 0.72,
+  u_softness: 0.18,
+  u_distortion: 0.85,
   u_angle: 24,
   u_shape: 0,
   u_isImage: false,
@@ -49,15 +49,7 @@ export function LiquidMetalButton(props: LiquidMetalButtonProps) {
         const { liquidMetalFragmentShader, ShaderMount } = await import("@paper-design/shaders");
         if (cancelled || !layer) return;
 
-        shaderRef.current = new ShaderMount(
-          layer,
-          liquidMetalFragmentShader,
-          metalUniforms,
-          undefined,
-          0,
-          900,
-          1,
-        );
+        shaderRef.current = new ShaderMount(layer, liquidMetalFragmentShader, metalUniforms, undefined, 0, 900, 1);
         syncMotion();
       } catch {
         if (!cancelled) layer?.replaceChildren();
