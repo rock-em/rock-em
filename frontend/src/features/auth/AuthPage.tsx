@@ -103,11 +103,7 @@ export function AuthPage({ mode }: { mode: Mode }) {
             {busy ? "Please wait…" : "Create account →"}
           </button>
         ) : (
-          <LiquidMetalButton
-            type="submit"
-            label={busy ? "Signing in…" : "Sign in"}
-            disabled={busy || checking}
-          />
+          <LiquidMetalButton type="submit" label={busy ? "Signing in…" : "Sign in"} disabled={busy || checking} />
         )}
       </form>
       <p className="auth-switch">

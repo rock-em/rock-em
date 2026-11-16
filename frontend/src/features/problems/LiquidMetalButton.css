@@ -4,107 +4,80 @@
   position: relative;
   isolation: isolate;
   display: inline-flex;
+  align-items: stretch;
   max-width: 100%;
-  padding: 2px;
+  padding: 1px;
   overflow: hidden;
+  border: 1px solid #8f97a6;
   border-radius: 999px;
-  background: linear-gradient(128deg, #f7faff, #626c8a 34%, #dce2ff 59%, #777da2 82%, #fff);
-  color: #f8faff;
+  background: linear-gradient(145deg, #f9fbfe, #929aa8 40%, #edf0f5 68%, #9ea6b3);
   text-decoration: none;
-  box-shadow: 0 5px 20px #0007, 0 0 22px #a2a8ff26;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  vertical-align: middle;
 }
 
 .liquid-metal-layer {
   position: absolute;
   z-index: -1;
-  inset: 0;
+  inset: -15%;
+  border-radius: inherit;
   pointer-events: none;
 }
 
 .liquid-metal-face {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  min-height: 46px;
-  padding: 5px 17px 5px 5px;
+  justify-content: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 0 12px;
   border-radius: inherit;
   background:
-    radial-gradient(ellipse at var(--highlight-x) var(--highlight-y), #7385b272, transparent 66%),
-    linear-gradient(180deg, #30364c, #0c101c 78%);
-  box-shadow: inset 0 1px 1px #e7ecff43;
-  font-size: 0.94rem;
+    radial-gradient(ellipse at var(--highlight-x) var(--highlight-y), #ffffff80, transparent 65%),
+    linear-gradient(115deg, #d9eaff40, #ffffff55 45%, #d8c3ff48 85%);
+  box-shadow:
+    inset 0 1px 1px #fffd,
+    inset 0 -1px 1px #50596c55;
+  color: #121722;
+  font-size: 0.875rem;
   font-weight: 700;
+  line-height: 1;
+  text-shadow:
+    0 0 3px #fff,
+    0 0 6px #ffffffe6;
+  white-space: nowrap;
 }
 
 .liquid-metal-icon {
-  display: grid;
-  flex: 0 0 34px;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border: 1px solid #dce2ff;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #fff, #929bb7 45%, #f5f6ff 69%, #b6bed5);
-  color: #111523;
-  box-shadow: inset 0 1px 2px #fff;
+  display: inline-flex;
 }
 
-.liquid-metal-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 9px 24px #0008, 0 0 24px #a2a8ff50;
+.liquid-metal-icon svg {
+  width: 13px;
+  height: 13px;
+  filter: drop-shadow(0 0 2px #fff);
 }
 
-.liquid-metal-button:active {
-  transform: translateY(0);
-}
-
-.liquid-metal-button:focus-visible {
-  outline: 2px solid #6d71cf;
-  outline-offset: 4px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .liquid-metal-button {
-    transition: none;
-  }
-
-  .liquid-metal-button:hover {
-    transform: none;
-  }
-
-  .liquid-metal-face {
-    background: linear-gradient(180deg, #30364c, #0c101c 78%);
-  }
-}
-
-button.liquid-metal-button {
-  border: 0;
-}
-
-.liquid-metal-face {
-  color: #f8faff;
+.account-nav > .liquid-metal-button:hover {
+  text-decoration: none;
 }
 
 .auth-form .liquid-metal-face {
   flex: 1;
-  justify-content: center;
+  min-height: 38px;
+}
+
+.liquid-metal-button:focus-visible {
+  outline: 2px solid #7167cf;
+  outline-offset: 3px;
 }
 
 .liquid-metal-button:disabled {
   cursor: wait;
   opacity: 0.65;
-  transform: none;
 }
 
-@media (max-width: 480px) {
-  .account-nav .liquid-metal-face {
-    min-height: 36px;
-    padding: 5px 10px;
-    white-space: nowrap;
-  }
-
-  .account-nav .liquid-metal-icon {
-    display: none;
+@media (prefers-reduced-motion: reduce) {
+  .liquid-metal-face {
+    background: linear-gradient(115deg, #d9eaff40, #ffffff55 45%, #d8c3ff48 85%);
   }
 }
