@@ -4,6 +4,7 @@ import { navigate } from "../../lib/router";
 import { useDismiss } from "../../lib/useDismiss";
 import { signOut } from "./api";
 import { useSession } from "./session";
+import { LiquidMetalButton } from "../problems/LiquidMetalButton";
 import "./auth.css";
 
 export function AccountMenu() {
@@ -57,7 +58,7 @@ export function AccountMenu() {
         </details>
       ) : (
         <>
-          <Link href="/sign-in">Sign in</Link>
+          <LiquidMetalButton href="/sign-in" label="Sign in" />
           <Link className="account-button" href="/sign-up">
             Sign up
           </Link>
