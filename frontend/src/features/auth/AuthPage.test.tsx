@@ -49,7 +49,8 @@ describe("AuthPage", () => {
       "/api/auth/login": () => jsonResponse(user),
       "/api/auth/logout": () => new Response(null, { status: 204 }),
     });
-await fillAndSubmit({ Email: user.email, Password: "test-password" }, "Sign in");    await waitFor(() => expect(window.location.pathname).toBe("/"));
+    await fillAndSubmit({ Email: user.email, Password: "test-password" }, "Sign in");
+    await waitFor(() => expect(window.location.pathname).toBe("/"));
     fireEvent.click(screen.getByText(user.displayName, { selector: ".profile-name" }));
     expect(screen.getByText(user.email)).toBeVisible();
     const login = fetch.mock.calls.findIndex(
