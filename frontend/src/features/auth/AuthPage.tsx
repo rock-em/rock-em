@@ -4,6 +4,7 @@ import { navigate } from "../../lib/router";
 import { signIn, signUp } from "./api";
 import { AuthLayout } from "./AuthLayout";
 import { useSession } from "./session";
+import { LiquidMetalButton } from "../problems/LiquidMetalButton";
 
 type Mode = "sign-in" | "sign-up";
 
@@ -97,9 +98,17 @@ export function AuthPage({ mode }: { mode: Mode }) {
             {error}
           </p>
         )}
-        <button className="auth-submit" disabled={busy || checking}>
-          {busy ? "Please wait…" : signingUp ? "Create account →" : "Sign in →"}
-        </button>
+        {signingUp ? (
+          <button type="submit" className="auth-submit" disabled={busy || checking}>
+            {busy ? "Please wait…" : "Create account →"}
+          </button>
+        ) : (
+          <LiquidMetalButton
+            type="submit"
+            label={busy ? "Signing in…" : "Sign in"}
+            disabled={busy || checking}
+          />
+        )}
       </form>
       <p className="auth-switch">
         {signingUp ? "Already have an account? " : "New here? "}
