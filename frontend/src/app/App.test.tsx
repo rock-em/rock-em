@@ -3,7 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
 
 vi.mock("../features/problems/ChromeSculpture", () => ({
-  ChromeSculpture: ({ topic }: { topic: string }) => <div aria-label={`Sculpture for ${topic}`}>{topic}</div>,
+  ChromeSculpture: ({ topic, label = topic }: { topic: string; label?: string }) => (
+    <div aria-label={`Sculpture for ${topic}`}>{label}</div>
+  ),
 }));
 vi.mock("../features/workspace/CodeEditor", () => ({
   CodeEditor: ({
@@ -102,10 +104,10 @@ describe("API-backed pages", () => {
     expect(screen.getByRole("heading", { name: "Loading problems…" })).toBeVisible();
     expect(await screen.findByRole("link", { name: "Array API Task" })).toBeVisible();
     expect(screen.getAllByRole("link", { name: "rock em" })).toHaveLength(1);
-    expect(screen.getByRole("status")).toHaveTextContent("3 problems · 0 solved");
+    expect(screen.getByRole("status")).toHaveTextContent(/^3 problems$/);
     expect(screen.queryByText("Two Sum")).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Your Practice Dashboard" })).not.toBeInTheDocument();
-    expect(await screen.findByLabelText("Sculpture for All problems")).toBeVisible();
+    expect(await screen.findByLabelText("Sculpture for All problems")).toHaveTextContent("0 / 3 solved");
   });
 
   it("filters by a secondary topic and difficulty, sorts, and keeps the filters in the URL", async () => {
