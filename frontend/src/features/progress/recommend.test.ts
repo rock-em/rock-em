@@ -3,7 +3,17 @@ import type { ProblemListItem } from "../problems/model";
 import type { AttemptStats } from "./attempts";
 import { recommend, summarize } from "./recommend";
 
-const problem = (id: string): ProblemListItem => ({ id, title: id, topic: "Arrays", difficulty: "easy" });
+const problem = (
+  id: string,
+  topic = "Arrays",
+  difficulty: ProblemListItem["difficulty"] = "easy",
+): ProblemListItem => ({
+  id,
+  title: id,
+  topic,
+  topics: [topic],
+  difficulty,
+});
 const stats = (overrides: Partial<AttemptStats>): AttemptStats => ({
   attempts: 1,
   successes: 1,
@@ -29,6 +39,17 @@ describe("recommend", () => {
       ["new", "New problem"],
       ["onTrack", "On track"],
     ]);
+  });
+
+  it("suggests new problems from practiced topics first, easiest first", () => {
+    const catalog = [
+      problem("other-easy", "Graphs"),
+      problem("same-hard", "Stack", "hard"),
+      problem("same-easy", "Stack"),
+      problem("tried", "Stack"),
+    ];
+    const order = recommend(catalog, { tried: stats({ nextReview: future }) }, now);
+    expect(order.map((item) => item.id)).toEqual(["same-easy", "same-hard", "other-easy", "tried"]);
   });
 
   it("returns at most the requested number of problems", () => {

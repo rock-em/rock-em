@@ -8,7 +8,7 @@ vi.mock("../problems/ChromeSculpture", () => ({ ChromeSculpture: () => null }));
 const user = { id: 1, displayName: "Sam Rivers", role: "admin", email: "sam@example.com" };
 const guest = {
   "/api/auth/me": () => jsonResponse({ error: "unauthorized" }, 401),
-  "/api/problems": () => jsonResponse([]),
+  "/api/catalog": () => jsonResponse({ topics: [], problems: [] }),
 };
 
 function open(path: string, routes: Parameters<typeof routedFetch>[0] = {}) {

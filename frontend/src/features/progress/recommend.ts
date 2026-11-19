@@ -1,4 +1,4 @@
-import type { ProblemListItem } from "../problems/model";
+import { difficultyOrder, type ProblemListItem } from "../problems/model";
 import type { AttemptHistory } from "./attempts";
 
 export type Recommendation = ProblemListItem & { priority: number; reason: string };
@@ -33,8 +33,13 @@ export function recommend(
   now: number,
   limit = 5,
 ): Recommendation[] {
+  // Among problems not tried yet, suggest ones in topics already being
+  // practiced, easiest first, rather than whatever comes first in the catalog.
+  const practiced = new Set(problems.filter((problem) => history[problem.id]).flatMap((problem) => problem.topics));
+  const fit = (problem: ProblemListItem) =>
+    (problem.topics.some((topic) => practiced.has(topic)) ? 0 : 3) + difficultyOrder[problem.difficulty];
   return problems
     .map((problem) => classify(problem, history, now))
-    .sort((a, b) => a.priority - b.priority)
+    .sort((a, b) => a.priority - b.priority || fit(a) - fit(b))
     .slice(0, limit);
 }

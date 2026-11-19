@@ -39,24 +39,16 @@ describe("problem language discovery", () => {
   });
 });
 
-describe("catalog pagination", () => {
-  it("loads every page of summaries without fetching problem details", async () => {
-    const first = Array.from({ length: 100 }, (_, index) => ({
-      slug: `task-${index}`,
-      title: `Task ${index}`,
-      category: "API topic",
-      difficulty: "easy",
-      shortDescription: "Summary",
-    }));
-    const fetch = vi
-      .fn()
-      .mockResolvedValueOnce(new Response(JSON.stringify(first)))
-      .mockResolvedValueOnce(new Response(JSON.stringify([{ ...first[0], slug: "last-task" }])));
+describe("catalog", () => {
+  it("loads every problem in one request", async () => {
+    const catalog = {
+      topics: [{ slug: "array", name: "Array" }],
+      problems: [{ slug: "two-sum", title: "Two Sum", difficulty: "easy", topics: [0] }],
+    };
+    const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify(catalog)));
     vi.stubGlobal("fetch", fetch);
-    const problems = await getProblemCatalog();
-    expect(problems).toHaveLength(101);
-    expect(problems.at(-1)?.slug).toBe("last-task");
-    expect(new URL(fetch.mock.calls[1][0].url).searchParams.get("offset")).toBe("100");
-    expect(new URL(fetch.mock.calls[0][0].url).pathname).toBe("/api/problems");
+    expect(await getProblemCatalog()).toEqual(catalog);
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(new URL(fetch.mock.calls[0][0].url).pathname).toBe("/api/catalog");
   });
 });

@@ -70,7 +70,7 @@
 }
 
 .solved-label {
-  color: #267047;
+  color: var(--color-good);
 }
 
 .problem-description {
@@ -80,8 +80,8 @@
 .example {
   padding: 14px 16px;
   margin: 12px 0;
-  background: #f7f7f7;
-  border-left: 2px solid #ccc;
+  background: var(--color-surface);
+  border-left: 2px solid var(--color-border-strong);
   overflow-wrap: anywhere;
 }
 
@@ -126,7 +126,7 @@
 }
 
 .reset-button:hover {
-  color: #111;
+  color: var(--color-strong);
   text-decoration: underline;
 }
 
@@ -151,7 +151,7 @@
 .code-loading {
   margin: 0;
   padding: 20px;
-  background: #fcfcfc;
+  background: var(--color-surface);
   color: var(--color-text);
   font-family: var(--font-mono);
   font-size: 14px;
@@ -181,9 +181,9 @@
   padding: 4px 8px;
   font: inherit;
   font-size: 13px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-strong);
   border-radius: 3px;
-  background: #fff;
+  background: var(--color-bg);
   color: var(--color-text);
 }
 
@@ -212,8 +212,8 @@
 .test-case {
   padding: 12px 14px;
   margin-top: 10px;
-  background: #f8f8f8;
-  border-left: 3px solid #bbb;
+  background: var(--color-surface);
+  border-left: 3px solid var(--color-border-strong);
   overflow-wrap: anywhere;
   font-size: 13px;
 }
@@ -223,17 +223,17 @@
 }
 
 .test-pass {
-  border-left-color: #4b8b63;
+  border-left-color: var(--color-good);
 }
 
 .test-fail {
-  border-left-color: #b95b5b;
+  border-left-color: var(--color-bad);
 }
 
 .runner-note {
   margin: 0;
   padding: 0 20px 20px;
-  color: #888;
+  color: var(--color-subtle);
   font-size: 12px;
 }
 

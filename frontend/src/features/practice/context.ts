@@ -1,17 +1,18 @@
 import { createContext, useContext } from "react";
 import type { Problem, ProblemListItem } from "../problems/model";
 
+export type TopicCount = { name: string; count: number };
+
 export type Practice = {
   catalog: { loading: boolean; error: string; retry: () => void };
   problems: ProblemListItem[];
-  topics: string[];
-  topic: string;
-  setTopic: (topic: string) => void;
+  /** Every topic any problem is tagged with, most problems first. */
+  topics: TopicCount[];
   generated: Problem[];
   addGenerated: (problem: Problem) => void;
   drafts: Record<string, string>;
   setDraft: (key: string, code: string) => void;
-  solved: string[];
+  solved: ReadonlySet<string>;
   markSolved: (id: string) => void;
   languages: Record<string, string>;
   setLanguage: (problemId: string, language: string) => void;

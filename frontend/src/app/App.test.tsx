@@ -25,35 +25,38 @@ vi.mock("../features/workspace/CodeEditor", () => ({
     />
   ),
 }));
-const catalog = [
+const details = [
   {
     slug: "array-api-task",
     title: "Array API Task",
     category: "Arrays",
+    topics: ["Arrays", "Hashing"],
     difficulty: "easy",
-    shortDescription: "From the server",
   },
-  {
-    slug: "stack-api-task",
-    title: "Stack API Task",
-    category: "Stack",
-    difficulty: "medium",
-    shortDescription: "From the server",
-  },
+  { slug: "stack-api-task", title: "Stack API Task", category: "Stack", topics: ["Stack"], difficulty: "medium" },
   {
     slug: "graph-api-task",
     title: "Graph API Task",
     category: "Graphs",
+    topics: ["Graphs", "Hashing"],
     difficulty: "hard",
-    shortDescription: "From the server",
   },
-];
+].map((problem) => ({ ...problem, shortDescription: "From the server" }));
+const topicNames = ["Arrays", "Hashing", "Stack", "Graphs"];
+const catalog = {
+  topics: topicNames.map((name) => ({ slug: name.toLowerCase(), name })),
+  problems: details.map(({ slug, title, difficulty, topics }) => ({
+    slug,
+    title,
+    difficulty,
+    topics: topics.map((name) => topicNames.indexOf(name)),
+  })),
+};
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 const detailFor = (slug: string, language: string) => ({
-  ...(catalog.find((problem) => problem.slug === slug) ?? catalog[0]),
+  ...(details.find((problem) => problem.slug === slug) ?? details[0]),
   language,
-  topics: [(catalog.find((problem) => problem.slug === slug) ?? catalog[0]).category],
   description: "The statement supplied by the API.",
   constraints: ["value is an integer"],
   signature: { function: "solve", params: [{ name: "value", type: "int" }], returns: "int" },
@@ -70,7 +73,7 @@ function handler(request: RequestInfo | URL) {
     "http://localhost",
   );
   if (url.pathname === "/api/auth/me") return Promise.resolve(json({}, 401));
-  if (url.pathname === "/api/problems") return Promise.resolve(json(catalog));
+  if (url.pathname === "/api/catalog") return Promise.resolve(json(catalog));
   if (url.pathname.endsWith("/languages")) return Promise.resolve(json(["python", "javascript"]));
   if (url.pathname.startsWith("/api/problems/")) {
     const slug = url.pathname.split("/").at(-1)!;
@@ -94,18 +97,49 @@ function explore(name: string) {
 }
 
 describe("API-backed pages", () => {
-  it("shows API problems and categories without a demo fallback or fake completions", async () => {
+  it("lists API problems with every topic and no demo fallback or fake completions", async () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: "Loading problems…" })).toBeVisible();
-    expect(await screen.findByRole("button", { name: /Array API Task/ })).toBeVisible();
+    expect(await screen.findByRole("link", { name: "Array API Task" })).toBeVisible();
     expect(screen.getAllByRole("link", { name: "rock em" })).toHaveLength(1);
-    expect(screen.getByLabelText("Sculpture for Arrays")).toBeVisible();
-    expect(screen.getByText(/0 \/ 1 solved/)).toBeVisible();
+    expect(screen.getByRole("status")).toHaveTextContent("3 problems · 0 solved");
     expect(screen.queryByText("Two Sum")).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Your Practice Dashboard" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Next topic" }));
-    expect(screen.getByRole("button", { name: /Stack API Task/ })).toBeVisible();
+    expect(await screen.findByLabelText("Sculpture for All problems")).toBeVisible();
+  });
+
+  it("filters by a secondary topic and difficulty, sorts, and keeps the filters in the URL", async () => {
+    render(<App />);
+    await screen.findByRole("link", { name: "Array API Task" });
+    const titles = () =>
+      screen
+        .getAllByRole("row")
+        .slice(1)
+        .map((row) => row.querySelector("a")?.textContent);
+
+    fireEvent.click(screen.getByRole("button", { name: /^Hashing/ }));
+    expect(titles()).toEqual(["Array API Task", "Graph API Task"]);
+    expect(window.location.search).toBe("?topic=Hashing");
+
+    fireEvent.click(screen.getByRole("button", { name: "Hard" }));
+    expect(titles()).toEqual(["Graph API Task"]);
+    expect(new URLSearchParams(window.location.search).get("difficulty")).toBe("hard");
+
+    fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sort by difficulty" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sort by difficulty" }));
+    expect(titles()).toEqual(["Graph API Task", "Stack API Task", "Array API Task"]);
+
+    fireEvent.change(screen.getByRole("searchbox", { name: "Search problems" }), { target: { value: "nothing" } });
+    expect(screen.getByText("No problems match these filters.")).toBeVisible();
+  });
+
+  it("opens with the filters from a shared URL", async () => {
+    window.history.replaceState(null, "", "/?topic=Stack");
+    render(<App />);
+    expect(await screen.findByRole("link", { name: "Stack API Task" })).toBeVisible();
+    expect(screen.queryByRole("link", { name: "Array API Task" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Stack/ })).toHaveAttribute("aria-pressed", "true");
   });
 
   it.each([
@@ -117,12 +151,12 @@ describe("API-backed pages", () => {
     window.history.replaceState(null, "", path);
     render(<App />);
     expect(await screen.findByRole("heading", { level: 1, name: heading })).toBeVisible();
-    expect(screen.queryByLabelText("Sculpture for Arrays")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/^Sculpture for/)).not.toBeInTheDocument();
   });
 
   it("loads details by slug and preserves independent language drafts across navigation", async () => {
     render(<App />);
-    fireEvent.click(await screen.findByRole("button", { name: /Array API Task/ }));
+    fireEvent.click(await screen.findByRole("link", { name: "Array API Task" }));
     expect(window.location.pathname).toBe("/problems/array-api-task");
     const python = await screen.findByRole("textbox", { name: "python solution" });
     expect(python).toHaveValue("def solve(value):\n    pass");
@@ -143,14 +177,14 @@ describe("API-backed pages", () => {
     fireEvent.change(screen.getByLabelText("Language"), { target: { value: "python" } });
     expect(await screen.findByRole("textbox", { name: "python solution" })).toHaveValue("python draft");
     fireEvent.click(screen.getByRole("link", { name: "rock em" }));
-    expect(await screen.findByLabelText("Sculpture for Arrays")).toBeVisible();
+    expect(await screen.findByRole("link", { name: "Array API Task" })).toBeVisible();
   });
 
   it("loads a direct problem URL even if the catalog is unavailable", async () => {
     window.history.replaceState(null, "", "/problems/graph-api-task");
     vi.mocked(fetch).mockImplementation((request) =>
       new URL(typeof request === "string" ? request : (request as Request).url, "http://localhost").pathname ===
-      "/api/problems"
+      "/api/catalog"
         ? Promise.resolve(json({}, 500))
         : handler(request as Request),
     );
@@ -166,29 +200,46 @@ describe("API-backed pages", () => {
     expect(screen.queryByText("Two Sum")).not.toBeInTheDocument();
     vi.mocked(fetch).mockImplementation(handler);
     fireEvent.click(screen.getByRole("button", { name: "Reload problems" }));
-    expect(await screen.findByRole("button", { name: /Array API Task/ })).toBeVisible();
+    expect(await screen.findByRole("link", { name: "Array API Task" })).toBeVisible();
   });
 
   it("handles an empty catalog", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(json([])));
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(json({ topics: [], problems: [] })));
     render(<App />);
     expect(await screen.findByRole("heading", { name: "No problems yet" })).toBeVisible();
-    expect(screen.queryByRole("button", { name: "Next topic" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 
-  it("shares API topic selection with learning paths and account navigation", async () => {
+  it("links learning paths, the filtered list and the review page together", async () => {
     render(<App />);
-    await screen.findByRole("button", { name: /Array API Task/ });
-    fireEvent.click(screen.getByRole("button", { name: "Next topic" }));
+    await screen.findByRole("link", { name: "Array API Task" });
     explore("Learning paths");
-    expect(screen.getByLabelText("Topic")).toHaveValue("Stack");
-    fireEvent.change(screen.getByLabelText("Topic"), { target: { value: "Graphs" } });
+    // Hashing is never a primary topic, yet it has a path with both of its problems.
+    fireEvent.click(screen.getByRole("link", { name: "Hashing" }));
+    expect(window.location.search).toBe("?topic=Hashing");
+    expect(screen.getByRole("heading", { level: 1, name: "Hashing" })).toBeVisible();
+    expect(screen.getByText("0/2 problems solved")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Graph API Task" })).toBeVisible();
+
     act(() => {
       window.history.replaceState(null, "", "/sign-in");
       window.dispatchEvent(new PopStateEvent("popstate"));
     });
     expect(screen.getByRole("heading", { name: "Welcome back." })).toBeVisible();
-    explore("Problems");
-    await waitFor(() => expect(screen.getByLabelText("Sculpture for Graphs")).toBeVisible());
+
+    explore("Practice review");
+    expect(screen.getByRole("status")).toHaveTextContent("Nothing to review yet.");
+    fireEvent.click(screen.getByRole("link", { name: "Hard" }));
+    await waitFor(() => expect(screen.getByRole("link", { name: "Graph API Task" })).toBeVisible());
+    expect(screen.queryByRole("link", { name: "Array API Task" })).not.toBeInTheDocument();
+  });
+
+  it("starts dark and remembers a switch to light", async () => {
+    render(<App />);
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    fireEvent.click(screen.getByRole("button", { name: "Light mode" }));
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(localStorage.getItem("rock-em:theme")).toBe("light");
+    expect(screen.getByRole("button", { name: "Dark mode" })).toBeVisible();
   });
 });
