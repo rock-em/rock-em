@@ -93,6 +93,7 @@ func Convert(p Problem) (problems.Input, error) {
 // since it's the only snippet with type hints we can map directly.
 func signature(code string) (problems.Signature, error) {
 	var sig problems.Signature
+	code = stripComments(code)
 	if strings.Contains(code, "class Solution") && strings.Count(code, "def ") > 1 {
 		return sig, errors.New("more than one method")
 	}
@@ -119,7 +120,25 @@ func signature(code string) (problems.Signature, error) {
 	return sig, nil
 }
 
+// stripComments drops comment lines, such as the commented-out ListNode and
+// TreeNode definitions LeetCode puts above class Solution.
+func stripComments(code string) string {
+	var kept []string
+	for _, line := range strings.Split(code, "\n") {
+		if !strings.HasPrefix(strings.TrimSpace(line), "#") {
+			kept = append(kept, line)
+		}
+	}
+	return strings.Join(kept, "\n")
+}
+
 func pyType(t string) (string, bool) {
+	// newer snippets write `X | None` instead of `Optional[X]`
+	if inner, ok := strings.CutSuffix(t, " | None"); ok {
+		t = "Optional[" + strings.TrimSpace(inner) + "]"
+	} else if inner, ok := strings.CutPrefix(t, "None | "); ok {
+		t = "Optional[" + strings.TrimSpace(inner) + "]"
+	}
 	if inner, ok := unwrap(t, "Optional"); ok {
 		// only nodes can be null in the test format
 		if inner == "ListNode" || inner == "TreeNode" {

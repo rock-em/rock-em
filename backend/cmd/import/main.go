@@ -29,8 +29,12 @@ func main() {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		var err error
-		if db, err = pgxpool.New(ctx, url); err != nil || db.Ping(ctx) != nil {
-			log.Fatal("could not connect to database")
+		// pgx masks the password in both of these errors
+		if db, err = pgxpool.New(ctx, url); err != nil {
+			log.Fatalf("invalid DATABASE_URL: %v", err)
+		}
+		if err = db.Ping(ctx); err != nil {
+			log.Fatalf("could not connect to database: %v", err)
 		}
 		defer db.Close()
 	}

@@ -77,6 +77,10 @@ func TestPyType(t *testing.T) {
 		"Optional[int]":            "",
 		"dict[str, int]":           "",
 		"List[Optional[TreeNode]]": "TreeNode[]",
+		"ListNode | None":          "ListNode",
+		"None | TreeNode":          "TreeNode",
+		"list[TreeNode | None]":    "TreeNode[]",
+		"int | None":               "",
 	}
 	for in, want := range cases {
 		got, ok := pyType(in)
@@ -85,6 +89,20 @@ func TestPyType(t *testing.T) {
 		} else if want != "" && got != want {
 			t.Errorf("pyType(%q) = %q, want %q", in, got, want)
 		}
+	}
+}
+
+func TestSignatureIgnoresCommentedNodeDefinition(t *testing.T) {
+	code := "# Definition for singly-linked list.\n# class ListNode:\n#     def __init__(self, val=0, next=None):\n#         self.val = val\n#         self.next = next\nclass Solution:\n    def addTwoNumbers(self, l1: ListNode | None, l2: ListNode | None) -> ListNode | None:\n        \n"
+	sig, err := signature(code)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sig.Function != "addTwoNumbers" || sig.Returns != "ListNode" || len(sig.Params) != 2 || sig.Params[1].Type != "ListNode" {
+		t.Fatalf("signature = %+v", sig)
+	}
+	if _, err := signature("class Solution:\n    def a(self) -> int:\n    def b(self) -> int:\n"); err == nil {
+		t.Fatal("two real methods should still be rejected")
 	}
 }
 
