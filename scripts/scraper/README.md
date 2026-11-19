@@ -1,29 +1,31 @@
 # Scraper
 
-Scrapes coding problems, the official editorial and the top community solutions into JSON. Uses only the Python 3.10+ standard library.
+Scrapes LeetCode problems into JSON through LeetCode's GraphQL API (`https://leetcode.com/graphql`). Uses only the Python 3.10+ standard library.
+
+It lists the problemset with `questionList`, then fetches problems 50 at a time in one aliased `question` query per request. The problem statement comes back from the API as HTML, so the script also writes a plain-text copy, `description`, which the importer parses for examples and constraints.
 
 ## Usage
 
 ```bash
-# A single problem
-python3 scraper.py https://example.com/problems/two-sum/ -o two-sum.json
+# Every free problem (about 3,300, roughly 5 minutes)
+python3 scraper.py -o problems.json
 
-# A study plan, problem list, tag or the whole problemset (mix freely; duplicates are removed)
-python3 scraper.py https://example.com/studyplan/top-interview-150/ -o top150.json
-python3 scraper.py https://example.com/problem-list/array/ --limit 50 -o array.json
-python3 scraper.py https://example.com/tag/dynamic-programming/ --limit 20
-python3 scraper.py https://example.com/problemset/ --limit 100 -n 0 --no-official
+# The first 100 problems of the problemset
+python3 scraper.py --limit 100 -o first100.json
+
+# Specific problems, by slug or URL
+python3 scraper.py two-sum https://leetcode.com/problems/add-two-numbers/ -o some.json
 ```
 
 | Flag | Meaning |
 | --- | --- |
-| `-o, --output` | Write to a file instead of stdout |
-| `-n, --community` | Top community solutions per problem, by votes (default 3, `0` to skip) |
-| `--no-official` | Skip the official editorial |
-| `--limit` | Max problems per list URL |
-| `--delay` | Seconds between requests (default 0.5) |
+| `-o, --output` | Write to a file instead of stdout. If the file exists, problems already in it are kept and skipped, so an interrupted run picks up where it stopped. |
+| `--limit` | Only the first N problems of the problemset |
+| `--batch` | Problems per request (default 50) |
+| `--delay` | Seconds between requests (default 1) |
+| `--premium` | Also fetch premium problems. Needs `SCRAPER_COOKIE` set to the `Cookie` header of a logged-in premium session. |
 
-The site to scrape is taken from each URL's host, and requests go to its `/graphql` endpoint. Progress is written to stderr. Set `SCRAPER_COOKIE` to the `Cookie` header from a logged-in browser session (e.g. `name=value`) to access premium problems, premium editorials and private or curated lists.
+Premium problems are skipped by default, because without a premium session the API returns no statement for them. Progress is written to stderr, and the output file is saved after every batch.
 
 ## Output
 
@@ -35,32 +37,19 @@ The site to scrape is taken from each URL's host, and requests go to its `/graph
       "slug": "two-sum",
       "title": "Two Sum",
       "difficulty": "easy",
-      "url": "https://example.com/problems/two-sum/",
+      "url": "https://leetcode.com/problems/two-sum/",
       "paid_only": false,
       "topics": ["Array", "Hash Table"],
       "description_html": "<p>...</p>",
       "description": "plain-text version",
       "hints": ["..."],
       "example_testcases": ["[2,7,11,15]\n9"],
-      "code_snippets": { "python3": "class Solution: ..." },
-      "answers": {
-        "official": {
-          "available": true,
-          "paid_only": false,
-          "content_markdown": "... <!-- code: WTVGRyeD --> ...",
-          "code_blocks": [{ "id": "WTVGRyeD", "code": { "python3": "...", "cpp": "..." } }]
-        },
-        "community": [
-          { "title": "...", "author": "...", "upvotes": 12171, "url": "...", "content_markdown": "..." }
-        ]
-      }
+      "code_snippets": { "python3": "class Solution: ..." }
     }
   ],
   "failures": [{ "slug": "...", "error": "..." }]
 }
 ```
-
-The `<!-- code: ID -->` markers in the editorial show where each entry in `code_blocks` belongs. `official` is `null` if the problem has no editorial, and `{"available": false}` if it is premium-only.
 
 ## Importing into the backend
 
@@ -68,7 +57,7 @@ The `<!-- code: ID -->` markers in the editorial show where each entry in `code_
 
 ```bash
 go run ./cmd/import ../scripts/scraper/sample.json
-go run ./cmd/import -dry-run top150.json   # just report what would be imported
+go run ./cmd/import -dry-run problems.json   # just report what would be imported
 ```
 
 Each problem gets its signature from the `python3` snippet and its example tests from `example_testcases`, paired with the `Output:` lines in the description. Problems that can't be checked with plain input/output tests are skipped with a reason: in-place edits, custom judges, design classes and unsupported types. Slugs that already exist are left untouched, so rerunning an import is safe.
