@@ -23,7 +23,7 @@
 
 .site-header-start {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 30px;
   min-width: 0;
 }
