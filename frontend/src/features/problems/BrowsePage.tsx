@@ -27,6 +27,8 @@ export function BrowsePage() {
   const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const page = Math.min(filters.page, pageCount);
   const visible = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  // Counted against the catalog, so a solved problem that was later removed is left out.
+  const solvedTotal = useMemo(() => problems.filter((problem) => solved.has(problem.id)).length, [problems, solved]);
   const solvedCount = rows.reduce((count, row) => count + (solved.has(row.problem.id) ? 1 : 0), 0);
 
   // Changing a filter returns to the first page; turning a page keeps the rest.
@@ -49,13 +51,15 @@ export function BrowsePage() {
     ? topics
     : topics.filter((topic, index) => index < TOPICS_SHOWN || filters.topics.includes(topic.name));
   const heroTopic = filters.topics[0] ?? "All problems";
+  // With no topic picked, the sculpture carries overall progress instead of a name.
+  const heroLabel = filters.topics[0] ?? `${solvedTotal.toLocaleString()} / ${problems.length.toLocaleString()} solved`;
 
   return (
     <main className="page browse-page">
       <h1 className="sr-only">Problems</h1>
       <div className="browse-hero">
         <Suspense fallback={<div className="browse-hero-placeholder" />}>
-          <ChromeSculpture key={heroTopic} topic={heroTopic} />
+          <ChromeSculpture key={heroTopic} topic={heroTopic} label={heroLabel} />
         </Suspense>
       </div>
 
@@ -121,8 +125,7 @@ export function BrowsePage() {
       <div className="results-bar" id="problem-results">
         <span role="status">
           {rows.length.toLocaleString()} {rows.length === 1 ? "problem" : "problems"}
-          {" · "}
-          {solvedCount.toLocaleString()} solved
+          {isFiltered(filters) && ` · ${solvedCount.toLocaleString()} solved`}
         </span>
         <span className="results-actions">
           {isFiltered(filters) && (

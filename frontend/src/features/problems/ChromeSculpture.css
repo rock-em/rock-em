@@ -36,11 +36,14 @@
   font-family: var(--font-serif);
   font-size: 26px;
   font-weight: normal;
+  /* Dark text on its own white glow, so it stays readable where it runs past
+     the sculpture onto a dark page. */
   color: #111;
-
   text-shadow:
-    0 1px 3px rgba(255, 255, 255, 0.9),
-    0 0 12px rgba(255, 255, 255, 0.7);
+    0 0 2px #fff,
+    0 0 4px #fff,
+    0 0 8px rgba(255, 255, 255, 0.9),
+    0 0 14px rgba(255, 255, 255, 0.7);
 
   pointer-events: none;
   user-select: none;

@@ -4,9 +4,11 @@ import { mergeVertices } from "three/addons/utils/BufferGeometryUtils.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import "./ChromeSculpture.css";
 
-type Props = { topic: string };
+// topic shapes the sculpture. The text drawn over it is the topic unless a
+// label is given, so the label can change without rebuilding the shape.
+type Props = { topic: string; label?: string };
 
-export function ChromeSculpture({ topic }: Props) {
+export function ChromeSculpture({ topic, label = topic }: Props) {
   const shapeSeed = Array.from(topic).reduce((sum, char) => sum + char.charCodeAt(0), 0);
   const mountRef = useRef<HTMLDivElement>(null);
   const pointer = useRef({ x: 0, y: 0, active: false, dragging: false });
@@ -209,7 +211,7 @@ export function ChromeSculpture({ topic }: Props) {
         }}
       />
       <div className="chrome-topic" aria-live="polite">
-        {topic}
+        {label}
       </div>
     </div>
   );
