@@ -79,6 +79,10 @@ func (s *apiServer) ListProblems(w http.ResponseWriter, r *http.Request, params 
 	s.p.List(w, r)
 }
 
+func (s *apiServer) GetCatalog(w http.ResponseWriter, r *http.Request) {
+	s.p.Catalog(w, r)
+}
+
 func (s *apiServer) CreateProblem(w http.ResponseWriter, r *http.Request) {
 	s.a.Require(true, s.p.Create)(w, r)
 }

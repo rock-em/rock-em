@@ -216,6 +216,39 @@
         }
       }
     },
+    "/api/catalog": {
+      "get": {
+        "operationId": "GetCatalog",
+        "summary": "GetCatalog",
+        "description": "Every published problem in one compact, cacheable response for browsing, filtering and sorting in the client. Problems list their topics as indexes into topics, primary topic first. Sends an ETag and answers If-None-Match with 304; gzip-encoded when accepted.",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not modified"
+          },
+          "default": {
+            "description": "Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
     "/api/problems": {
       "get": {
         "operationId": "ListProblems",
@@ -1808,6 +1841,73 @@
         "required": [
           "status"
         ],
+        "additionalProperties": false
+      },
+      "Catalog": {
+        "type": "object",
+        "required": [
+          "topics",
+          "problems"
+        ],
+        "properties": {
+          "topics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogTopic"
+            }
+          },
+          "problems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CatalogProblem"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "CatalogProblem": {
+        "type": "object",
+        "required": [
+          "slug",
+          "title",
+          "difficulty",
+          "topics"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "difficulty": {
+            "$ref": "#/components/schemas/Difficulty"
+          },
+          "topics": {
+            "type": "array",
+            "description": "Indexes into the catalog's topics, primary topic first.",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "CatalogTopic": {
+        "type": "object",
+        "required": [
+          "slug",
+          "name"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
         "additionalProperties": false
       },
       "Difficulty": {

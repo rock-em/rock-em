@@ -7,6 +7,15 @@ live (older binaries still read the dropped `topic` column).
 
 ## Problem data
 
+`GET /api/catalog` returns every published problem in one response for the
+browse page: `topics` (`slug`, `name`) and `problems` (`slug`, `title`,
+`difficulty`, and `topics` as indexes into the topic list, primary first). The
+API builds it once, keeps the JSON and its gzip in memory, and rebuilds after a
+problem is created, updated or deleted through the API, or after 30 seconds for
+changes made elsewhere such as the importer. It is sent with an `ETag` and
+`Cache-Control: public, max-age=30, stale-while-revalidate=300`, so a repeat
+visit costs a 304. `frontend/index.html` preloads it alongside the scripts.
+
 `GET /api/problems` returns only `slug`, `title`, `shortDescription`, `difficulty`,
 and `category`. Filters: `q`, `category` (`topic` remains an alias), `difficulty`,
 `limit` (default 50, maximum 100), and `offset`.

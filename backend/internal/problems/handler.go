@@ -15,7 +15,10 @@ import (
 	"github.com/rock-em/rock-em/backend/internal/httpapi"
 )
 
-type Handler struct{ db *pgxpool.Pool }
+type Handler struct {
+	db      *pgxpool.Pool
+	catalog catalogCache
+}
 
 func NewHandler(db *pgxpool.Pool) *Handler { return &Handler{db: db} }
 
@@ -190,6 +193,7 @@ func (h *Handler) write(w http.ResponseWriter, r *http.Request, create bool) {
 		fail(w, err)
 		return
 	}
+	h.catalog.reset()
 	status := 200
 	if create {
 		status = 201
@@ -207,6 +211,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		fail(w, pgx.ErrNoRows)
 		return
 	}
+	h.catalog.reset()
 	w.WriteHeader(204)
 }
 

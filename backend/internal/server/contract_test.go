@@ -49,11 +49,23 @@ func TestOpenAPIContractAndStubs(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+	w := httptest.NewRecorder()
+	h.ServeHTTP(w, httptest.NewRequest("GET", "/api/catalog", nil))
+	var catalog any
+	if err := json.Unmarshal(w.Body.Bytes(), &catalog); err != nil || w.Code != 200 {
+		t.Fatalf("/api/catalog: %d %v", w.Code, err)
+	}
+	if err := spec.Components.Schemas["Catalog"].Value.VisitJSON(catalog); err != nil {
+		t.Fatal(err)
+	}
+	if cache := w.Header().Get("Cache-Control"); !strings.Contains(cache, "max-age") {
+		t.Fatalf("catalog should be cacheable, got %q", cache)
+	}
 	email := fmt.Sprintf("stub-%d@example.com", time.Now().UnixNano())
 	t.Cleanup(func() { _, _ = db.Exec(context.Background(), `DELETE FROM users WHERE email=$1`, email) })
 	r := httptest.NewRequest("POST", "/api/auth/register", strings.NewReader(fmt.Sprintf(`{"email":%q,"password":"correct-horse-battery","displayName":"Stub Tester"}`, email)))
 	r.Header.Set("Content-Type", "application/json")
-	w := httptest.NewRecorder()
+	w = httptest.NewRecorder()
 	h.ServeHTTP(w, r)
 	if w.Code != 201 {
 		t.Fatal(w.Body.String())
