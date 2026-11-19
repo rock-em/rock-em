@@ -8,6 +8,7 @@ export async function toVerifiedProblem(generated: GeneratedProblem): Promise<Pr
   const { referenceSolution, ...fields } = generated;
   const problem: Problem = {
     ...fields,
+    topics: [fields.topic],
     referenceSolution,
     id: `generated-${crypto.randomUUID()}`,
     language: "javascript",

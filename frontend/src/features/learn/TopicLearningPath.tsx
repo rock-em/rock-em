@@ -7,7 +7,7 @@ import "./TopicLearningPath.css";
 type Props = {
   topic: string;
   problems: ProblemListItem[];
-  solvedIds: string[];
+  solved: ReadonlySet<string>;
   onOpenProblem: (id: string) => void;
 };
 
@@ -23,7 +23,7 @@ function readCheckedConcepts(): Record<string, string[]> {
   );
 }
 
-export function TopicLearningPath({ topic, problems, solvedIds, onOpenProblem }: Props) {
+export function TopicLearningPath({ topic, problems, solved, onOpenProblem }: Props) {
   const [checkedByTopic, setCheckedByTopic] = useState(readCheckedConcepts);
   const [expanded, setExpanded] = useState(false);
   useEffect(() => writeJson(STORAGE_KEY, checkedByTopic), [checkedByTopic]);
@@ -31,12 +31,12 @@ export function TopicLearningPath({ topic, problems, solvedIds, onOpenProblem }:
   const guide = guideFor(topic);
   const checked = checkedByTopic[topic] ?? [];
   const conceptCount = guide.concepts.filter((concept) => checked.includes(concept.title)).length;
-  const solvedCount = problems.filter((problem) => solvedIds.includes(problem.id)).length;
+  const solvedCount = problems.filter((problem) => solved.has(problem.id)).length;
   const conceptPercent = Math.round((conceptCount / guide.concepts.length) * 100);
   const problemPercent = problems.length ? Math.round((solvedCount / problems.length) * 100) : 0;
   const mastery = Math.round((conceptPercent + problemPercent) / 2);
   const next = problems
-    .filter((problem) => !solvedIds.includes(problem.id))
+    .filter((problem) => !solved.has(problem.id))
     .sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty])[0];
 
   function toggleConcept(title: string) {
@@ -54,7 +54,7 @@ export function TopicLearningPath({ topic, problems, solvedIds, onOpenProblem }:
       <div className="learning-path-heading">
         <div>
           <div className="learning-path-kicker">TOPIC LEARNING PATH</div>
-          <h2>{topic}</h2>
+          <h2>Concepts</h2>
         </div>
         <span className="learning-path-percent">{mastery}% complete</span>
       </div>
@@ -115,7 +115,7 @@ export function TopicLearningPath({ topic, problems, solvedIds, onOpenProblem }:
               ? next.title
               : problems.length
                 ? "You've solved every problem here!"
-                : "Generate your first problem below"}
+                : "No problems in this topic yet"}
           </strong>
           {next && (
             <span>

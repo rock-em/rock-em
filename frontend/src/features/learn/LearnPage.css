@@ -1,14 +1,38 @@
-.topic-picker {
-  display: grid;
-  gap: 6px;
-  max-width: 280px;
+.topic-table {
   margin-top: 28px;
 }
-.topic-picker select {
-  font: inherit;
-  padding: 9px 12px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  background: #fff;
-  color: var(--color-text);
+
+.learn-title {
+  margin-top: 18px;
+}
+
+.ladder {
+  margin-top: 28px;
+}
+
+.ladder h3 {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.ladder-count {
+  color: var(--color-subtle);
+  font-size: 13px;
+  font-weight: normal;
+}
+
+.ladder ol {
+  margin: 12px 0;
+  padding-left: 22px;
+}
+
+.ladder li {
+  padding: 3px 0;
+}
+
+.ladder li::marker {
+  color: var(--color-subtle);
 }

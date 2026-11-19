@@ -30,14 +30,73 @@
   font-display: swap;
 }
 
+/* Dark is the default theme. The header toggle sets data-theme="light". */
 :root {
+  color-scheme: dark;
+  --color-bg: #121314;
+  --color-surface: #1a1b1d;
+  --color-surface-strong: #26282b;
+  --color-text: #e4e4e0;
+  --color-strong: #fff;
+  --color-muted: #a9a9a4;
+  --color-subtle: #8d8d88;
+  --color-link: #8ab4f8;
+  --color-border: #303236;
+  --color-border-strong: #4b4e53;
+  --color-inverse-bg: #e4e4e0;
+  --color-inverse-hover: #c9c9c5;
+  --color-inverse-text: #121314;
+  --color-good: #6fbf8b;
+  --color-good-bg: #17281e;
+  --color-warn: #d9a441;
+  --color-warn-bg: #2d2412;
+  --color-bad: #e58a8a;
+  --color-bad-bg: #2e1919;
+  --color-info: #86aee0;
+  --color-info-bg: #16212e;
+  --code-keyword: #c792ea;
+  --code-string: #9ccc65;
+  --code-number: #f0a060;
+  --code-comment: #7f8580;
+  --code-type: #f48fb1;
+  --code-property: #7fcbe0;
+  --code-active-line: #1f2228;
+  --code-bracket: #2c3e5e;
+  --font-serif: Georgia, serif;
+  --font-mono: Consolas, "Courier New", monospace;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-bg: #fff;
+  --color-surface: #f8f8f8;
+  --color-surface-strong: #f1f1f1;
   --color-text: #222;
+  --color-strong: #111;
   --color-muted: #666;
   --color-subtle: #777;
   --color-link: #0645ad;
   --color-border: #ddd;
-  --font-serif: Georgia, serif;
-  --font-mono: Consolas, "Courier New", monospace;
+  --color-border-strong: #bbb;
+  --color-inverse-bg: #222;
+  --color-inverse-hover: #444;
+  --color-inverse-text: #fff;
+  --color-good: #267047;
+  --color-good-bg: #eaf5ed;
+  --color-warn: #946819;
+  --color-warn-bg: #fff4df;
+  --color-bad: #a03030;
+  --color-bad-bg: #fceaea;
+  --color-info: #456993;
+  --color-info-bg: #eef3fa;
+  --code-keyword: #8a2bb9;
+  --code-string: #2f7d32;
+  --code-number: #b35900;
+  --code-comment: #7a7a7a;
+  --code-type: #a3305a;
+  --code-property: #1d5c7a;
+  --code-active-line: #f3f6fb;
+  --code-bracket: #dbe7ff;
 }
 
 * {
@@ -46,7 +105,7 @@
 
 body {
   margin: 0;
-  background: #fff;
+  background: var(--color-bg);
   color: var(--color-text);
   font-family: "Atkinson Hyperlegible", Arial, sans-serif;
   font-size: 15px;
@@ -55,6 +114,7 @@ body {
 
 button,
 textarea,
+select,
 input {
   font: inherit;
 }
@@ -85,7 +145,7 @@ h1 {
 section {
   margin-top: 50px;
   padding-top: 8px;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid var(--color-border-strong);
 }
 
 h2 {
@@ -98,26 +158,26 @@ h2 {
 .submit-button {
   padding: 9px 17px;
   border-radius: 3px;
-  border: 1px solid #aaa;
+  border: 1px solid var(--color-border-strong);
 }
 
 .run-button {
-  background: #fff;
-  color: #333;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 .submit-button {
-  background: var(--color-text);
-  color: #fff;
-  border-color: var(--color-text);
+  background: var(--color-inverse-bg);
+  color: var(--color-inverse-text);
+  border-color: var(--color-inverse-bg);
 }
 
-.run-button:hover {
-  background: #f1f1f1;
+.run-button:hover:not(:disabled) {
+  background: var(--color-surface-strong);
 }
 
 .submit-button:hover {
-  background: #444;
+  background: var(--color-inverse-hover);
 }
 
 .run-button:disabled,
@@ -151,6 +211,10 @@ h2 {
   text-underline-offset: 4px;
 }
 
+.utility-page > h2 {
+  margin: 44px 0 6px;
+}
+
 .about-page {
   max-width: 620px;
 }
@@ -159,4 +223,70 @@ h2 {
   .page {
     margin: 32px auto;
   }
+}
+
+.text-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-link);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.text-button:focus-visible {
+  outline: 2px solid var(--color-link);
+  outline-offset: 3px;
+}
+
+/* Shared small pieces for the list pages: a thin progress bar and plain tables. */
+.meter {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-surface-strong);
+  overflow: hidden;
+}
+
+.meter > span {
+  display: block;
+  height: 100%;
+  background: var(--color-good);
+}
+
+.plain-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.plain-table th {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--color-border-strong);
+  color: var(--color-subtle);
+  font-size: 13px;
+  font-weight: normal;
+  text-align: left;
+}
+
+.plain-table td {
+  padding: 11px 6px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: baseline;
+}
+
+.plain-table .numeric {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.difficulty-easy {
+  color: var(--color-good);
+}
+
+.difficulty-medium {
+  color: var(--color-warn);
+}
+
+.difficulty-hard {
+  color: var(--color-bad);
 }

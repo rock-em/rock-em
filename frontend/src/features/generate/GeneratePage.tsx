@@ -6,7 +6,7 @@ import { toVerifiedProblem } from "./verify";
 import "./GeneratePage.css";
 
 export function GeneratePage() {
-  const { addGenerated, setTopic } = usePractice();
+  const { addGenerated } = usePractice();
   const [topic, setTopicInput] = useState("");
   const [theme, setTheme] = useState("");
   const [level, setLevel] = useState<Level>("intermediate");
@@ -23,7 +23,6 @@ export function GeneratePage() {
         await generateProblem({ topic: topic.trim(), theme: theme.trim(), level }),
       );
       addGenerated(problem);
-      setTopic(problem.topic);
       navigate(`/problems/${problem.id}`);
     } catch (failure) {
       setError(failure instanceof Error ? failure.message : String(failure));

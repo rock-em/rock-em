@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .site-header a {
@@ -28,6 +28,29 @@
   min-width: 0;
 }
 
+.site-header-end {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.theme-toggle {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-muted);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.theme-toggle-glyph {
+  display: none;
+}
+
+.theme-toggle:hover {
+  color: var(--color-strong);
+}
+
 .site-navigation {
   font-size: 14px;
 }
@@ -35,6 +58,7 @@
   position: relative;
 }
 .explore-menu summary {
+  white-space: nowrap;
   cursor: pointer;
   color: var(--color-muted);
 }
@@ -47,7 +71,7 @@
   padding: 8px;
   border: 1px solid var(--color-border);
   border-radius: 3px;
-  background: #fff;
+  background: var(--color-bg);
 }
 .explore-links a {
   display: block;
@@ -56,12 +80,12 @@
 }
 .explore-links a:hover,
 .explore-links a[aria-current="page"] {
-  background: #f5f5f5;
-  color: #111;
+  background: var(--color-surface-strong);
+  color: var(--color-strong);
 }
 
 .site-header :is(a, button, input, summary):focus-visible {
-  outline: 2px solid #555;
+  outline: 2px solid var(--color-muted);
   outline-offset: 3px;
 }
 
@@ -71,9 +95,29 @@
     gap: 12px;
   }
   .site-header-start {
-    gap: 14px;
+    gap: 10px;
   }
-  .site-navigation {
+  .site-brand {
+    font-size: 21px;
+  }
+  .site-navigation,
+  .theme-toggle {
     font-size: 13px;
+  }
+  .site-header-end,
+  .site-header-end .account-nav {
+    gap: 10px;
+  }
+  .theme-toggle-word {
+    display: none;
+  }
+  /* No room for the words next to the account buttons on a phone. */
+  .theme-toggle-glyph {
+    display: inline;
+    font-size: 17px;
+  }
+  .site-header-end .account-button {
+    padding: 7px 8px;
+    white-space: nowrap;
   }
 }

@@ -1,0 +1,22 @@
+.review-table th {
+  width: 34%;
+  padding: 11px 6px;
+  border-bottom: 1px solid var(--color-border);
+  color: inherit;
+  font-size: inherit;
+  vertical-align: baseline;
+}
+
+.review-table th a {
+  color: inherit;
+}
+
+.review-table .review-meter {
+  width: 46%;
+  vertical-align: middle;
+}
+
+/* Keep one solved problem out of hundreds visible on the bar. */
+.review-table .meter > span:not([style*=": 0%"]) {
+  min-width: 3px;
+}

@@ -43,11 +43,11 @@ export function WorkspacePage({ slug }: { slug: string }) {
           ← Back to problems
         </Link>
         <span className="workspace-counter">
-          {solved.length} / {problems.length} solved
+          {solved.size} / {problems.length} solved
         </span>
       </header>
       <div className="workspace-grid">
-        <ProblemStatement problem={problem} solved={solved.includes(problem.id)} />
+        <ProblemStatement problem={problem} solved={solved.has(problem.id)} />
         <SolutionPanel
           problem={problem}
           languages={generatedProblem ? ["javascript"] : detail.languages}

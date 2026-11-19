@@ -1,9 +1,9 @@
 .learning-path {
-  margin: 0 0 28px;
+  margin: 24px 0 28px;
   padding: 23px 25px;
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  background: #fff;
+  background: var(--color-bg);
 }
 
 .learning-path-heading,
@@ -18,7 +18,7 @@
 
 .learning-path-kicker,
 .learning-path-next small {
-  color: #888;
+  color: var(--color-subtle);
   font-size: 11px;
   letter-spacing: 1.1px;
 }
@@ -28,7 +28,7 @@
 }
 
 .learning-path-percent {
-  color: #555;
+  color: var(--color-muted);
   font-size: 13px;
   white-space: nowrap;
 }
@@ -42,7 +42,7 @@
 .learning-path-progress {
   height: 5px;
   overflow: hidden;
-  background: #eee;
+  background: var(--color-surface-strong);
   border-radius: 10px;
 }
 
@@ -50,7 +50,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: #333;
+  background: var(--color-inverse-bg);
   transition: width 0.25s ease;
 }
 
@@ -65,7 +65,7 @@
   margin-top: 22px;
   padding: 12px 0;
   border: 0;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--color-border);
   background: none;
   color: var(--color-link);
   text-align: left;
@@ -86,13 +86,13 @@
   align-items: flex-start;
   gap: 12px;
   padding: 11px 0;
-  border-top: 1px solid #f1f1f1;
+  border-top: 1px solid var(--color-border);
   cursor: pointer;
 }
 
 .learning-path-concept input {
   margin: 5px 0 0;
-  accent-color: #333;
+  accent-color: var(--color-inverse-bg);
 }
 
 .learning-path-concept span {
@@ -129,21 +129,21 @@
 
 .learning-path-next span {
   font-size: 12px;
-  color: #888;
+  color: var(--color-subtle);
 }
 
 .learning-path-next button {
   flex: 0 0 auto;
   padding: 8px 12px;
-  border: 1px solid #333;
+  border: 1px solid var(--color-inverse-bg);
   border-radius: 3px;
   background: var(--color-text);
-  color: white;
+  color: var(--color-inverse-text);
   font-size: 13px;
 }
 
 .learning-path-next button:hover {
-  background: #444;
+  background: var(--color-inverse-hover);
 }
 
 .learning-path-next button:focus-visible,

@@ -12,7 +12,7 @@
 }
 .account-button {
   padding: 7px 16px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-strong);
   border-radius: 3px;
 }
 
@@ -45,7 +45,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #f1f1f1;
+  background: var(--color-surface-strong);
 }
 .profile-panel {
   position: absolute;
@@ -56,7 +56,7 @@
   padding: 20px;
   border: 1px solid var(--color-border);
   border-radius: 3px;
-  background: #fff;
+  background: var(--color-bg);
   overflow-wrap: anywhere;
 }
 .profile-panel > strong,
@@ -111,8 +111,8 @@
   min-width: 0;
   padding: 10px 12px;
   color: var(--color-text);
-  background: #fff;
-  border: 1px solid #bbb;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-strong);
   border-radius: 3px;
 }
 .password-field {
@@ -144,10 +144,10 @@
   border: 1px solid var(--color-text);
   border-radius: 3px;
   background: var(--color-text);
-  color: #fff;
+  color: var(--color-inverse-text);
 }
 .auth-submit:hover {
-  background: #444;
+  background: var(--color-inverse-hover);
 }
 .auth-submit:disabled,
 .profile-panel button:disabled {
@@ -156,7 +156,7 @@
 }
 .auth-error {
   margin: 0;
-  color: #a03030;
+  color: var(--color-bad);
   font-size: 13px;
 }
 .auth-switch {
@@ -168,7 +168,7 @@
 }
 
 .auth-page :is(a, button, input, summary):focus-visible {
-  outline: 2px solid #555;
+  outline: 2px solid var(--color-muted);
   outline-offset: 3px;
 }
 

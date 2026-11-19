@@ -1,7 +1,7 @@
 .adaptive-practice {
   margin-top: 50px;
   padding-top: 20px;
-  border-top: 1px solid #ccc;
+  border-top: 1px solid var(--color-border-strong);
 }
 
 .adaptive-heading {
@@ -17,13 +17,13 @@
 }
 
 .adaptive-kicker {
-  color: #888;
+  color: var(--color-subtle);
   font-size: 11px;
   letter-spacing: 1.1px;
 }
 
 .adaptive-subtitle {
-  color: #888;
+  color: var(--color-subtle);
   font-size: 13px;
 }
 
@@ -41,7 +41,7 @@
   padding: 20px;
   border: 1px solid var(--color-border);
   border-radius: 4px;
-  background: #fff;
+  background: var(--color-bg);
 }
 
 .adaptive-stat span {
@@ -59,7 +59,7 @@
   display: flex;
   justify-content: space-between;
   margin-top: 28px;
-  color: #555;
+  color: var(--color-muted);
   font-size: 13px;
 }
 
@@ -68,13 +68,13 @@
   margin-top: 10px;
   overflow: hidden;
   border-radius: 10px;
-  background: #eee;
+  background: var(--color-surface-strong);
 }
 
 .adaptive-progress-bar > div {
   height: 100%;
   border-radius: inherit;
-  background: #267047;
+  background: var(--color-good);
   transition: width 0.4s ease;
 }
 
@@ -113,7 +113,7 @@
 
 .adaptive-problem:hover {
   padding-left: 10px;
-  background: #fafafa;
+  background: var(--color-surface);
 }
 
 .adaptive-problem:focus-visible {
@@ -133,7 +133,7 @@
 }
 
 .adaptive-problem-difficulty {
-  color: #888;
+  color: var(--color-subtle);
   font-size: 12px;
 }
 
@@ -141,29 +141,29 @@
   padding: 4px 9px;
   border-radius: 3px;
   color: var(--color-muted);
-  background: #f2f2f2;
+  background: var(--color-surface-strong);
   font-size: 12px;
   white-space: nowrap;
 }
 
 .priority-0 {
-  background: #fceaea;
-  color: #a34444;
+  background: var(--color-bad-bg);
+  color: var(--color-bad);
 }
 
 .priority-1 {
-  background: #fff4df;
-  color: #946819;
+  background: var(--color-warn-bg);
+  color: var(--color-warn);
 }
 
 .priority-2 {
-  background: #eef3fa;
-  color: #456993;
+  background: var(--color-info-bg);
+  color: var(--color-info);
 }
 
 .priority-3 {
-  background: #eaf5ed;
-  color: #267047;
+  background: var(--color-good-bg);
+  color: var(--color-good);
 }
 
 @media (max-width: 650px) {

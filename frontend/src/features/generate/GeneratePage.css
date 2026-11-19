@@ -20,7 +20,7 @@
 .generator-form select {
   padding: 8px 0;
   border: none;
-  border-bottom: 1px solid #aaa;
+  border-bottom: 1px solid var(--color-border-strong);
   background: transparent;
   outline: none;
 }
@@ -44,10 +44,10 @@
 }
 
 .generator-status {
-  color: #555;
+  color: var(--color-muted);
   font-size: 14px;
 }
 
 .generator-error {
-  color: #b95b5b;
+  color: var(--color-bad);
 }

@@ -58,33 +58,46 @@ const highlightStyle = HighlightStyle.define([
       tags.definitionKeyword,
       tags.modifier,
     ],
-    color: "#8a2bb9",
+    color: "var(--code-keyword)",
   },
-  { tag: [tags.string, tags.special(tags.string), tags.regexp], color: "#2f7d32" },
-  { tag: [tags.number, tags.bool, tags.null, tags.atom], color: "#b35900" },
-  { tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment], color: "#7a7a7a", fontStyle: "italic" },
+  { tag: [tags.string, tags.special(tags.string), tags.regexp], color: "var(--code-string)" },
+  { tag: [tags.number, tags.bool, tags.null, tags.atom], color: "var(--code-number)" },
+  {
+    tag: [tags.comment, tags.lineComment, tags.blockComment, tags.docComment],
+    color: "var(--code-comment)",
+    fontStyle: "italic",
+  },
   {
     tag: [
       tags.function(tags.variableName),
       tags.function(tags.propertyName),
       tags.function(tags.definition(tags.variableName)),
     ],
-    color: "#0645ad",
+    color: "var(--color-link)",
   },
-  { tag: [tags.typeName, tags.className, tags.namespace, tags.standard(tags.variableName)], color: "#a3305a" },
-  { tag: [tags.definition(tags.variableName), tags.propertyName], color: "#1d5c7a" },
-  { tag: [tags.meta, tags.annotation, tags.processingInstruction], color: "#666" },
-  { tag: tags.invalid, color: "#b95b5b" },
+  { tag: [tags.typeName, tags.className, tags.namespace, tags.standard(tags.variableName)], color: "var(--code-type)" },
+  { tag: [tags.definition(tags.variableName), tags.propertyName], color: "var(--code-property)" },
+  { tag: [tags.meta, tags.annotation, tags.processingInstruction], color: "var(--color-muted)" },
+  { tag: tags.invalid, color: "var(--color-bad)" },
 ]);
 
 const theme = EditorView.theme({
-  "&": { backgroundColor: "#fcfcfc", color: "#222" },
+  "&": { backgroundColor: "var(--color-surface)", color: "var(--color-text)" },
   ".cm-scroller": { fontFamily: 'Consolas, "Courier New", monospace', lineHeight: "1.7" },
-  ".cm-gutters": { backgroundColor: "#f4f4f4", color: "#999", borderRight: "1px solid #e4e4e4" },
-  ".cm-activeLine": { backgroundColor: "#f3f6fb" },
-  ".cm-activeLineGutter": { backgroundColor: "#e9eef7", color: "#555" },
-  "&.cm-focused .cm-matchingBracket": { backgroundColor: "#dbe7ff", outline: "1px solid #a9c2f0" },
-  "&.cm-focused": { outline: "2px solid #0645ad", outlineOffset: "-2px" },
+  ".cm-gutters": {
+    backgroundColor: "var(--color-surface-strong)",
+    color: "var(--color-subtle)",
+    borderRight: "1px solid var(--color-border)",
+  },
+  ".cm-activeLine": { backgroundColor: "var(--code-active-line)" },
+  ".cm-activeLineGutter": { backgroundColor: "var(--code-active-line)", color: "var(--color-muted)" },
+  "&.cm-focused .cm-matchingBracket": {
+    backgroundColor: "var(--code-bracket)",
+    outline: "1px solid var(--color-link)",
+  },
+  ".cm-content": { caretColor: "var(--color-text)" },
+  ".cm-cursor, .cm-dropCursor": { borderLeftColor: "var(--color-text)" },
+  "&.cm-focused": { outline: "2px solid var(--color-link)", outlineOffset: "-2px" },
 });
 
 export function CodeEditor({

@@ -1,5 +1,5 @@
 import type { components } from "../../api/schema";
-import type { ProblemDetail, ProblemSummary } from "./api";
+import type { Catalog, ProblemDetail } from "./api";
 
 export type Difficulty = components["schemas"]["Difficulty"];
 export type Compare = components["schemas"]["Compare"];
@@ -9,7 +9,9 @@ export type TestCase = { input: unknown[]; expected: unknown };
 export type ProblemListItem = {
   id: string;
   title: string;
+  /** The primary topic, also the first entry of topics. */
   topic: string;
+  topics: string[];
   difficulty: Difficulty;
 };
 
@@ -36,15 +38,30 @@ export function chooseLanguage(languages: string[], preferred?: string | null): 
   return languages.includes("python") ? "python" : null;
 }
 
-export function fromSummary(summary: ProblemSummary): ProblemListItem {
-  return { id: summary.slug, title: summary.title, topic: summary.category, difficulty: summary.difficulty };
+export const difficulties: Difficulty[] = ["easy", "medium", "hard"];
+
+export function fromCatalog(catalog: Catalog): ProblemListItem[] {
+  return catalog.problems.map((problem) => {
+    const topics = problem.topics.map((index) => catalog.topics[index]?.name).filter((name) => name !== undefined);
+    return {
+      id: problem.slug,
+      title: problem.title,
+      topic: topics[0] ?? "",
+      topics,
+      difficulty: problem.difficulty,
+    };
+  });
 }
 
 const show = (value: unknown) => JSON.stringify(value);
 
 export function fromDetail(detail: ProblemDetail): Problem {
   return {
-    ...fromSummary(detail),
+    id: detail.slug,
+    title: detail.title,
+    topic: detail.category,
+    topics: detail.topics.length ? detail.topics : [detail.category],
+    difficulty: detail.difficulty,
     language: detail.language,
     description: detail.description,
     constraints: detail.constraints,
