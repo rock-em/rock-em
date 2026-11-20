@@ -1,11 +1,14 @@
 import type { ReactNode } from "react";
 import { AccountMenu } from "../features/auth/AccountMenu";
 import { Link } from "../lib/Link";
+import { usePathname } from "../lib/router";
 import { SiteNavigation } from "./SiteNavigation";
 import { ThemeToggle } from "./ThemeToggle";
 import "./AppShell.css";
 
 export function AppShell({ children }: { children: ReactNode }) {
+  // The problem workspace fills the window and brings its own slim bar.
+  if (usePathname().startsWith("/problems/")) return <>{children}</>;
   return (
     <>
       <header className="site-header">
