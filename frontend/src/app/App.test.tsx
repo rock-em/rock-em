@@ -169,8 +169,10 @@ describe("API-backed pages", () => {
       target: { value: "javascript draft" },
     });
     expect(screen.getByRole("button", { name: "Run tests" })).toBeEnabled();
-    explore("Generate a problem");
-    expect(window.location.pathname).toBe("/generate");
+    // The workspace swaps the site header for its own slim bar.
+    expect(screen.queryByText("Explore", { selector: "summary" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("link", { name: "← Problems" }));
+    expect(window.location.pathname).toBe("/");
     act(() => {
       window.history.replaceState(null, "", "/problems/array-api-task");
       window.dispatchEvent(new PopStateEvent("popstate"));
@@ -178,7 +180,29 @@ describe("API-backed pages", () => {
     expect(await screen.findByRole("textbox", { name: "javascript solution" })).toHaveValue("javascript draft");
     fireEvent.change(screen.getByLabelText("Language"), { target: { value: "python" } });
     expect(await screen.findByRole("textbox", { name: "python solution" })).toHaveValue("python draft");
-    fireEvent.click(screen.getByRole("link", { name: "rock em" }));
+    const splitter = screen.getByRole("separator", { name: "Resize left and right panes" });
+    fireEvent.keyDown(splitter, { key: "ArrowRight" });
+    expect(splitter).toHaveAttribute("aria-valuenow", "46");
+    expect(JSON.parse(localStorage.getItem("rock-em:workspace-layout:v1")!)).toEqual({
+      x: 46,
+      y: 64,
+      order: ["description", "code", "tests"],
+    });
+    fireEvent.doubleClick(splitter);
+    expect(splitter).toHaveAttribute("aria-valuenow", "44");
+    // Panes swap places without being rebuilt, so the draft stays in the editor.
+    const area = (name: string) => screen.getByRole("region", { name }).style.gridArea;
+    fireEvent.click(screen.getByRole("button", { name: "Move Description pane" }));
+    expect([area("Description"), area("Code"), area("Tests")]).toEqual(["pane-top", "pane-left", "pane-bottom"]);
+    const transfer = { setData: vi.fn(), effectAllowed: "", dropEffect: "" };
+    fireEvent.dragStart(screen.getByText("Tests", { selector: "strong" }), { dataTransfer: transfer });
+    const target = screen.getByRole("region", { name: "Code" }).querySelector(".pane-drop")!;
+    fireEvent.dragOver(target, { dataTransfer: transfer });
+    expect(target).toHaveTextContent("Swap with Code");
+    fireEvent.drop(target, { dataTransfer: transfer });
+    expect([area("Description"), area("Code"), area("Tests")]).toEqual(["pane-top", "pane-bottom", "pane-left"]);
+    expect(screen.getByRole("textbox", { name: "python solution" })).toHaveValue("python draft");
+    fireEvent.click(screen.getByRole("link", { name: "← Problems" }));
     expect(await screen.findByRole("link", { name: "Array API Task" })).toBeVisible();
   });
 

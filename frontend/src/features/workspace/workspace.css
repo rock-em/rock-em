@@ -1,71 +1,230 @@
+/* The workspace fills the window: a slim bar, then three panes that scroll on
+   their own and are resized with the splitters between them. */
 .workspace-page {
-  max-width: 1500px;
-  margin: 0 auto;
-  padding: 0 24px 48px;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
 }
 
-.workspace-header {
-  min-height: 72px;
-  display: flex;
+.workspace-bar {
+  flex: none;
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+  padding: 0 12px;
   border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
 }
 
 .back-link {
-  padding: 8px 0;
-  border: 0;
-  background: none;
-  color: var(--color-link);
+  justify-self: start;
+  color: var(--color-muted);
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .back-link:hover {
-  text-decoration: underline;
+  color: var(--color-strong);
+}
+
+.workspace-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.workspace-actions button {
+  padding: 5px 14px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.workspace-bar-end {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
 .workspace-counter {
   color: var(--color-subtle);
+  white-space: nowrap;
+}
+
+/* Only the glyph and the avatar: the bar stays out of the way. */
+.workspace-bar .theme-toggle-word,
+.workspace-bar .profile-name {
+  display: none;
+}
+
+.workspace-bar .theme-toggle-glyph {
+  display: inline;
+  font-size: 16px;
+}
+
+.workspace-bar .avatar {
+  width: 28px;
+  height: 28px;
   font-size: 13px;
 }
 
-.workspace-grid {
+.workspace-bar .account-button,
+.workspace-bar .account-nav > a {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  font-size: 13px;
+}
+
+.workspace-bar :is(a, button, summary):focus-visible {
+  outline: 2px solid var(--color-muted);
+  outline-offset: 2px;
+}
+
+.workspace-panes {
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 24px;
-  align-items: start;
-  margin-top: 26px;
+  /* Track sizes come from the page; each pane picks one of the three areas. */
+  grid-template-areas:
+    "pane-left split-x pane-top"
+    "pane-left split-x split-y"
+    "pane-left split-x pane-bottom";
 }
 
-.workspace-panel {
+.pane {
+  position: relative;
   min-width: 0;
+  min-height: 0;
   margin: 0;
-  padding: 26px;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
 }
 
-.workspace-eyebrow {
-  margin-bottom: 8px;
-  color: var(--color-subtle);
+.pane-header {
+  flex: none;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px 0 6px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
   font-size: 13px;
+  cursor: grab;
 }
 
-.description-panel h1 {
-  margin-bottom: 12px;
+/* Whatever follows the pane's name sits at the far end of the header. */
+.pane-header > strong {
+  margin-right: auto;
 }
 
-.description-panel h2 {
-  margin-top: 32px;
-  font-size: 20px;
+.pane-grip {
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  color: var(--color-subtle);
+  font-size: 14px;
+  line-height: 1;
+  cursor: grab;
+}
+
+.pane-grip:hover {
+  color: var(--color-strong);
+}
+
+.pane-drop {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+
+.pane-drop-over {
+  outline: 2px solid var(--color-link);
+  outline-offset: -2px;
+  background: color-mix(in srgb, var(--color-link) 14%, transparent);
+}
+
+.pane-drop span {
+  padding: 6px 12px;
+  border-radius: 3px;
+  background: var(--color-bg);
+  pointer-events: none;
+}
+
+.pane-note {
+  color: var(--color-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pane-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px 18px 24px;
+}
+
+.splitter {
+  background: var(--color-border);
+  touch-action: none;
+  user-select: none;
+}
+
+.splitter {
+  position: relative;
+  z-index: 1;
+}
+
+/* The bar stays thin, but the area that grabs it is wider. */
+.splitter::after {
+  content: "";
+  position: absolute;
+}
+
+.splitter-x {
+  grid-area: split-x;
+  cursor: col-resize;
+}
+
+.splitter-x::after {
+  inset: 0 -4px;
+}
+
+.splitter-y {
+  grid-area: split-y;
+  cursor: row-resize;
+}
+
+.splitter-y::after {
+  inset: -4px 0;
+}
+
+.splitter:hover,
+.splitter:active,
+.splitter:focus-visible {
+  background: var(--color-link);
+  outline: none;
+}
+
+.description-pane .pane-body h1 {
+  margin: 0 0 8px;
+  font-size: 26px;
+}
+
+.description-pane .pane-body h2 {
+  margin-top: 24px;
+  font-size: 18px;
 }
 
 .problem-difficulty,
 .solved-label {
   display: inline-block;
   margin-right: 14px;
-  color: var(--color-subtle);
   font-size: 13px;
 }
 
@@ -74,19 +233,19 @@
 }
 
 .problem-description {
-  margin-top: 24px;
+  margin-top: 14px;
 }
 
 .example {
-  padding: 14px 16px;
-  margin: 12px 0;
+  padding: 10px 14px;
+  margin: 10px 0;
   background: var(--color-surface);
   border-left: 2px solid var(--color-border-strong);
   overflow-wrap: anywhere;
 }
 
 .example > div {
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .example code,
@@ -101,24 +260,26 @@
 }
 
 .constraints li {
-  margin-bottom: 7px;
+  margin-bottom: 5px;
 }
 
-.editor-panel {
-  padding: 0;
-  overflow: hidden;
+.pane-header label {
+  margin-right: 8px;
+  color: var(--color-muted);
 }
 
-.editor-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--color-border);
+.pane-header select {
+  padding: 2px 6px;
+  font: inherit;
+  font-size: 13px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 3px;
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
 .reset-button {
+  padding: 0;
   background: transparent;
   border: none;
   color: var(--color-muted);
@@ -130,27 +291,30 @@
   text-decoration: underline;
 }
 
+/* The editor takes whatever height the pane has and scrolls inside it. */
+.code-editor {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
 .code-editor .cm-editor {
+  height: 100%;
   font-size: 14px;
   tab-size: 2;
 }
 
-.code-editor .cm-content,
-.code-editor .cm-gutter {
-  min-height: 420px;
-}
-
 .code-editor .cm-content {
-  padding: 20px 0;
+  padding: 12px 0;
 }
 
 .code-editor .cm-line {
-  padding: 0 20px 0 12px;
+  padding: 0 16px 0 10px;
 }
 
 .code-loading {
   margin: 0;
-  padding: 20px;
+  padding: 12px 16px;
   background: var(--color-surface);
   color: var(--color-text);
   font-family: var(--font-mono);
@@ -159,48 +323,20 @@
   white-space: pre-wrap;
 }
 
-.code-editor.code-loading {
-  min-height: 420px;
-}
-
-.editor-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  padding: 14px 20px;
-  border-top: 1px solid var(--color-border);
-}
-
-.editor-heading label {
-  margin-right: 8px;
-  font-size: 13px;
-  color: var(--color-muted);
-}
-.editor-heading select {
-  margin-top: 6px;
-  padding: 4px 8px;
-  font: inherit;
-  font-size: 13px;
-  border: 1px solid var(--color-border-strong);
-  border-radius: 3px;
-  background: var(--color-bg);
-  color: var(--color-text);
+.test-pane .pane-body > :first-child {
+  margin-top: 0;
 }
 
 .test-message {
-  padding: 0 20px;
-  margin: 14px 0;
+  margin: 0 0 12px;
   font-size: 14px;
-}
-
-.test-results {
-  padding: 0 20px 16px;
 }
 
 .test-results h2 {
   display: flex;
   justify-content: space-between;
-  font-size: 18px;
+  margin: 0;
+  font-size: 16px;
 }
 
 .test-results h2 span {
@@ -210,7 +346,7 @@
 }
 
 .test-case {
-  padding: 12px 14px;
+  padding: 10px 14px;
   margin-top: 10px;
   background: var(--color-surface);
   border-left: 3px solid var(--color-border-strong);
@@ -219,7 +355,7 @@
 }
 
 .test-case > div {
-  margin-top: 5px;
+  margin-top: 4px;
 }
 
 .test-pass {
@@ -231,8 +367,7 @@
 }
 
 .runner-note {
-  margin: 0;
-  padding: 0 20px 20px;
+  margin: 14px 0 0;
   color: var(--color-subtle);
   font-size: 12px;
 }
@@ -262,32 +397,61 @@
   padding: 0 14px;
 }
 
+/* Too narrow for side-by-side panes: stack them and let the page scroll. */
 @media (max-width: 850px) {
-  .workspace-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 650px) {
   .workspace-page {
-    padding: 0 12px 30px;
+    height: auto;
+    min-height: 100dvh;
   }
 
-  .workspace-panel {
-    padding: 18px;
+  .workspace-bar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--color-bg);
   }
 
-  .editor-panel {
-    padding: 0;
+  .workspace-panes {
+    display: block;
+  }
+
+  /* Stacked panes keep their reading order, so there is nothing to move. */
+  .splitter,
+  .pane-grip {
+    display: none;
+  }
+
+  .pane-header {
+    padding-left: 14px;
+    cursor: default;
+  }
+
+  .pane-body {
+    overflow: visible;
+  }
+
+  .code-editor {
+    min-height: 320px;
+  }
+
+  .code-editor .cm-content,
+  .code-editor .cm-gutter {
+    min-height: 320px;
   }
 
   .workspace-counter {
     display: none;
   }
+}
 
-  .code-editor .cm-content,
-  .code-editor .cm-gutter,
-  .code-editor.code-loading {
-    min-height: 320px;
+/* A phone has no room for the account buttons next to Run and Submit. */
+@media (max-width: 650px) {
+  .workspace-bar {
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+  }
+
+  .workspace-bar .account-nav {
+    display: none;
   }
 }
