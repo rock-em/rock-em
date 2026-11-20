@@ -209,30 +209,75 @@ class _TextExtractor(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.chunks: list[str] = []
+        self.pre = 0
+        # Text of the <code> element being read, or None outside one.
+        self.code: list[str] | None = None
+
+    def emit(self, text: str) -> None:
+        (self.chunks if self.code is None else self.code).append(text)
 
     def handle_starttag(self, tag, attrs):
-        if tag == "li":
-            self.chunks.append("\n- ")
+        if tag == "pre":
+            self.pre += 1
+        if tag == "code":
+            # Example blocks are <pre>, where the importer reads raw values.
+            if self.code is None and not self.pre:
+                self.code = []
+        elif tag == "li":
+            self.emit("\n- ")
         elif tag == "sup":
-            self.chunks.append("^")
+            self.emit("^")
         elif tag in self.BLOCK_TAGS:
-            self.chunks.append("\n")
+            self.emit("\n")
 
     def handle_endtag(self, tag):
-        if tag in self.BLOCK_TAGS:
-            self.chunks.append("\n")
+        if tag == "pre":
+            self.pre = max(0, self.pre - 1)
+        if tag == "code":
+            if self.code is not None:
+                text = " ".join("".join(self.code).replace("`", "").split())
+                self.code = None
+                if text:
+                    self.chunks.append(f"`{text}`")
+        elif tag in self.BLOCK_TAGS:
+            self.emit("\n")
 
     def handle_data(self, data):
-        self.chunks.append(data)
+        self.emit(data)
 
 
 def html_to_text(html: str) -> str:
-    """LeetCode serves problem statements as HTML; the importer reads plain text."""
+    """LeetCode serves problem statements as HTML; the importer reads plain text.
+
+    Inline <code> is kept as `backticks`, which the site shows as code.
+    """
     parser = _TextExtractor()
-    parser.feed(html)
-    text = "".join(parser.chunks).replace("\xa0", " ")
+    # Non-breaking spaces become plain ones; zero-width spaces are dropped.
+    parser.feed(re.sub(r"\u200b|&#8203;", "", html.replace("\xa0", " ").replace("&nbsp;", " ")))
+    text = "".join(parser.chunks)
     text = re.sub(r"[ \t]+\n", "\n", text)
     return re.sub(r"\n{3,}", "\n\n", text).strip()
+
+
+def reconvert(path: str) -> int:
+    """Rebuild every description in a scraped file from its saved HTML."""
+    with open(path) as f:
+        data = json.load(f)
+    problems = data.get("problems", [])
+    changed = 0
+    for problem in problems:
+        if not problem.get("description_html"):
+            continue
+        text = html_to_text(problem["description_html"])
+        changed += text != problem.get("description")
+        problem["description"] = text
+    # Written in place and in the file's own order, so the diff is only the text.
+    tmp = f"{path}.tmp"
+    with open(tmp, "w") as f:
+        f.write(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+    os.replace(tmp, path)
+    log(f"done: {changed} of {len(problems)} descriptions changed")
+    return 0
 
 
 def parse_slug(arg: str) -> str:
@@ -275,7 +320,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--batch", type=int, default=50, help="problems per request (default 50)")
     parser.add_argument("--delay", type=float, default=1.0, help="seconds between requests (default 1)")
     parser.add_argument("--premium", action="store_true", help="also fetch premium problems (needs SCRAPER_COOKIE)")
+    parser.add_argument("--reconvert", metavar="FILE", help="rebuild the descriptions in FILE from its saved HTML, without fetching")
     args = parser.parse_args(argv)
+    if args.reconvert:
+        return reconvert(args.reconvert)
 
     cookie = os.environ.get("SCRAPER_COOKIE")
     if args.premium and not cookie:

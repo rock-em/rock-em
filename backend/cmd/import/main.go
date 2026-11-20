@@ -16,9 +16,10 @@ import (
 
 func main() {
 	dryRun := flag.Bool("dry-run", false, "only report what would be imported")
+	update := flag.Bool("update", false, "also rewrite the description, constraints and explanations of problems already imported")
 	flag.Parse()
 	if flag.NArg() == 0 {
-		log.Fatal("usage: import [-dry-run] scraped.json...")
+		log.Fatal("usage: import [-dry-run] [-update] scraped.json...")
 	}
 	var db *pgxpool.Pool
 	if !*dryRun {
@@ -39,7 +40,7 @@ func main() {
 		defer db.Close()
 	}
 
-	added, existing, skipped := 0, 0, 0
+	added, existing, updated, skipped := 0, 0, 0, 0
 	for _, path := range flag.Args() {
 		data, err := os.ReadFile(path)
 		if err != nil {
@@ -63,8 +64,15 @@ func main() {
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 			ok, err := problems.Import(ctx, db, in)
+			refreshed := false
+			if err == nil && !ok && *update {
+				refreshed, err = problems.RefreshText(ctx, db, in)
+			}
 			cancel()
 			switch {
+			case err == nil && refreshed:
+				log.Printf("updated %s", in.Slug)
+				updated++
 			case err != nil:
 				log.Printf("skip %s: %v", p.Slug, err)
 				skipped++
@@ -81,5 +89,5 @@ func main() {
 		log.Printf("%d would be imported, %d skipped", added, skipped)
 		return
 	}
-	log.Printf("%d added, %d already there, %d skipped", added, existing, skipped)
+	log.Printf("%d added, %d updated, %d already there, %d skipped", added, updated, existing, skipped)
 }

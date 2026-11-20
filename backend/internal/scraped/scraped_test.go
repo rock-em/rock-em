@@ -45,7 +45,7 @@ func TestConvertTwoSum(t *testing.T) {
 	if strings.Contains(in.Description, "Example 1") || strings.Contains(in.Description, "Constraints:") || !strings.Contains(in.Description, "Follow-up:") {
 		t.Fatalf("description = %q", in.Description)
 	}
-	if len(in.Constraints) != 4 || in.Constraints[0] != "2 <= nums.length <= 10^4" {
+	if len(in.Constraints) != 4 || in.Constraints[0] != "`2 <= nums.length <= 10^4`" {
 		t.Fatalf("constraints = %q", in.Constraints)
 	}
 }
@@ -113,5 +113,28 @@ func TestSignatureSplitsNestedTypes(t *testing.T) {
 	}
 	if len(sig.Params) != 2 || sig.Params[0].Type != "int[][]" || sig.Params[1].Name != "b" || sig.Returns != "bool" {
 		t.Fatalf("signature = %+v", sig)
+	}
+}
+
+func TestConvertKeepsInlineCodeMarks(t *testing.T) {
+	in, err := Convert(sample(t)["two-sum"])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(in.Description, "an array of integers `nums` and an integer `target`") {
+		t.Fatalf("description = %q", in.Description)
+	}
+	if strings.Contains(in.ShortDescription, "`") {
+		t.Fatalf("short description = %q", in.ShortDescription)
+	}
+}
+
+func TestExampleTestReadsMarkedOutput(t *testing.T) {
+	test, err := exampleTest("[1,2]", "Input: nums = [1,2]\nOutput: `3`\nExplanation: `1 + 2` is 3.")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(test.Expected) != "3" || test.Explanation != "`1 + 2` is 3." {
+		t.Fatalf("test = %+v", test)
 	}
 }
