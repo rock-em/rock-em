@@ -1,6 +1,7 @@
 import { difficultyLabel, type Problem } from "../problems/model";
 import { LazyCodeEditor } from "./LazyCodeEditor";
 import { Pane } from "./Pane";
+import { InlineText, Prose } from "./Prose";
 
 export function ProblemStatement({ problem, solved }: { problem: Problem; solved: boolean }) {
   return (
@@ -20,7 +21,7 @@ export function ProblemStatement({ problem, solved }: { problem: Problem; solved
           {difficultyLabel[problem.difficulty]}
         </span>
         {solved && <span className="solved-label">✓ Solved</span>}
-        <p className="problem-description">{problem.description}</p>
+        <Prose className="problem-description" text={problem.description} />
 
         <h2>Examples</h2>
         {problem.examples.map((example, index) => (
@@ -34,7 +35,7 @@ export function ProblemStatement({ problem, solved }: { problem: Problem; solved
             </div>
             {example.explanation && (
               <div>
-                <b>Explanation:</b> {example.explanation}
+                <b>Explanation:</b> <InlineText text={example.explanation} />
               </div>
             )}
           </div>
@@ -43,7 +44,9 @@ export function ProblemStatement({ problem, solved }: { problem: Problem; solved
         <h2>Constraints</h2>
         <ul className="constraints">
           {problem.constraints.map((constraint) => (
-            <li key={constraint}>{constraint}</li>
+            <li key={constraint}>
+              <InlineText text={constraint} />
+            </li>
           ))}
         </ul>
 

@@ -2,7 +2,7 @@
 
 Scrapes LeetCode problems into JSON through LeetCode's GraphQL API (`https://leetcode.com/graphql`). Uses only the Python 3.10+ standard library.
 
-It lists the problemset with `questionList`, then fetches problems 50 at a time in one aliased `question` query per request. The problem statement comes back from the API as HTML, so the script also writes a plain-text copy, `description`, which the importer parses for examples and constraints.
+It lists the problemset with `questionList`, then fetches problems 50 at a time in one aliased `question` query per request. The problem statement comes back from the API as HTML, so the script also writes a plain-text copy, `description`, which the importer parses for examples and constraints. Inline `<code>` is kept in that copy as `` `backticks` ``, which the site shows as inline code; other tags are dropped.
 
 ## Usage
 
@@ -23,6 +23,7 @@ python3 scraper.py two-sum https://leetcode.com/problems/add-two-numbers/ -o som
 | `--limit` | Only the first N problems of the problemset |
 | `--batch` | Problems per request (default 50) |
 | `--delay` | Seconds between requests (default 1) |
+| `--reconvert FILE` | Rebuild every `description` in FILE from its saved `description_html`, without fetching anything. Use it after the text conversion changes. |
 | `--premium` | Also fetch premium problems. Needs `SCRAPER_COOKIE` set to the `Cookie` header of a logged-in premium session. |
 
 Premium problems are skipped by default, because without a premium session the API returns no statement for them. Progress is written to stderr, and the output file is saved after every batch.
@@ -58,9 +59,12 @@ Premium problems are skipped by default, because without a premium session the A
 ```bash
 go run ./cmd/import ../scripts/scraper/sample.json
 go run ./cmd/import -dry-run problems.json   # just report what would be imported
+go run ./cmd/import -update problems.json    # also rewrite the wording of problems already imported
 ```
 
 Each problem gets its signature from the `python3` snippet and its example tests from `example_testcases`, paired with the `Output:` lines in the description. Problems that can't be checked with plain input/output tests are skipped with a reason: in-place edits, custom judges, design classes and unsupported types. Slugs that already exist are left untouched, so rerunning an import is safe.
+
+With `-update`, a problem that already exists has its description, summary, constraints and example explanations rewritten from the file. Its signature, tests, topics and starter code are not touched, and problems created by an account are skipped.
 
 ## Tests
 

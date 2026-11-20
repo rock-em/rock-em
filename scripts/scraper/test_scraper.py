@@ -47,7 +47,18 @@ class ParseSlugTest(unittest.TestCase):
 class HtmlToTextTest(unittest.TestCase):
     def test_html_to_text(self):
         html = "<p>Given <code>n</code>&nbsp;items.</p><ul><li>1 &lt;= n &lt;= 10<sup>4</sup></li></ul>"
-        self.assertEqual(html_to_text(html), "Given n items.\n\n- 1 <= n <= 10^4")
+        self.assertEqual(html_to_text(html), "Given `n` items.\n\n- 1 <= n <= 10^4")
+
+    def test_code_becomes_backticks_outside_example_blocks(self):
+        html = (
+            "<p>Return <code>nums[i]</code> and <code> a`b\n c </code><code></code>.</p>"
+            "<pre><strong>Output:</strong> <code>[0,1]</code></pre>"
+            "<ul><li><code>1 &lt;= n &lt;= 10<sup>4</sup></code></li></ul>"
+        )
+        self.assertEqual(
+            html_to_text(html),
+            "Return `nums[i]` and `ab c`.\n\nOutput: [0,1]\n\n- `1 <= n <= 10^4`",
+        )
 
 
 class BatchTest(unittest.TestCase):

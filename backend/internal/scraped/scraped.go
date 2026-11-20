@@ -70,7 +70,8 @@ func Convert(p Problem) (problems.Input, error) {
 	in.Slug = p.Slug
 	in.Title = p.Title
 	in.Difficulty = strings.ToLower(p.Difficulty)
-	in.ShortDescription = shorten(strings.SplitN(statement, "\n\n", 2)[0], 200)
+	// The summary is shown as plain text, so it drops the inline code marks.
+	in.ShortDescription = shorten(strings.ReplaceAll(strings.SplitN(statement, "\n\n", 2)[0], "`", ""), 200)
 	in.Description = statement
 	if followUp != "" {
 		in.Description += "\n\n" + followUp
@@ -263,7 +264,8 @@ func exampleTest(testcase, example string) (problems.Test, error) {
 	if !ok {
 		return test, errors.New("no output")
 	}
-	output := strings.TrimSpace(strings.SplitN(after, "\n", 2)[0])
+	// The scraper marks inline code with backticks, which aren't part of the value.
+	output := strings.TrimSpace(strings.ReplaceAll(strings.SplitN(after, "\n", 2)[0], "`", ""))
 	if !json.Valid([]byte(output)) {
 		return test, fmt.Errorf("output %q is not JSON", output)
 	}
