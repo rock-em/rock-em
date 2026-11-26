@@ -147,7 +147,9 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  transition: background-position 450ms ease, filter 250ms ease;
+  transition:
+    background-position 450ms ease,
+    filter 250ms ease;
 }
 
 .site-brand::after {
@@ -161,7 +163,9 @@
   opacity: 0.45;
   transform: scaleX(0.55);
   transform-origin: center;
-  transition: opacity 250ms ease, transform 250ms ease;
+  transition:
+    opacity 250ms ease,
+    transform 250ms ease;
 }
 
 .site-brand:hover,
@@ -195,7 +199,9 @@
 
 .explore-links a {
   border-radius: 5px;
-  transition: background-color 160ms ease, color 160ms ease;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
 }
 
 .explore-links a[aria-current="page"] {
