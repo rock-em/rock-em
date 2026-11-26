@@ -121,3 +121,106 @@
     white-space: nowrap;
   }
 }
+
+/*
+ * Header chrome polish
+ * --------------------
+ * Keep the brand restrained at rest; let interaction reveal the metallic
+ * finish. These details are CSS-only and respect reduced-motion preferences.
+ */
+.site-brand {
+  position: relative;
+  display: inline-block;
+  padding: 3px 0 5px;
+  color: var(--color-strong);
+  background-image: linear-gradient(
+    115deg,
+    #787d86 0%,
+    #e9edf3 22%,
+    #9299a3 40%,
+    #fff 50%,
+    #939ba5 64%,
+    #d9dfe7 82%,
+    #737985 100%
+  );
+  background-size: 180% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: background-position 450ms ease, filter 250ms ease;
+}
+
+.site-brand::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #aeb8c7, transparent);
+  opacity: 0.45;
+  transform: scaleX(0.55);
+  transform-origin: center;
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+
+.site-brand:hover,
+.site-brand:focus-visible {
+  background-position: 100% 0;
+  filter: drop-shadow(0 0 7px rgb(180 195 220 / 17%));
+}
+
+.site-brand:hover::after,
+.site-brand:focus-visible::after {
+  opacity: 0.95;
+  transform: scaleX(1);
+}
+
+.explore-menu summary,
+.theme-toggle {
+  transition: color 180ms ease;
+}
+
+.explore-menu summary:hover,
+.explore-menu[open] summary,
+.theme-toggle:focus-visible {
+  color: var(--color-strong);
+}
+
+.explore-links {
+  overflow: hidden;
+  border-radius: 9px;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 12%);
+}
+
+.explore-links a {
+  border-radius: 5px;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.explore-links a[aria-current="page"] {
+  position: relative;
+  padding-left: 17px;
+}
+
+.explore-links a[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 7px;
+  width: 3px;
+  height: 14px;
+  border-radius: 3px;
+  background: #aeb8c7;
+  transform: translateY(-50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-brand,
+  .site-brand::after,
+  .explore-menu summary,
+  .explore-links a,
+  .theme-toggle {
+    transition: none;
+  }
+}
