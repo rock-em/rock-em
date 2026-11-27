@@ -26,9 +26,15 @@ export function BrowsePage() {
   const filters = useMemo(() => readFilters(query), [query]);
   const [allTopics, setAllTopics] = useState(false);
   const { bookmarks, toggleBookmark } = useBookmarks();
-  const savedCount = useMemo(() => problems.filter((problem) => bookmarks.has(problem.id)).length, [problems, bookmarks]);
+  const savedCount = useMemo(
+    () => problems.filter((problem) => bookmarks.has(problem.id)).length,
+    [problems, bookmarks],
+  );
 
-  const rows = useMemo(() => applyFilters(problems, filters, solved, bookmarks), [problems, filters, solved, bookmarks]);
+  const rows = useMemo(
+    () => applyFilters(problems, filters, solved, bookmarks),
+    [problems, filters, solved, bookmarks],
+  );
   const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const page = Math.min(filters.page, pageCount);
   const visible = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
