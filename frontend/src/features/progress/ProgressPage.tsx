@@ -3,6 +3,7 @@ import { Link } from "../../lib/Link";
 import { navigate } from "../../lib/router";
 import { usePractice } from "../practice/context";
 import { difficulties, difficultyLabel } from "../problems/model";
+import { ActivityHeatmap } from "./ActivityHeatmap";
 import { AdaptivePractice } from "./AdaptivePractice";
 import { RecentViews } from "./RecentViews";
 import { useAttempts } from "./attempts";
@@ -61,6 +62,7 @@ export function ProgressPage() {
       </div>
 
       <WeeklyGoal history={history} />
+      <ActivityHeatmap />
 
       {!started && (
         <p role="status">

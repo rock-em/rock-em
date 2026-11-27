@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { isRecord, readJson, writeJson } from "../../lib/storage";
 
+import { recordActivity } from "./activity";
+
 export type AttemptStats = {
   attempts: number;
   successes: number;
@@ -38,7 +40,9 @@ export function nextStats(previous: AttemptStats | undefined, passed: boolean, n
 
 export function recordAttempt(problemId: string, passed: boolean) {
   const history = loadAttempts();
-  writeJson(STORAGE_KEY, { ...history, [problemId]: nextStats(history[problemId], passed, new Date()) });
+  const now = new Date();
+  writeJson(STORAGE_KEY, { ...history, [problemId]: nextStats(history[problemId], passed, now) });
+  recordActivity(now);
   window.dispatchEvent(new Event(UPDATED_EVENT));
 }
 
