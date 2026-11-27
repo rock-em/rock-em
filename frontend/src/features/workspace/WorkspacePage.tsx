@@ -5,6 +5,7 @@ import { AccountMenu } from "../auth/AccountMenu";
 import { usePractice } from "../practice/context";
 import { useProblemDetail } from "../problems/hooks";
 import { fromDetail } from "../problems/model";
+import { recordRecentView } from "../progress/recentViews";
 import { CodePane } from "./CodePane";
 import { LanguageSelect } from "./LanguageSelect";
 import { DEFAULT_LAYOUT, LAYOUT_KEY, PaneArrangementContext, savedLayout, swapPanes, type PaneId } from "./layout";
@@ -40,6 +41,10 @@ export function WorkspacePage({ slug }: { slug: string }) {
   const generatedProblem = generated.find((problem) => problem.id === slug);
   const detail = useProblemDetail(generatedProblem ? null : slug, languages[slug]);
   const problem = generatedProblem ?? (detail.data ? fromDetail(detail.data) : undefined);
+  const viewedId = problem?.id;
+  useEffect(() => {
+    if (viewedId) recordRecentView(viewedId);
+  }, [viewedId]);
   const solution = useSolution(problem);
   const [layout, setLayout] = useState(savedLayout);
   const [dragging, setDragging] = useState<PaneId | null>(null);
