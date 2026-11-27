@@ -1,0 +1,54 @@
+.bookmark-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.bookmark-hint {
+  margin-left: auto;
+  color: var(--color-subtle);
+  font-size: 12px;
+}
+
+.problem-table .column-bookmark {
+  width: 38px;
+  padding-left: 8px;
+  text-align: center;
+}
+
+.bookmark-button {
+  display: inline-grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--color-subtle);
+  cursor: pointer;
+}
+
+.bookmark-button:hover {
+  border-color: var(--color-border);
+  background: var(--color-surface-strong);
+  color: var(--color-text);
+}
+
+.bookmark-button[aria-pressed="true"] {
+  color: var(--color-link);
+}
+
+.bookmark-button:focus-visible {
+  outline: 2px solid var(--color-link);
+  outline-offset: 2px;
+}
+
+@media (max-width: 650px) {
+  .bookmark-hint {
+    flex-basis: 100%;
+    margin-left: 0;
+  }
+}
