@@ -4,6 +4,7 @@ import { navigate } from "../../lib/router";
 import { usePractice } from "../practice/context";
 import { difficulties, difficultyLabel } from "../problems/model";
 import { AdaptivePractice } from "./AdaptivePractice";
+import { RecentViews } from "./RecentViews";
 import { useAttempts } from "./attempts";
 import "./ProgressPage.css";
 
@@ -66,6 +67,8 @@ export function ProgressPage() {
       )}
 
       <AdaptivePractice problems={problems} onSelectProblem={(id) => navigate(`/problems/${id}`)} />
+
+      <RecentViews />
 
       <h2>Solved by difficulty</h2>
       <table className="plain-table review-table">
