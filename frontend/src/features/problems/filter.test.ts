@@ -65,7 +65,12 @@ describe("filter URLs", () => {
 
 describe("saved problem filters", () => {
   it("combines bookmarks with difficulty and retains catalog numbering", () => {
-    const rows = applyFilters(problems, filters("saved=1&difficulty=easy"), new Set(), new Set(["binary-search", "word-ladder"]));
+    const rows = applyFilters(
+      problems,
+      filters("saved=1&difficulty=easy"),
+      new Set(),
+      new Set(["binary-search", "word-ladder"]),
+    );
     expect(rows.map((row) => [row.problem.id, row.number])).toEqual([["binary-search", 4]]);
   });
 
