@@ -1,0 +1,102 @@
+.weekly-goal {
+  margin: 24px 0;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+}
+
+.weekly-goal-header,
+.weekly-goal-count,
+.weekly-goal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.weekly-goal-header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.weekly-goal-dates {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+}
+
+.weekly-goal-setting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.weekly-goal-setting select {
+  padding: 6px 8px;
+  color: var(--color-text);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 4px;
+}
+
+.weekly-goal-count {
+  margin-top: 20px;
+  font-size: 0.9rem;
+}
+
+.weekly-goal-count strong {
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.weekly-goal progress {
+  display: block;
+  width: 100%;
+  height: 8px;
+  margin: 10px 0 14px;
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-surface-strong);
+  color: var(--color-good);
+  overflow: hidden;
+}
+
+.weekly-goal progress::-webkit-progress-bar {
+  background: var(--color-surface-strong);
+}
+
+.weekly-goal progress::-webkit-progress-value {
+  background: var(--color-good);
+  border-radius: 999px;
+}
+
+.weekly-goal progress::-moz-progress-bar {
+  background: var(--color-good);
+  border-radius: 999px;
+}
+
+.weekly-goal-achieved {
+  color: var(--color-good);
+}
+
+.weekly-goal-footer {
+  font-size: 0.85rem;
+}
+
+.weekly-goal-footer p {
+  flex: 1 1 240px;
+  margin: 0;
+}
+
+.weekly-goal-footer a {
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .weekly-goal {
+    padding: 14px;
+  }
+}
