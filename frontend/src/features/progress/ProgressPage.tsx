@@ -6,6 +6,7 @@ import { difficulties, difficultyLabel } from "../problems/model";
 import { AdaptivePractice } from "./AdaptivePractice";
 import { RecentViews } from "./RecentViews";
 import { useAttempts } from "./attempts";
+import { WeeklyGoal } from "./WeeklyGoal";
 import "./ProgressPage.css";
 
 const TOPIC_ROWS = 10;
@@ -58,6 +59,8 @@ export function ProgressPage() {
           <strong>Topics</strong> · {topics.length}
         </span>
       </div>
+
+      <WeeklyGoal history={history} />
 
       {!started && (
         <p role="status">
