@@ -1,0 +1,134 @@
+.palette-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 9px;
+  background: transparent;
+  color: var(--color-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.palette-trigger:hover {
+  color: var(--color-strong);
+  border-color: var(--color-border-strong);
+}
+
+.palette-trigger kbd {
+  font: 11px var(--font-mono);
+  color: var(--color-subtle);
+}
+
+.command-palette {
+  position: fixed;
+  inset: 12vh 0 auto;
+  margin: 0 auto;
+  width: min(520px, 92vw);
+  max-height: 80vh;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 10px;
+  box-shadow: 0 18px 60px #0005;
+  overflow: auto;
+}
+
+.command-palette::backdrop {
+  background: #0008;
+}
+
+.palette-search {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.palette-search input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  color: inherit;
+  border: 0;
+  padding: 6px;
+}
+
+.palette-search button {
+  background: var(--color-surface);
+  color: var(--color-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.palette-caption {
+  margin: 12px 20px 4px;
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+.palette-results {
+  padding: 4px 10px 12px;
+}
+
+.palette-result {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+  padding: 10px;
+  background: transparent;
+  color: inherit;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  text-align: left;
+}
+
+.palette-result[data-active="true"] {
+  background: var(--color-surface-strong);
+  border-color: var(--color-border);
+}
+
+.palette-result strong,
+.palette-result small {
+  display: block;
+}
+
+.palette-result small,
+.palette-empty {
+  color: var(--color-muted);
+}
+
+.palette-empty {
+  padding: 12px;
+}
+
+.palette-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 10px 20px;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 850px) {
+  .palette-trigger kbd {
+    display: none;
+  }
+}
+
+@media (max-width: 550px) {
+  .palette-trigger span {
+    font-size: 11px;
+  }
+  .palette-trigger {
+    padding: 3px;
+  }
+}
