@@ -4,6 +4,8 @@ import { navigate, setQuery, useQuery } from "../../lib/router";
 import { usePractice } from "../practice/context";
 import { applyFilters, isFiltered, PAGE_SIZE, readFilters, writeFilters, type Filters, type SortKey } from "./filter";
 import { difficulties, difficultyLabel } from "./model";
+import { BookmarkButton } from "./BookmarkButton";
+import { useBookmarks } from "./useBookmarks";
 import { DailyChallenge } from "./DailyChallenge";
 import "./BrowsePage.css";
 
@@ -23,8 +25,10 @@ export function BrowsePage() {
   const query = useQuery();
   const filters = useMemo(() => readFilters(query), [query]);
   const [allTopics, setAllTopics] = useState(false);
+  const { bookmarks, toggleBookmark } = useBookmarks();
+  const savedCount = useMemo(() => problems.filter((problem) => bookmarks.has(problem.id)).length, [problems, bookmarks]);
 
-  const rows = useMemo(() => applyFilters(problems, filters, solved), [problems, filters, solved]);
+  const rows = useMemo(() => applyFilters(problems, filters, solved, bookmarks), [problems, filters, solved, bookmarks]);
   const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
   const page = Math.min(filters.page, pageCount);
   const visible = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -125,6 +129,26 @@ export function BrowsePage() {
         )}
       </div>
 
+      <div className="bookmark-toolbar" role="group" aria-label="Saved problems">
+        <button
+          type="button"
+          className="filter-chip"
+          aria-pressed={!filters.bookmarked}
+          onClick={() => update({ bookmarked: false })}
+        >
+          All problems
+        </button>
+        <button
+          type="button"
+          className="filter-chip"
+          aria-pressed={filters.bookmarked}
+          onClick={() => update({ bookmarked: true })}
+        >
+          Saved <span className="chip-count">{savedCount}</span>
+        </button>
+        <span className="bookmark-hint">Save questions to revisit on this browser.</span>
+      </div>
+
       <div className="results-bar" id="problem-results">
         <span role="status">
           {rows.length.toLocaleString()} {rows.length === 1 ? "problem" : "problems"}
@@ -149,7 +173,11 @@ export function BrowsePage() {
       </div>
 
       {rows.length === 0 ? (
-        <p className="no-results">No problems match these filters.</p>
+        <p className="no-results">
+          {filters.bookmarked && savedCount === 0
+            ? "No saved problems yet. Select a bookmark beside any problem to save it for later."
+            : "No problems match these filters."}
+        </p>
       ) : (
         <table className="problem-table">
           <thead>
@@ -167,6 +195,9 @@ export function BrowsePage() {
                   </button>
                 </th>
               ))}
+              <th scope="col" className="column-bookmark">
+                <span className="sr-only">Bookmark</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -189,6 +220,13 @@ export function BrowsePage() {
                   </td>
                   <td className={`column-difficulty difficulty-${problem.difficulty}`}>
                     {difficultyLabel[problem.difficulty]}
+                  </td>
+                  <td className="column-bookmark">
+                    <BookmarkButton
+                      title={problem.title}
+                      saved={bookmarks.has(problem.id)}
+                      onToggle={() => toggleBookmark(problem.id)}
+                    />
                   </td>
                 </tr>
               );

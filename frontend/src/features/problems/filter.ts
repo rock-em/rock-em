@@ -9,6 +9,7 @@ export type Filters = {
   /** A problem must have every selected topic. */
   topics: string[];
   status: Status;
+  bookmarked: boolean;
   sort: SortKey;
   descending: boolean;
   page: number;
@@ -29,6 +30,7 @@ export function readFilters(query: URLSearchParams): Filters {
     difficulty: oneOf(query.get("difficulty"), ["", "easy", "medium", "hard"], ""),
     topics: query.getAll("topic"),
     status: oneOf(query.get("status"), ["", "todo", "solved"], ""),
+    bookmarked: query.get("saved") === "1",
     sort: oneOf(query.get("sort"), ["number", "title", "difficulty"], "number"),
     descending: query.get("order") === "desc",
     page: Number.isInteger(page) && page > 1 ? page : 1,
@@ -42,6 +44,7 @@ export function writeFilters(filters: Filters): URLSearchParams {
   if (filters.difficulty) query.set("difficulty", filters.difficulty);
   for (const topic of filters.topics) query.append("topic", topic);
   if (filters.status) query.set("status", filters.status);
+  if (filters.bookmarked) query.set("saved", "1");
   if (filters.sort !== "number") query.set("sort", filters.sort);
   if (filters.descending) query.set("order", "desc");
   if (filters.page > 1) query.set("page", String(filters.page));
@@ -49,13 +52,19 @@ export function writeFilters(filters: Filters): URLSearchParams {
 }
 
 export function isFiltered(filters: Filters) {
-  return Boolean(filters.q || filters.difficulty || filters.topics.length || filters.status);
+  return Boolean(filters.q || filters.difficulty || filters.topics.length || filters.status || filters.bookmarked);
 }
 
-export function applyFilters(problems: ProblemListItem[], filters: Filters, solved: ReadonlySet<string>): Row[] {
+export function applyFilters(
+  problems: ProblemListItem[],
+  filters: Filters,
+  solved: ReadonlySet<string>,
+  bookmarks: ReadonlySet<string> = new Set(),
+): Row[] {
   const words = filters.q.toLowerCase().split(/\s+/).filter(Boolean);
   const rows: Row[] = [];
   problems.forEach((problem, index) => {
+    if (filters.bookmarked && !bookmarks.has(problem.id)) return;
     if (filters.difficulty && problem.difficulty !== filters.difficulty) return;
     if (filters.status && solved.has(problem.id) !== (filters.status === "solved")) return;
     if (!filters.topics.every((topic) => problem.topics.includes(topic))) return;

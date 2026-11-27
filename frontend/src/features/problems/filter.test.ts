@@ -62,3 +62,16 @@ describe("filter URLs", () => {
     });
   });
 });
+
+describe("saved problem filters", () => {
+  it("combines bookmarks with difficulty and retains catalog numbering", () => {
+    const rows = applyFilters(problems, filters("saved=1&difficulty=easy"), new Set(), new Set(["binary-search", "word-ladder"]));
+    expect(rows.map((row) => [row.problem.id, row.number])).toEqual([["binary-search", 4]]);
+  });
+
+  it("round-trips the saved filter and ignores unsupported values", () => {
+    expect(writeFilters(filters("saved=1")).toString()).toBe("saved=1");
+    expect(filters("saved=yes").bookmarked).toBe(false);
+    expect(applyFilters(problems, filters("saved=1"), new Set())).toEqual([]);
+  });
+});
