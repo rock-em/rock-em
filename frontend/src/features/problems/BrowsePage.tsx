@@ -4,6 +4,7 @@ import { navigate, setQuery, useQuery } from "../../lib/router";
 import { usePractice } from "../practice/context";
 import { applyFilters, isFiltered, PAGE_SIZE, readFilters, writeFilters, type Filters, type SortKey } from "./filter";
 import { difficulties, difficultyLabel } from "./model";
+import { DailyChallenge } from "./DailyChallenge";
 import "./BrowsePage.css";
 
 // three.js is most of the sculpture's weight. Loading it apart from the page
@@ -62,6 +63,8 @@ export function BrowsePage() {
           <ChromeSculpture key={heroTopic} topic={heroTopic} label={heroLabel} />
         </Suspense>
       </div>
+
+      <DailyChallenge />
 
       <div className="filters">
         <input
