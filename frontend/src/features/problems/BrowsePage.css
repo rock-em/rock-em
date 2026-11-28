@@ -44,7 +44,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
 .topic-filter {
@@ -56,109 +56,70 @@
   font-size: 13px;
 }
 
-/* Sculpted silver controls with flowing, monochrome reflections. */
+/* Slim polished controls inspired by the sign-in surface. */
 .filter-chip {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  padding: 7px 13px;
-  border: 1px solid #a6a6a6;
-  border-radius: 50% 48% 46% 50% / 65% 65% 60% 60%;
-  background:
-    radial-gradient(ellipse at 28% 7%, #ffffff 0%, #ffffffb0 18%, transparent 55%),
-    radial-gradient(ellipse at 82% 95%, #ffffff 0%, transparent 48%),
-    linear-gradient(175deg, #fdfdfd 0%, #e3e3e3 29%, #969696 48%, #f7f7f7 62%, #bdbdbd 83%, #777777 100%);
+  padding: 5px 12px;
+  border: 1px solid #a0a0a0;
+  border-radius: 999px;
+  background: linear-gradient(145deg, #f5f5f5, #969696 43%, #e6e6e6 72%, #a5a5a5);
   box-shadow:
-    inset 0 2px 3px #ffffff,
-    inset 0 -3px 5px #33333365,
-    0 3px 6px #00000030;
-  color: #141414;
+    inset 0 1px 1px #ffffffb0,
+    inset 0 -1px 2px #33333345;
+  color: #161616;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition:
-    border-radius 350ms ease,
-    transform 250ms ease,
-    box-shadow 250ms ease;
-}
-
-.filter-chip::before,
-.filter-chip::after {
-  position: absolute;
-  z-index: -1;
-  inset: -45%;
-  pointer-events: none;
-  content: "";
+    box-shadow 180ms ease,
+    border-color 180ms ease;
 }
 
 .filter-chip::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -90% -30%;
+  pointer-events: none;
   background:
-    radial-gradient(ellipse at 30% 30%, #ffffffd9 0%, transparent 39%),
-    radial-gradient(ellipse at 70% 65%, #30303038 0%, transparent 35%),
-    conic-gradient(from 35deg, transparent, #ffffffb0, transparent, #42424238, transparent);
-  opacity: 0;
-  transition: opacity 250ms ease;
-}
-
-.filter-chip::after {
-  background: linear-gradient(115deg, transparent 32%, #ffffffc9 46%, #ffffff30 54%, transparent 68%);
-  transform: translateX(-80%);
+    radial-gradient(ellipse at 32% 35%, #ffffffee 0%, transparent 32%),
+    radial-gradient(ellipse at 66% 58%, #54545490 0%, transparent 34%),
+    conic-gradient(from 30deg, #eeeeee, #949494, #ffffff, #b5b5b5, #eeeeee);
+  opacity: 0.42;
+  transform: rotate(-12deg);
+  transition: opacity 200ms ease;
 }
 
 .filter-chip:hover {
-  color: #141414;
-  border-color: #d5d5d5;
-  border-radius: 44% 56% 52% 48% / 65% 48% 68% 55%;
-  transform: translateY(-2px) scale(1.035);
+  border-color: #dddddd;
+  color: #111111;
   box-shadow:
-    inset 0 2px 4px #ffffff,
-    inset 0 -4px 6px #33333355,
-    0 5px 10px #00000045;
+    inset 0 1px 2px #ffffffdd,
+    0 2px 7px #00000025;
 }
 
 .filter-chip:hover::before {
-  opacity: 1;
-  animation: catalog-liquid-flow 2.4s ease-in-out infinite alternate;
-}
-
-.filter-chip:hover::after {
-  animation: catalog-liquid-shine 1.6s ease-in-out infinite;
+  opacity: 0.75;
+  animation: catalog-metal-flow 2.8s ease-in-out infinite alternate;
 }
 
 .filter-chip[aria-pressed="true"] {
-  border-color: #292929;
-  background:
-    radial-gradient(ellipse at 35% 10%, #ffffff 0%, transparent 58%),
-    linear-gradient(175deg, #ffffff, #e6e6e6 35%, #a9a9a9 48%, #ffffff 66%, #d2d2d2 85%, #888888);
-  color: #101010;
-  font-weight: 750;
-  outline: 2px solid var(--color-text);
-  outline-offset: 2px;
+  border-color: var(--color-text);
+  background: linear-gradient(145deg, #ffffff, #bdbdbd 45%, #f5f5f5 75%, #b0b0b0);
+  color: #111111;
+  box-shadow:
+    0 0 0 1px var(--color-text),
+    inset 0 1px 2px #ffffff;
 }
 
-.filter-chip:active {
-  transform: scale(0.96, 0.88);
-}
-
-@keyframes catalog-liquid-flow {
+@keyframes catalog-metal-flow {
   from {
-    transform: translate(-12%, -8%) rotate(-12deg) scale(1);
+    transform: translate(-13%, -6%) rotate(-18deg) scale(1.05);
   }
-
   to {
-    transform: translate(14%, 10%) rotate(28deg) scale(1.2, 0.85);
-  }
-}
-
-@keyframes catalog-liquid-shine {
-  0%,
-  15% {
-    transform: translateX(-80%) skewX(-15deg);
-  }
-
-  85%,
-  100% {
-    transform: translateX(80%) skewX(15deg);
+    transform: translate(13%, 9%) rotate(23deg) scale(1.2, 0.9);
   }
 }
 
@@ -168,14 +129,18 @@
     transition: none;
   }
 
-  .filter-chip:hover,
-  .filter-chip:active {
-    transform: none;
+  .filter-chip:hover::before {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .filter-chip::before {
+    display: none;
   }
 
-  .filter-chip:hover::before,
-  .filter-chip:hover::after {
-    animation: none;
+  .filter-chip[aria-pressed="true"] {
+    border: 2px solid Highlight;
   }
 }
 
